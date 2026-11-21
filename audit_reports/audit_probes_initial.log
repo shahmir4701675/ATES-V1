@@ -1,0 +1,915 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.2, pytest-9.2.0, pluggy-1.7.0 -- C:\Users\DELL\OneDrive\Desktop\ATES-V1\.venv\Scripts\python.exe
+rootdir: C:\Users\DELL\OneDrive\Desktop\ATES-V1
+configfile: pytest.ini
+plugins: anyio-4.16.0
+collecting ... collected 26 items
+
+audit_reports/test_audit_probes.py::test_unauthenticated_read_requires_login FAILED [  3%]
+audit_reports/test_audit_probes.py::test_unauthenticated_write_requires_login FAILED [  7%]
+audit_reports/test_audit_probes.py::test_forged_role_is_not_authentication FAILED [ 11%]
+audit_reports/test_audit_probes.py::test_student_cannot_read_generated_schedule FAILED [ 15%]
+audit_reports/test_audit_probes.py::test_student_list_contains_published_only FAILED [ 19%]
+audit_reports/test_audit_probes.py::test_faculty_without_identity_cannot_edit_any_instructor FAILED [ 23%]
+audit_reports/test_audit_probes.py::test_administrator_cannot_generate FAILED [ 26%]
+audit_reports/test_audit_probes.py::test_required_endpoint_exists[post-/auth/login-payload0] FAILED [ 30%]
+audit_reports/test_audit_probes.py::test_required_endpoint_exists[post-/auth/logout-payload1] FAILED [ 34%]
+audit_reports/test_audit_probes.py::test_required_endpoint_exists[get-/users-None] FAILED [ 38%]
+audit_reports/test_audit_probes.py::test_required_endpoint_exists[get-/audit-None] FAILED [ 42%]
+audit_reports/test_audit_probes.py::test_required_endpoint_exists[post-/import/courses-payload4] FAILED [ 46%]
+audit_reports/test_audit_probes.py::test_required_endpoint_exists[post-/schedules/1/publish-payload5] FAILED [ 50%]
+audit_reports/test_audit_probes.py::test_required_endpoint_exists[get-/schedules/1/export?format=csv-None] FAILED [ 53%]
+audit_reports/test_audit_probes.py::test_required_endpoint_exists[get-/schedules/1/export?format=pdf-None] FAILED [ 57%]
+audit_reports/test_audit_probes.py::test_weekly_slot_overlap_rejected FAILED [ 61%]
+audit_reports/test_audit_probes.py::test_unequal_slot_length_rejected FAILED [ 65%]
+audit_reports/test_audit_probes.py::test_bad_time_returns_validation_error FAILED [ 69%]
+audit_reports/test_audit_probes.py::test_grid_over_midnight_returns_validation_error FAILED [ 73%]
+audit_reports/test_audit_probes.py::test_invalid_day_returns_validation_error FAILED [ 76%]
+audit_reports/test_audit_probes.py::test_generated_schedule_immutable_through_master_data FAILED [ 80%]
+audit_reports/test_audit_probes.py::test_lab_contiguity_uses_clock_time FAILED [ 84%]
+audit_reports/test_audit_probes.py::test_mixed_enrollment_fallback_has_cohort_conflict FAILED [ 88%]
+audit_reports/test_audit_probes.py::test_exam_manual_override_persisted FAILED [ 92%]
+audit_reports/test_audit_probes.py::test_published_direct_edit_rejected FAILED [ 96%]
+audit_reports/test_audit_probes.py::test_mutation_audit_written FAILED   [100%]
+
+================================== FAILURES ===================================
+__________________ test_unauthenticated_read_requires_login ___________________
+
+env = (<starlette.testclient.TestClient object at 0x000002240277D6A0>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_unauthenticated_read_requires_login(env):
+        c,_=env
+        r=c.get('/courses')
+>       assert r.status_code==401, f'Unauthenticated GET /courses returned {r.status_code}'
+E       AssertionError: Unauthenticated GET /courses returned 200
+E       assert 200 == 401
+E        +  where 200 = <Response [200 OK]>.status_code
+
+audit_reports\test_audit_probes.py:31: AssertionError
+__________________ test_unauthenticated_write_requires_login __________________
+
+env = (<starlette.testclient.TestClient object at 0x0000022402B66FD0>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_unauthenticated_write_requires_login(env):
+        c,_=env
+        r=c.post('/rooms',json=dict(room_code='AUDIT',building='X',capacity=30,room_type='Lecture'))
+>       assert r.status_code==401, f'Unauthenticated room creation returned {r.status_code}'
+E       AssertionError: Unauthenticated room creation returned 201
+E       assert 201 == 401
+E        +  where 201 = <Response [201 Created]>.status_code
+
+audit_reports\test_audit_probes.py:36: AssertionError
+___________________ test_forged_role_is_not_authentication ____________________
+
+env = (<starlette.testclient.TestClient object at 0x0000022402E5DA90>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_forged_role_is_not_authentication(env):
+        c,_=env
+        r=c.post('/rooms',headers={'X-User-Role':'Administrator'},json=dict(room_code='FORGED',building='X',capacity=30,room_type='Lecture'))
+>       assert r.status_code==401, f'Forged Administrator header returned {r.status_code}'
+E       AssertionError: Forged Administrator header returned 201
+E       assert 201 == 401
+E        +  where 201 = <Response [201 Created]>.status_code
+
+audit_reports\test_audit_probes.py:41: AssertionError
+_________________ test_student_cannot_read_generated_schedule _________________
+
+env = (<starlette.testclient.TestClient object at 0x0000022402E44770>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_student_cannot_read_generated_schedule(env):
+        c,_=env
+        r=c.get('/schedules/1/entries',headers={'X-User-Role':'Student','X-Batch-Id':'1'})
+>       assert r.status_code in (401,403,404), f'Student read {r.json().get("status")} schedule with {len(r.json().get("timetable_entries",[]))} entries'
+E       AssertionError: Student read Generated schedule with 26 entries
+E       assert 200 in (401, 403, 404)
+E        +  where 200 = <Response [200 OK]>.status_code
+
+audit_reports\test_audit_probes.py:46: AssertionError
+__________________ test_student_list_contains_published_only __________________
+
+env = (<starlette.testclient.TestClient object at 0x0000022402E46FD0>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_student_list_contains_published_only(env):
+        c,_=env
+        r=c.get('/schedules',headers={'X-User-Role':'Student','X-Batch-Id':'1'})
+>       assert r.status_code in (401,403) or all(x['status']=='Published' for x in r.json()), str(r.json())[:500]
+E       AssertionError: [{'schedule_id': 1, 'term_id': 1, 'config_id': 1, 'schedule_type': 'Timetable', 'version_no': 1, 'status': 'Generated', 'solver_status': 'optimal', 'objective_score': 128.0, 'run_seconds': 1.25, 'entry_count': 26, 'conflict_count': 0, 'hard_violation_count': 0, 'generated_by': 1, 'generated_at': '2026-10-20T09:15:00Z', 'approved_by': None, 'published_at': None}, {'schedule_id': 2, 'term_id': 1, 'config_id': 2, 'schedule_type': 'Exam', 'version_no': 1, 'status': 'Generated', 'solver_status': 'opt
+E       assert (200 in (401, 403) or False)
+E        +  where 200 = <Response [200 OK]>.status_code
+E        +  and   False = all(<generator object test_student_list_contains_published_only.<locals>.<genexpr> at 0x0000022403265080>)
+
+audit_reports\test_audit_probes.py:51: AssertionError
+__________ test_faculty_without_identity_cannot_edit_any_instructor ___________
+
+env = (<starlette.testclient.TestClient object at 0x0000022404501EB0>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_faculty_without_identity_cannot_edit_any_instructor(env):
+        c,_=env
+        r=c.put('/instructors/2/availability',headers={'X-User-Role':'Faculty'},json={'slots':[{'slot_id':1,'is_available':False}]})
+>       assert r.status_code in (401,403), f'Unlinked Faculty edit returned {r.status_code}'
+E       AssertionError: Unlinked Faculty edit returned 200
+E       assert 200 in (401, 403)
+E        +  where 200 = <Response [200 OK]>.status_code
+
+audit_reports\test_audit_probes.py:56: AssertionError
+_____________________ test_administrator_cannot_generate ______________________
+
+env = (<starlette.testclient.TestClient object at 0x00000224046AFAC0>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_administrator_cannot_generate(env):
+        c,_=env
+        with patch('backend.routers.schedules.run_schedule_generation_worker'):
+            r=c.post('/schedules/generate',headers={'X-User-Role':'Administrator'},json={'term_id':1,'config_id':1})
+>       assert r.status_code==403, f'Administrator generation returned {r.status_code}'
+E       AssertionError: Administrator generation returned 202
+E       assert 202 == 403
+E        +  where 202 = <Response [202 Accepted]>.status_code
+
+audit_reports\test_audit_probes.py:62: AssertionError
+__________ test_required_endpoint_exists[post-/auth/login-payload0] ___________
+
+env = (<starlette.testclient.TestClient object at 0x000002240492B570>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+method = 'post', path = '/auth/login'
+payload = {'username': 'x', 'password': '12345678'}
+
+    @pytest.mark.parametrize('method,path,payload',[
+     ('post','/auth/login',{'username':'x','password':'12345678'}),
+     ('post','/auth/logout',{}),
+     ('get','/users',None),
+     ('get','/audit',None),
+     ('post','/import/courses',{}),
+     ('post','/schedules/1/publish',{}),
+     ('get','/schedules/1/export?format=csv',None),
+     ('get','/schedules/1/export?format=pdf',None),
+    ])
+    def test_required_endpoint_exists(env,method,path,payload):
+        c,_=env
+        r=getattr(c,method)(path,**({'json':payload} if payload is not None else {}))
+>       assert r.status_code not in (404,405), f'{method.upper()} {path}: {r.status_code}'
+E       AssertionError: POST /auth/login: 404
+E       assert 404 not in (404, 405)
+E        +  where 404 = <Response [404 Not Found]>.status_code
+
+audit_reports\test_audit_probes.py:77: AssertionError
+__________ test_required_endpoint_exists[post-/auth/logout-payload1] __________
+
+env = (<starlette.testclient.TestClient object at 0x0000022404D70650>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+method = 'post', path = '/auth/logout', payload = {}
+
+    @pytest.mark.parametrize('method,path,payload',[
+     ('post','/auth/login',{'username':'x','password':'12345678'}),
+     ('post','/auth/logout',{}),
+     ('get','/users',None),
+     ('get','/audit',None),
+     ('post','/import/courses',{}),
+     ('post','/schedules/1/publish',{}),
+     ('get','/schedules/1/export?format=csv',None),
+     ('get','/schedules/1/export?format=pdf',None),
+    ])
+    def test_required_endpoint_exists(env,method,path,payload):
+        c,_=env
+        r=getattr(c,method)(path,**({'json':payload} if payload is not None else {}))
+>       assert r.status_code not in (404,405), f'{method.upper()} {path}: {r.status_code}'
+E       AssertionError: POST /auth/logout: 404
+E       assert 404 not in (404, 405)
+E        +  where 404 = <Response [404 Not Found]>.status_code
+
+audit_reports\test_audit_probes.py:77: AssertionError
+_______________ test_required_endpoint_exists[get-/users-None] ________________
+
+env = (<starlette.testclient.TestClient object at 0x0000022402ABCD50>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+method = 'get', path = '/users', payload = None
+
+    @pytest.mark.parametrize('method,path,payload',[
+     ('post','/auth/login',{'username':'x','password':'12345678'}),
+     ('post','/auth/logout',{}),
+     ('get','/users',None),
+     ('get','/audit',None),
+     ('post','/import/courses',{}),
+     ('post','/schedules/1/publish',{}),
+     ('get','/schedules/1/export?format=csv',None),
+     ('get','/schedules/1/export?format=pdf',None),
+    ])
+    def test_required_endpoint_exists(env,method,path,payload):
+        c,_=env
+        r=getattr(c,method)(path,**({'json':payload} if payload is not None else {}))
+>       assert r.status_code not in (404,405), f'{method.upper()} {path}: {r.status_code}'
+E       AssertionError: GET /users: 404
+E       assert 404 not in (404, 405)
+E        +  where 404 = <Response [404 Not Found]>.status_code
+
+audit_reports\test_audit_probes.py:77: AssertionError
+_______________ test_required_endpoint_exists[get-/audit-None] ________________
+
+env = (<starlette.testclient.TestClient object at 0x00000224044B66C0>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+method = 'get', path = '/audit', payload = None
+
+    @pytest.mark.parametrize('method,path,payload',[
+     ('post','/auth/login',{'username':'x','password':'12345678'}),
+     ('post','/auth/logout',{}),
+     ('get','/users',None),
+     ('get','/audit',None),
+     ('post','/import/courses',{}),
+     ('post','/schedules/1/publish',{}),
+     ('get','/schedules/1/export?format=csv',None),
+     ('get','/schedules/1/export?format=pdf',None),
+    ])
+    def test_required_endpoint_exists(env,method,path,payload):
+        c,_=env
+        r=getattr(c,method)(path,**({'json':payload} if payload is not None else {}))
+>       assert r.status_code not in (404,405), f'{method.upper()} {path}: {r.status_code}'
+E       AssertionError: GET /audit: 404
+E       assert 404 not in (404, 405)
+E        +  where 404 = <Response [404 Not Found]>.status_code
+
+audit_reports\test_audit_probes.py:77: AssertionError
+________ test_required_endpoint_exists[post-/import/courses-payload4] _________
+
+env = (<starlette.testclient.TestClient object at 0x00000224044B5130>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+method = 'post', path = '/import/courses', payload = {}
+
+    @pytest.mark.parametrize('method,path,payload',[
+     ('post','/auth/login',{'username':'x','password':'12345678'}),
+     ('post','/auth/logout',{}),
+     ('get','/users',None),
+     ('get','/audit',None),
+     ('post','/import/courses',{}),
+     ('post','/schedules/1/publish',{}),
+     ('get','/schedules/1/export?format=csv',None),
+     ('get','/schedules/1/export?format=pdf',None),
+    ])
+    def test_required_endpoint_exists(env,method,path,payload):
+        c,_=env
+        r=getattr(c,method)(path,**({'json':payload} if payload is not None else {}))
+>       assert r.status_code not in (404,405), f'{method.upper()} {path}: {r.status_code}'
+E       AssertionError: POST /import/courses: 404
+E       assert 404 not in (404, 405)
+E        +  where 404 = <Response [404 Not Found]>.status_code
+
+audit_reports\test_audit_probes.py:77: AssertionError
+______ test_required_endpoint_exists[post-/schedules/1/publish-payload5] ______
+
+env = (<starlette.testclient.TestClient object at 0x0000022404A71470>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+method = 'post', path = '/schedules/1/publish', payload = {}
+
+    @pytest.mark.parametrize('method,path,payload',[
+     ('post','/auth/login',{'username':'x','password':'12345678'}),
+     ('post','/auth/logout',{}),
+     ('get','/users',None),
+     ('get','/audit',None),
+     ('post','/import/courses',{}),
+     ('post','/schedules/1/publish',{}),
+     ('get','/schedules/1/export?format=csv',None),
+     ('get','/schedules/1/export?format=pdf',None),
+    ])
+    def test_required_endpoint_exists(env,method,path,payload):
+        c,_=env
+        r=getattr(c,method)(path,**({'json':payload} if payload is not None else {}))
+>       assert r.status_code not in (404,405), f'{method.upper()} {path}: {r.status_code}'
+E       AssertionError: POST /schedules/1/publish: 404
+E       assert 404 not in (404, 405)
+E        +  where 404 = <Response [404 Not Found]>.status_code
+
+audit_reports\test_audit_probes.py:77: AssertionError
+___ test_required_endpoint_exists[get-/schedules/1/export?format=csv-None] ____
+
+env = (<starlette.testclient.TestClient object at 0x00000224051BCE50>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+method = 'get', path = '/schedules/1/export?format=csv', payload = None
+
+    @pytest.mark.parametrize('method,path,payload',[
+     ('post','/auth/login',{'username':'x','password':'12345678'}),
+     ('post','/auth/logout',{}),
+     ('get','/users',None),
+     ('get','/audit',None),
+     ('post','/import/courses',{}),
+     ('post','/schedules/1/publish',{}),
+     ('get','/schedules/1/export?format=csv',None),
+     ('get','/schedules/1/export?format=pdf',None),
+    ])
+    def test_required_endpoint_exists(env,method,path,payload):
+        c,_=env
+        r=getattr(c,method)(path,**({'json':payload} if payload is not None else {}))
+>       assert r.status_code not in (404,405), f'{method.upper()} {path}: {r.status_code}'
+E       AssertionError: GET /schedules/1/export?format=csv: 404
+E       assert 404 not in (404, 405)
+E        +  where 404 = <Response [404 Not Found]>.status_code
+
+audit_reports\test_audit_probes.py:77: AssertionError
+___ test_required_endpoint_exists[get-/schedules/1/export?format=pdf-None] ____
+
+env = (<starlette.testclient.TestClient object at 0x000002240556E270>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+method = 'get', path = '/schedules/1/export?format=pdf', payload = None
+
+    @pytest.mark.parametrize('method,path,payload',[
+     ('post','/auth/login',{'username':'x','password':'12345678'}),
+     ('post','/auth/logout',{}),
+     ('get','/users',None),
+     ('get','/audit',None),
+     ('post','/import/courses',{}),
+     ('post','/schedules/1/publish',{}),
+     ('get','/schedules/1/export?format=csv',None),
+     ('get','/schedules/1/export?format=pdf',None),
+    ])
+    def test_required_endpoint_exists(env,method,path,payload):
+        c,_=env
+        r=getattr(c,method)(path,**({'json':payload} if payload is not None else {}))
+>       assert r.status_code not in (404,405), f'{method.upper()} {path}: {r.status_code}'
+E       AssertionError: GET /schedules/1/export?format=pdf: 404
+E       assert 404 not in (404, 405)
+E        +  where 404 = <Response [404 Not Found]>.status_code
+
+audit_reports\test_audit_probes.py:77: AssertionError
+______________________ test_weekly_slot_overlap_rejected ______________________
+
+env = (<starlette.testclient.TestClient object at 0x0000022405942EB0>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_weekly_slot_overlap_rejected(env):
+        c,_=env
+        r=c.post('/terms/1/slots',json={'day_of_week':1,'slot_index':99,'start_time':'08:30','end_time':'09:30'})
+>       assert r.status_code in (409,422), f'Overlapping slot accepted: {r.status_code}'
+E       AssertionError: Overlapping slot accepted: 201
+E       assert 201 in (409, 422)
+E        +  where 201 = <Response [201 Created]>.status_code
+
+audit_reports\test_audit_probes.py:82: AssertionError
+______________________ test_unequal_slot_length_rejected ______________________
+
+env = (<starlette.testclient.TestClient object at 0x0000022405B5FE70>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_unequal_slot_length_rejected(env):
+        c,_=env
+        r=c.post('/terms/1/slots',json={'day_of_week':7,'slot_index':1,'start_time':'08:00','end_time':'08:30'})
+>       assert r.status_code in (409,422), f'Unequal length accepted: {r.status_code}'
+E       AssertionError: Unequal length accepted: 201
+E       assert 201 in (409, 422)
+E        +  where 201 = <Response [201 Created]>.status_code
+
+audit_reports\test_audit_probes.py:87: AssertionError
+___________________ test_bad_time_returns_validation_error ____________________
+
+env = (<starlette.testclient.TestClient object at 0x0000022405889010>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_bad_time_returns_validation_error(env):
+        c,_=env
+        r=c.post('/terms/1/slots',json={'day_of_week':1,'slot_index':99,'start_time':'not-a-time','end_time':'10:00'})
+>       assert r.status_code==422, f'Malformed time returned {r.status_code}'
+E       AssertionError: Malformed time returned 500
+E       assert 500 == 422
+E        +  where 500 = <Response [500 Internal Server Error]>.status_code
+
+audit_reports\test_audit_probes.py:92: AssertionError
+______________ test_grid_over_midnight_returns_validation_error _______________
+
+env = (<starlette.testclient.TestClient object at 0x0000022405543BD0>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_grid_over_midnight_returns_validation_error(env):
+        c,_=env
+        r=c.post('/terms/1/slots/generate',json={'working_days':[7],'first_start_time':'23:00','slot_length_min':60,'slots_per_day':2})
+>       assert r.status_code==422, f'Cross-midnight grid returned {r.status_code}'
+E       AssertionError: Cross-midnight grid returned 500
+E       assert 500 == 422
+E        +  where 500 = <Response [500 Internal Server Error]>.status_code
+
+audit_reports\test_audit_probes.py:97: AssertionError
+__________________ test_invalid_day_returns_validation_error __________________
+
+env = (<starlette.testclient.TestClient object at 0x0000022402A98D70>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_invalid_day_returns_validation_error(env):
+        c,_=env
+        r=c.post('/terms/1/slots/generate',json={'working_days':[8],'slots_per_day':1})
+>       assert r.status_code==422, f'Invalid day returned {r.status_code}'
+E       AssertionError: Invalid day returned 409
+E       assert 409 == 422
+E        +  where 409 = <Response [409 Conflict]>.status_code
+
+audit_reports\test_audit_probes.py:102: AssertionError
+____________ test_generated_schedule_immutable_through_master_data ____________
+
+self = <sqlalchemy.engine.base.Connection object at 0x0000022402BC5250>
+dialect = <sqlalchemy.dialects.sqlite.pysqlite.SQLiteDialect_pysqlite object at 0x00000224054A1090>
+context = <sqlalchemy.dialects.sqlite.base.SQLiteExecutionContext object at 0x0000022402BC5490>
+statement = <sqlalchemy.dialects.sqlite.base.SQLiteCompiler object at 0x00000224032A30B0>
+parameters = [('Published', 1)]
+
+    def _exec_single_context(
+        self,
+        dialect: Dialect,
+        context: ExecutionContext,
+        statement: Union[str, Compiled],
+        parameters: Optional[_AnyMultiExecuteParams],
+    ) -> CursorResult[Unpack[TupleAny]]:
+        """continue the _execute_context() method for a single DBAPI
+        cursor.execute() or cursor.executemany() call.
+    
+        """
+        if dialect.bind_typing is BindTyping.SETINPUTSIZES:
+            generic_setinputsizes = context._prepare_set_input_sizes()
+    
+            if generic_setinputsizes:
+                try:
+                    dialect.do_set_input_sizes(
+                        context.cursor, generic_setinputsizes, context
+                    )
+                except BaseException as e:
+                    self._handle_dbapi_exception(
+                        e, str(statement), parameters, None, context
+                    )
+    
+        cursor, str_statement, parameters = (
+            context.cursor,
+            context.statement,
+            context.parameters,
+        )
+    
+        effective_parameters: Optional[_AnyExecuteParams]
+    
+        if not context.executemany:
+            effective_parameters = parameters[0]
+        else:
+            effective_parameters = parameters
+    
+        evt_handled: bool = False
+        try:
+            if self._has_events or self.engine._has_events:
+                for fn in self.dispatch.before_cursor_execute:
+                    str_statement, effective_parameters = fn(
+                        self,
+                        cursor,
+                        str_statement,
+                        effective_parameters,
+                        context,
+                        context.executemany,
+                    )
+    
+            if self._echo:
+                self._log_info(str_statement)
+    
+                stats = context._get_cache_stats()
+    
+                self._log_parameters(
+                    effective_parameters, stats, ismulti=context.executemany
+                )
+    
+            if context.execute_style is ExecuteStyle.EXECUTEMANY:
+                effective_parameters = cast(
+                    "_CoreMultiExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_executemany:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_executemany(
+                        cursor,
+                        str_statement,
+                        effective_parameters,
+                        context,
+                    )
+            elif not effective_parameters and context.no_parameters:
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute_no_params:
+                        if fn(cursor, str_statement, context):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_execute_no_params(
+                        cursor, str_statement, context
+                    )
+            else:
+                effective_parameters = cast(
+                    "_CoreSingleExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+>                   self.dialect.do_execute(
+                        cursor, str_statement, effective_parameters, context
+                    )
+
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1977: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <sqlalchemy.dialects.sqlite.pysqlite.SQLiteDialect_pysqlite object at 0x00000224054A1090>
+cursor = <sqlite3.Cursor object at 0x0000022402BD6340>
+statement = 'UPDATE schedules SET status=? WHERE schedules.schedule_id = ?'
+parameters = ('Published', 1)
+context = <sqlalchemy.dialects.sqlite.base.SQLiteExecutionContext object at 0x0000022402BC5490>
+
+    def do_execute(self, cursor, statement, parameters, context=None):
+>       cursor.execute(statement, parameters)
+E       sqlite3.IntegrityError: CHECK constraint failed: ck_schedules_published_approval
+
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:1192: IntegrityError
+
+The above exception was the direct cause of the following exception:
+
+env = (<starlette.testclient.TestClient object at 0x000002240472B3F0>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_generated_schedule_immutable_through_master_data(env):
+        c,f=env
+        with f() as s:
+>           sch=s.get(Schedule,1); sch.status='Published'; s.commit()
+                                                           ^^^^^^^^^^
+
+audit_reports\test_audit_probes.py:107: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:2177: in commit
+    trans.commit(_to_root=True)
+<sqlalchemy generated _go() wrapper for sqlalchemy.orm.session.SessionTransaction.commit>:2: in commit
+    return target(fn, self, _to_root=_to_root)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:1412: in commit
+    self._prepare_impl()
+<sqlalchemy generated _go() wrapper for sqlalchemy.orm.session.SessionTransaction._prepare_impl>:2: in _prepare_impl
+    return target(fn, self)
+           ^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:1386: in _prepare_impl
+    self.session.flush()
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:4626: in flush
+    self._flush(objects)
+<sqlalchemy generated warned() wrapper for sqlalchemy.orm.session.Session._flush>:2: in _flush
+    return target(fn, self, objects=objects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\util\deprecations.py:281: in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:4769: in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py:166: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:4730: in _flush
+    flush_context.execute()
+.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:467: in execute
+    rec.execute(self)
+.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:643: in execute
+    util.preloaded.orm_persistence._save_obj(
+.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:84: in _save_obj
+    _emit_update_statements(
+.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:929: in _emit_update_statements
+    c = connection.execute(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1494: in execute
+    return meth(
+.venv\Lib\site-packages\sqlalchemy\sql\elements.py:534: in _execute_on_connection
+    return connection._execute_clauseelement(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1714: in _execute_clauseelement
+    ret = self._execute_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1868: in _execute_context
+    return self._exec_single_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1996: in _exec_single_context
+    self._handle_dbapi_exception(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:2351: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1977: in _exec_single_context
+    self.dialect.do_execute(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <sqlalchemy.dialects.sqlite.pysqlite.SQLiteDialect_pysqlite object at 0x00000224054A1090>
+cursor = <sqlite3.Cursor object at 0x0000022402BD6340>
+statement = 'UPDATE schedules SET status=? WHERE schedules.schedule_id = ?'
+parameters = ('Published', 1)
+context = <sqlalchemy.dialects.sqlite.base.SQLiteExecutionContext object at 0x0000022402BC5490>
+
+    def do_execute(self, cursor, statement, parameters, context=None):
+>       cursor.execute(statement, parameters)
+E       sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) CHECK constraint failed: ck_schedules_published_approval
+E       [SQL: UPDATE schedules SET status=? WHERE schedules.schedule_id = ?]
+E       [parameters: ('Published', 1)]
+E       (Background on this error at: https://sqlalche.me/e/21/gkpj)
+
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:1192: IntegrityError
+_____________________ test_lab_contiguity_uses_clock_time _____________________
+
+    def test_lab_contiguity_uses_clock_time():
+        ds=load_dataset_from_json(ROOT/'data/seed_timetable.json')
+        labs=[e for e in ds.timetable_entries if e.session_type=='Lab']
+        off=labs[0].offering_id
+        ids=[e.slot_id for e in labs if e.offering_id==off]
+        last=max((s for s in ds.time_slots if s.slot_id in ids),key=lambda s:s.slot_index)
+        ds.time_slots=[replace(s,start_time='18:00',end_time='19:00') if s.slot_id==last.slot_id else s for s in ds.time_slots]
+        violations=TimetableValidator().validate(ds,config_id=1)
+>       assert any(v.rule_code=='H09' for v in violations), f'Nonadjacent clock-time lab accepted; violations={[v.rule_code for v in violations]}'
+E       AssertionError: Nonadjacent clock-time lab accepted; violations=[]
+E       assert False
+E        +  where False = any(<generator object test_lab_contiguity_uses_clock_time.<locals>.<genexpr> at 0x00000224045D3E00>)
+
+audit_reports\test_audit_probes.py:122: AssertionError
+_____________ test_mixed_enrollment_fallback_has_cohort_conflict ______________
+
+    def test_mixed_enrollment_fallback_has_cohort_conflict():
+        ds=load_dataset_from_json(ROOT/'data/seed_exam.json')
+        a=ds.course_offerings[0]
+        b=next(o for o in ds.course_offerings if o.batch_id==a.batch_id and o.course_id!=a.course_id)
+        ds.course_offerings=[a,b]
+        ds.enrollments=[Enrollment(enrollment_id=i+1,offering_id=a.offering_id,student_id=10000+i) for i in range(a.enrolled_count)]
+        graph=build_conflict_graph(ds,term_id=a.term_id)
+>       assert graph.has_edge(a.course_id,b.course_id), 'Fully enumerated course and missing-enrollment course in same batch have no edge'
+E       AssertionError: Fully enumerated course and missing-enrollment course in same batch have no edge
+E       assert False
+E        +  where False = has_edge(1, 2)
+E        +    where has_edge = <networkx.classes.graph.Graph object at 0x0000022402AB8590>.has_edge
+E        +    and   1 = CourseOffering(offering_id=1, term_id=1, course_id=1, batch_id=1, instructor_id=1, enrolled_count=45).course_id
+E        +    and   2 = CourseOffering(offering_id=2, term_id=1, course_id=2, batch_id=1, instructor_id=2, enrolled_count=45).course_id
+
+audit_reports\test_audit_probes.py:131: AssertionError
+_____________________ test_exam_manual_override_persisted _____________________
+
+env = (<starlette.testclient.TestClient object at 0x0000022404452510>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_exam_manual_override_persisted(env):
+        c,f=env
+        r=c.put('/schedules/2/entries/1',json={'is_locked':True})
+        assert r.status_code==200, str(r.text)
+>       assert 'is_manual_override' in r.json(), 'Exam response/model cannot preserve manual override flag'
+E       AssertionError: Exam response/model cannot preserve manual override flag
+E       assert 'is_manual_override' in {'exam_entry_id': 1, 'schedule_id': 2, 'course_id': 1, 'course_code': 'CS-326', ...}
+E        +  where {'exam_entry_id': 1, 'schedule_id': 2, 'course_id': 1, 'course_code': 'CS-326', ...} = json()
+E        +    where json = <Response [200 OK]>.json
+
+audit_reports\test_audit_probes.py:137: AssertionError
+_____________________ test_published_direct_edit_rejected _____________________
+
+self = <sqlalchemy.engine.base.Connection object at 0x0000022405CFAE10>
+dialect = <sqlalchemy.dialects.sqlite.pysqlite.SQLiteDialect_pysqlite object at 0x00000224030D8550>
+context = <sqlalchemy.dialects.sqlite.base.SQLiteExecutionContext object at 0x0000022405CFAC90>
+statement = <sqlalchemy.dialects.sqlite.base.SQLiteCompiler object at 0x0000022404495010>
+parameters = [('Published', 1)]
+
+    def _exec_single_context(
+        self,
+        dialect: Dialect,
+        context: ExecutionContext,
+        statement: Union[str, Compiled],
+        parameters: Optional[_AnyMultiExecuteParams],
+    ) -> CursorResult[Unpack[TupleAny]]:
+        """continue the _execute_context() method for a single DBAPI
+        cursor.execute() or cursor.executemany() call.
+    
+        """
+        if dialect.bind_typing is BindTyping.SETINPUTSIZES:
+            generic_setinputsizes = context._prepare_set_input_sizes()
+    
+            if generic_setinputsizes:
+                try:
+                    dialect.do_set_input_sizes(
+                        context.cursor, generic_setinputsizes, context
+                    )
+                except BaseException as e:
+                    self._handle_dbapi_exception(
+                        e, str(statement), parameters, None, context
+                    )
+    
+        cursor, str_statement, parameters = (
+            context.cursor,
+            context.statement,
+            context.parameters,
+        )
+    
+        effective_parameters: Optional[_AnyExecuteParams]
+    
+        if not context.executemany:
+            effective_parameters = parameters[0]
+        else:
+            effective_parameters = parameters
+    
+        evt_handled: bool = False
+        try:
+            if self._has_events or self.engine._has_events:
+                for fn in self.dispatch.before_cursor_execute:
+                    str_statement, effective_parameters = fn(
+                        self,
+                        cursor,
+                        str_statement,
+                        effective_parameters,
+                        context,
+                        context.executemany,
+                    )
+    
+            if self._echo:
+                self._log_info(str_statement)
+    
+                stats = context._get_cache_stats()
+    
+                self._log_parameters(
+                    effective_parameters, stats, ismulti=context.executemany
+                )
+    
+            if context.execute_style is ExecuteStyle.EXECUTEMANY:
+                effective_parameters = cast(
+                    "_CoreMultiExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_executemany:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_executemany(
+                        cursor,
+                        str_statement,
+                        effective_parameters,
+                        context,
+                    )
+            elif not effective_parameters and context.no_parameters:
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute_no_params:
+                        if fn(cursor, str_statement, context):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_execute_no_params(
+                        cursor, str_statement, context
+                    )
+            else:
+                effective_parameters = cast(
+                    "_CoreSingleExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+>                   self.dialect.do_execute(
+                        cursor, str_statement, effective_parameters, context
+                    )
+
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1977: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <sqlalchemy.dialects.sqlite.pysqlite.SQLiteDialect_pysqlite object at 0x00000224030D8550>
+cursor = <sqlite3.Cursor object at 0x0000022402FB65C0>
+statement = 'UPDATE schedules SET status=? WHERE schedules.schedule_id = ?'
+parameters = ('Published', 1)
+context = <sqlalchemy.dialects.sqlite.base.SQLiteExecutionContext object at 0x0000022405CFAC90>
+
+    def do_execute(self, cursor, statement, parameters, context=None):
+>       cursor.execute(statement, parameters)
+E       sqlite3.IntegrityError: CHECK constraint failed: ck_schedules_published_approval
+
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:1192: IntegrityError
+
+The above exception was the direct cause of the following exception:
+
+env = (<starlette.testclient.TestClient object at 0x0000022402FD90F0>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_published_direct_edit_rejected(env):
+        c,f=env
+        with f() as s:
+>           s.get(Schedule,1).status='Published'; s.commit()
+                                                  ^^^^^^^^^^
+
+audit_reports\test_audit_probes.py:142: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:2177: in commit
+    trans.commit(_to_root=True)
+<sqlalchemy generated _go() wrapper for sqlalchemy.orm.session.SessionTransaction.commit>:2: in commit
+    return target(fn, self, _to_root=_to_root)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:1412: in commit
+    self._prepare_impl()
+<sqlalchemy generated _go() wrapper for sqlalchemy.orm.session.SessionTransaction._prepare_impl>:2: in _prepare_impl
+    return target(fn, self)
+           ^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:1386: in _prepare_impl
+    self.session.flush()
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:4626: in flush
+    self._flush(objects)
+<sqlalchemy generated warned() wrapper for sqlalchemy.orm.session.Session._flush>:2: in _flush
+    return target(fn, self, objects=objects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\util\deprecations.py:281: in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:4769: in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py:166: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:4730: in _flush
+    flush_context.execute()
+.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:467: in execute
+    rec.execute(self)
+.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:643: in execute
+    util.preloaded.orm_persistence._save_obj(
+.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:84: in _save_obj
+    _emit_update_statements(
+.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:929: in _emit_update_statements
+    c = connection.execute(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1494: in execute
+    return meth(
+.venv\Lib\site-packages\sqlalchemy\sql\elements.py:534: in _execute_on_connection
+    return connection._execute_clauseelement(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1714: in _execute_clauseelement
+    ret = self._execute_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1868: in _execute_context
+    return self._exec_single_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1996: in _exec_single_context
+    self._handle_dbapi_exception(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:2351: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1977: in _exec_single_context
+    self.dialect.do_execute(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <sqlalchemy.dialects.sqlite.pysqlite.SQLiteDialect_pysqlite object at 0x00000224030D8550>
+cursor = <sqlite3.Cursor object at 0x0000022402FB65C0>
+statement = 'UPDATE schedules SET status=? WHERE schedules.schedule_id = ?'
+parameters = ('Published', 1)
+context = <sqlalchemy.dialects.sqlite.base.SQLiteExecutionContext object at 0x0000022405CFAC90>
+
+    def do_execute(self, cursor, statement, parameters, context=None):
+>       cursor.execute(statement, parameters)
+E       sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) CHECK constraint failed: ck_schedules_published_approval
+E       [SQL: UPDATE schedules SET status=? WHERE schedules.schedule_id = ?]
+E       [parameters: ('Published', 1)]
+E       (Background on this error at: https://sqlalche.me/e/21/gkpj)
+
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:1192: IntegrityError
+_________________________ test_mutation_audit_written _________________________
+
+env = (<starlette.testclient.TestClient object at 0x00000224045552B0>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_mutation_audit_written(env):
+        c,f=env
+        r=c.post('/rooms',json=dict(room_code='LOGTEST',building='X',capacity=30,room_type='Lecture'))
+        assert r.status_code==201
+        with f() as s:
+            logs=s.scalars(select(AuditLog).where(AuditLog.entity_type=='rooms')).all()
+>       assert logs, 'Room creation has no persistent audit event'
+E       AssertionError: Room creation has no persistent audit event
+E       assert []
+
+audit_reports\test_audit_probes.py:152: AssertionError
+============================== warnings summary ===============================
+.venv\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\DELL\OneDrive\Desktop\ATES-V1\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\DELL\OneDrive\Desktop\ATES-V1\audit_reports\audit_probes.xml -
+=========================== short test summary info ===========================
+FAILED audit_reports/test_audit_probes.py::test_unauthenticated_read_requires_login
+FAILED audit_reports/test_audit_probes.py::test_unauthenticated_write_requires_login
+FAILED audit_reports/test_audit_probes.py::test_forged_role_is_not_authentication
+FAILED audit_reports/test_audit_probes.py::test_student_cannot_read_generated_schedule
+FAILED audit_reports/test_audit_probes.py::test_student_list_contains_published_only
+FAILED audit_reports/test_audit_probes.py::test_faculty_without_identity_cannot_edit_any_instructor
+FAILED audit_reports/test_audit_probes.py::test_administrator_cannot_generate
+FAILED audit_reports/test_audit_probes.py::test_required_endpoint_exists[post-/auth/login-payload0]
+FAILED audit_reports/test_audit_probes.py::test_required_endpoint_exists[post-/auth/logout-payload1]
+FAILED audit_reports/test_audit_probes.py::test_required_endpoint_exists[get-/users-None]
+FAILED audit_reports/test_audit_probes.py::test_required_endpoint_exists[get-/audit-None]
+FAILED audit_reports/test_audit_probes.py::test_required_endpoint_exists[post-/import/courses-payload4]
+FAILED audit_reports/test_audit_probes.py::test_required_endpoint_exists[post-/schedules/1/publish-payload5]
+FAILED audit_reports/test_audit_probes.py::test_required_endpoint_exists[get-/schedules/1/export?format=csv-None]
+FAILED audit_reports/test_audit_probes.py::test_required_endpoint_exists[get-/schedules/1/export?format=pdf-None]
+FAILED audit_reports/test_audit_probes.py::test_weekly_slot_overlap_rejected
+FAILED audit_reports/test_audit_probes.py::test_unequal_slot_length_rejected
+FAILED audit_reports/test_audit_probes.py::test_bad_time_returns_validation_error
+FAILED audit_reports/test_audit_probes.py::test_grid_over_midnight_returns_validation_error
+FAILED audit_reports/test_audit_probes.py::test_invalid_day_returns_validation_error
+FAILED audit_reports/test_audit_probes.py::test_generated_schedule_immutable_through_master_data
+FAILED audit_reports/test_audit_probes.py::test_lab_contiguity_uses_clock_time
+FAILED audit_reports/test_audit_probes.py::test_mixed_enrollment_fallback_has_cohort_conflict
+FAILED audit_reports/test_audit_probes.py::test_exam_manual_override_persisted
+FAILED audit_reports/test_audit_probes.py::test_published_direct_edit_rejected
+FAILED audit_reports/test_audit_probes.py::test_mutation_audit_written - Asse...
+======================= 26 failed, 1 warning in 21.69s ========================

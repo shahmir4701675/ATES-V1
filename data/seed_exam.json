@@ -1,0 +1,405 @@
+{
+  "departments": [
+    {
+      "department_id": 1,
+      "code": "CISE",
+      "name": "Computer and Information Systems Engineering"
+    }
+  ],
+  "academic_terms": [
+    {
+      "term_id": 1,
+      "name": "Fall 2026",
+      "start_date": "2026-09-01",
+      "end_date": "2026-12-31",
+      "status": "Active"
+    }
+  ],
+  "batches": [
+    {
+      "batch_id": 1,
+      "department_id": 1,
+      "program_code": "BSCS",
+      "batch_year": 2024,
+      "section": "A",
+      "strength": 45,
+      "is_active": true
+    },
+    {
+      "batch_id": 2,
+      "department_id": 1,
+      "program_code": "BSCS",
+      "batch_year": 2024,
+      "section": "B",
+      "strength": 40,
+      "is_active": true
+    }
+  ],
+  "courses": [
+    {
+      "course_id": 1,
+      "course_code": "CS-326",
+      "title": "Software Engineering",
+      "department_id": 1,
+      "credit_hours": 4,
+      "lecture_hours": 3,
+      "lab_hours": 2,
+      "is_active": true
+    },
+    {
+      "course_id": 2,
+      "course_code": "CS-310",
+      "title": "Operating Systems",
+      "department_id": 1,
+      "credit_hours": 4,
+      "lecture_hours": 3,
+      "lab_hours": 2,
+      "is_active": true
+    },
+    {
+      "course_id": 3,
+      "course_code": "MT-212",
+      "title": "Linear Algebra",
+      "department_id": 1,
+      "credit_hours": 3,
+      "lecture_hours": 3,
+      "lab_hours": 0,
+      "is_active": true
+    },
+    {
+      "course_id": 4,
+      "course_code": "CS-318",
+      "title": "Database Systems",
+      "department_id": 1,
+      "credit_hours": 4,
+      "lecture_hours": 3,
+      "lab_hours": 2,
+      "is_active": true
+    },
+    {
+      "course_id": 5,
+      "course_code": "CS-332",
+      "title": "Computer Networks",
+      "department_id": 1,
+      "credit_hours": 3,
+      "lecture_hours": 3,
+      "lab_hours": 0,
+      "is_active": true
+    }
+  ],
+  "instructors": [
+    {
+      "instructor_id": 1,
+      "department_id": 1,
+      "full_name": "Dr. Fakhra Aftab",
+      "email": "fakhra@neduet.edu.pk",
+      "max_daily_hours": 4,
+      "max_weekly_hours": 12,
+      "is_active": true
+    },
+    {
+      "instructor_id": 2,
+      "department_id": 1,
+      "full_name": "Dr. Ali Raza",
+      "email": "aliraza@neduet.edu.pk",
+      "max_daily_hours": 4,
+      "max_weekly_hours": 12,
+      "is_active": true
+    },
+    {
+      "instructor_id": 3,
+      "department_id": 1,
+      "full_name": "Prof. Sara Khan",
+      "email": "sarakhan@neduet.edu.pk",
+      "max_daily_hours": 4,
+      "max_weekly_hours": 12,
+      "is_active": true
+    }
+  ],
+  "rooms": [
+    {
+      "room_id": 1,
+      "room_code": "Rm 301",
+      "building": "Main Block",
+      "capacity": 50,
+      "room_type": "Lecture",
+      "is_active": true
+    },
+    {
+      "room_id": 2,
+      "room_code": "Rm 204",
+      "building": "Main Block",
+      "capacity": 45,
+      "room_type": "Lecture",
+      "is_active": true
+    },
+    {
+      "room_id": 3,
+      "room_code": "Rm 105",
+      "building": "Annex Block",
+      "capacity": 30,
+      "room_type": "Lecture",
+      "is_active": true
+    },
+    {
+      "room_id": 4,
+      "room_code": "Lab 1",
+      "building": "Lab Block",
+      "capacity": 50,
+      "room_type": "Lab",
+      "is_active": true
+    },
+    {
+      "room_id": 5,
+      "room_code": "Lab 2",
+      "building": "Lab Block",
+      "capacity": 50,
+      "room_type": "Lab",
+      "is_active": true
+    },
+    {
+      "room_id": 6,
+      "room_code": "Hall A",
+      "building": "Main Block",
+      "capacity": 60,
+      "room_type": "Exam Hall",
+      "is_active": true
+    }
+  ],
+  "course_offerings": [
+    {
+      "offering_id": 1,
+      "term_id": 1,
+      "course_id": 1,
+      "batch_id": 1,
+      "instructor_id": 1,
+      "enrolled_count": 45
+    },
+    {
+      "offering_id": 2,
+      "term_id": 1,
+      "course_id": 2,
+      "batch_id": 1,
+      "instructor_id": 2,
+      "enrolled_count": 45
+    },
+    {
+      "offering_id": 3,
+      "term_id": 1,
+      "course_id": 3,
+      "batch_id": 1,
+      "instructor_id": 3,
+      "enrolled_count": 45
+    },
+    {
+      "offering_id": 4,
+      "term_id": 1,
+      "course_id": 1,
+      "batch_id": 2,
+      "instructor_id": 1,
+      "enrolled_count": 40
+    },
+    {
+      "offering_id": 5,
+      "term_id": 1,
+      "course_id": 4,
+      "batch_id": 2,
+      "instructor_id": 2,
+      "enrolled_count": 40
+    },
+    {
+      "offering_id": 6,
+      "term_id": 1,
+      "course_id": 5,
+      "batch_id": 2,
+      "instructor_id": 3,
+      "enrolled_count": 40
+    }
+  ],
+  "enrollments": [
+    {
+      "enrollment_id": 1,
+      "offering_id": 2,
+      "student_id": 9001
+    },
+    {
+      "enrollment_id": 2,
+      "offering_id": 5,
+      "student_id": 9001
+    }
+  ],
+  "exam_slots": [
+    {
+      "exam_slot_id": 1,
+      "term_id": 1,
+      "exam_date": "2026-12-14",
+      "session_label": "Morning",
+      "start_time": "09:00",
+      "end_time": "12:00"
+    },
+    {
+      "exam_slot_id": 2,
+      "term_id": 1,
+      "exam_date": "2026-12-14",
+      "session_label": "Afternoon",
+      "start_time": "14:00",
+      "end_time": "17:00"
+    },
+    {
+      "exam_slot_id": 3,
+      "term_id": 1,
+      "exam_date": "2026-12-15",
+      "session_label": "Morning",
+      "start_time": "09:00",
+      "end_time": "12:00"
+    },
+    {
+      "exam_slot_id": 4,
+      "term_id": 1,
+      "exam_date": "2026-12-15",
+      "session_label": "Afternoon",
+      "start_time": "14:00",
+      "end_time": "17:00"
+    },
+    {
+      "exam_slot_id": 5,
+      "term_id": 1,
+      "exam_date": "2026-12-16",
+      "session_label": "Morning",
+      "start_time": "09:00",
+      "end_time": "12:00"
+    },
+    {
+      "exam_slot_id": 6,
+      "term_id": 1,
+      "exam_date": "2026-12-16",
+      "session_label": "Afternoon",
+      "start_time": "14:00",
+      "end_time": "17:00"
+    }
+  ],
+  "scheduling_configs": [
+    {
+      "config_id": 2,
+      "term_id": 1,
+      "schedule_type": "Exam",
+      "name": "Default exam schedule",
+      "solver_time_limit_s": 120,
+      "random_seed": 1,
+      "created_by": 1,
+      "created_at": "2026-11-01T09:00:00Z"
+    }
+  ],
+  "constraint_rules": [
+    {"rule_id": 11, "config_id": 2, "rule_code": "E01", "rule_type": "Hard", "is_enabled": true, "weight": 0, "param_value": null},
+    {"rule_id": 12, "config_id": 2, "rule_code": "E02", "rule_type": "Hard", "is_enabled": true, "weight": 0, "param_value": 2},
+    {"rule_id": 13, "config_id": 2, "rule_code": "E03", "rule_type": "Hard", "is_enabled": true, "weight": 0, "param_value": null},
+    {"rule_id": 14, "config_id": 2, "rule_code": "E04", "rule_type": "Hard", "is_enabled": true, "weight": 0, "param_value": null},
+    {"rule_id": 15, "config_id": 2, "rule_code": "E05", "rule_type": "Hard", "is_enabled": true, "weight": 0, "param_value": null},
+    {"rule_id": 16, "config_id": 2, "rule_code": "ES01", "rule_type": "Soft", "is_enabled": true, "weight": 8, "param_value": null},
+    {"rule_id": 17, "config_id": 2, "rule_code": "ES02", "rule_type": "Soft", "is_enabled": true, "weight": 5, "param_value": null},
+    {"rule_id": 18, "config_id": 2, "rule_code": "ES03", "rule_type": "Soft", "is_enabled": true, "weight": 4, "param_value": null}
+  ],
+  "schedules": [
+    {
+      "schedule_id": 2,
+      "term_id": 1,
+      "config_id": 2,
+      "schedule_type": "Exam",
+      "version_no": 1,
+      "status": "Generated",
+      "solver_status": "optimal",
+      "objective_score": 100.0,
+      "run_seconds": 0.45,
+      "generated_by": 1,
+      "generated_at": "2026-11-01T09:05:00Z",
+      "approved_by": null,
+      "published_at": null
+    }
+  ],
+  "exam_entries": [
+    {
+      "exam_entry_id": 1,
+      "schedule_id": 2,
+      "course_id": 1,
+      "exam_slot_id": 1,
+      "student_count": 85,
+      "is_locked": false,
+      "is_manual_override": false
+    },
+    {
+      "exam_entry_id": 2,
+      "schedule_id": 2,
+      "course_id": 2,
+      "exam_slot_id": 3,
+      "student_count": 45,
+      "is_locked": false,
+      "is_manual_override": false
+    },
+    {
+      "exam_entry_id": 3,
+      "schedule_id": 2,
+      "course_id": 3,
+      "exam_slot_id": 5,
+      "student_count": 45,
+      "is_locked": false,
+      "is_manual_override": false
+    },
+    {
+      "exam_entry_id": 4,
+      "schedule_id": 2,
+      "course_id": 4,
+      "exam_slot_id": 5,
+      "student_count": 40,
+      "is_locked": false,
+      "is_manual_override": false
+    },
+    {
+      "exam_entry_id": 5,
+      "schedule_id": 2,
+      "course_id": 5,
+      "exam_slot_id": 3,
+      "student_count": 40,
+      "is_locked": false,
+      "is_manual_override": false
+    }
+  ],
+  "exam_room_allocations": [
+    {
+      "allocation_id": 1,
+      "exam_entry_id": 1,
+      "room_id": 6,
+      "seats_allocated": 60
+    },
+    {
+      "allocation_id": 2,
+      "exam_entry_id": 1,
+      "room_id": 1,
+      "seats_allocated": 25
+    },
+    {
+      "allocation_id": 3,
+      "exam_entry_id": 2,
+      "room_id": 6,
+      "seats_allocated": 45
+    },
+    {
+      "allocation_id": 4,
+      "exam_entry_id": 5,
+      "room_id": 1,
+      "seats_allocated": 40
+    },
+    {
+      "allocation_id": 5,
+      "exam_entry_id": 3,
+      "room_id": 6,
+      "seats_allocated": 45
+    },
+    {
+      "allocation_id": 6,
+      "exam_entry_id": 4,
+      "room_id": 1,
+      "seats_allocated": 40
+    }
+  ]
+}

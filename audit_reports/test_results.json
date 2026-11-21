@@ -1,0 +1,755 @@
+{
+  "existing": [
+    {
+      "name": "test_cors_allows_react_dev_server_only",
+      "className": "tests.test_backend_api",
+      "seconds": 0.584,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_role_check_readiness_enforces_roles_when_header_present",
+      "className": "tests.test_backend_api",
+      "seconds": 0.693,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_master_data_crud_courses_instructors_rooms_batches",
+      "className": "tests.test_backend_api",
+      "seconds": 0.879,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_master_data_terms_slots_exam_slots_offerings_and_configs",
+      "className": "tests.test_backend_api",
+      "seconds": 0.831,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_post_schedules_generate_creates_generating_row_and_runs_worker",
+      "className": "tests.test_backend_api",
+      "seconds": 9.857,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_post_schedules_generate_exam_schedule_end_to_end",
+      "className": "tests.test_backend_api",
+      "seconds": 0.739,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_post_schedules_generate_infeasible_persists_conflicts",
+      "className": "tests.test_backend_api",
+      "seconds": 1.18,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_put_schedule_entry_valid_move_and_409_on_violated_timetable_constraints",
+      "className": "tests.test_backend_api",
+      "seconds": 12.121,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_put_schedule_entry_exam_validation_409_and_valid_move",
+      "className": "tests.test_backend_api",
+      "seconds": 1.726,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_startup_recovery_marks_interrupted_generations_as_infeasible",
+      "className": "tests.test_backend_api",
+      "seconds": 0.745,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_env_example_and_gitignore_security_compliance",
+      "className": "tests.test_backend_db",
+      "seconds": 0.002,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_database_url_loading_and_normalization",
+      "className": "tests.test_backend_db",
+      "seconds": 0.026,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_all_21_models_match_schema_sql",
+      "className": "tests.test_backend_db",
+      "seconds": 0.002,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_seed_database_loads_master_data_students_and_enrollments",
+      "className": "tests.test_backend_db",
+      "seconds": 0.397,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_seed_cli_entrypoint_with_local_sqlite",
+      "className": "tests.test_backend_db",
+      "seconds": 0.584,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_db2_composite_foreign_key_and_db4_clash_constraints",
+      "className": "tests.test_backend_db",
+      "seconds": 0.315,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_db3_restrict_master_delete_and_cascade_schedule_delete",
+      "className": "tests.test_backend_db",
+      "seconds": 0.242,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_partial_unique_indexes_and_check_constraints",
+      "className": "tests.test_backend_db",
+      "seconds": 0.207,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_adapter_loads_term_and_validates_seeded_schedules",
+      "className": "tests.test_backend_db",
+      "seconds": 0.235,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_adapter_solves_and_saves_timetable_and_exam_results_in_one_transaction",
+      "className": "tests.test_backend_db",
+      "seconds": 11.906,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_adapter_saves_infeasible_results_and_logs_conflicts_without_harming_existing_schedules",
+      "className": "tests.test_backend_db",
+      "seconds": 0.146,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_saf2_and_db6_atomic_rollback_on_save_failure",
+      "className": "tests.test_backend_db",
+      "seconds": 0.144,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_step1_build_conflict_graph",
+      "className": "tests.test_exam_scheduler",
+      "seconds": 0.002,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_step2_dsatur_colouring_produces_valid_proper_colouring",
+      "className": "tests.test_exam_scheduler",
+      "seconds": 0.001,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_feasible_seed_exam_dataset_scheduled_and_validated",
+      "className": "tests.test_exam_scheduler",
+      "seconds": 0.018,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_overconstrained_exam_dataset_falls_back_to_cpsat_and_reports_shortfall",
+      "className": "tests.test_exam_scheduler",
+      "seconds": 0.044,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_cpsat_fallback_succeeds_when_dsatur_colour_group_exceeds_room_or_daily_limits",
+      "className": "tests.test_exam_scheduler",
+      "seconds": 0.037,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_infeasible_when_single_course_exceeds_total_exam_room_capacity",
+      "className": "tests.test_exam_scheduler",
+      "seconds": 0.03,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_optional_constraint_e02_can_be_disabled",
+      "className": "tests.test_exam_scheduler",
+      "seconds": 0.069,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_es01_soft_preference_spreads_batch_exams_across_different_days",
+      "className": "tests.test_exam_scheduler",
+      "seconds": 0.018,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_es02_soft_preference_minimises_rooms_per_exam",
+      "className": "tests.test_exam_scheduler",
+      "seconds": 0.019,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_es03_soft_preference_keeps_exam_rooms_in_same_building",
+      "className": "tests.test_exam_scheduler",
+      "seconds": 0.026,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_exam_soft_breakdown_objective_score_and_ui_summary",
+      "className": "tests.test_exam_scheduler",
+      "seconds": 0.017,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_exam_locked_sessions_are_preserved",
+      "className": "tests.test_exam_scheduler",
+      "seconds": 0.039,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_exam_deterministic_seed_and_extensible_soft_constraint_interface",
+      "className": "tests.test_exam_scheduler",
+      "seconds": 0.035,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_default_time_limit_constant",
+      "className": "tests.test_timetable_solver",
+      "seconds": 0.001,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_solve_seed_dataset_feasible_and_validated",
+      "className": "tests.test_timetable_solver",
+      "seconds": 3.247,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_solve_result_tuple_unpacking",
+      "className": "tests.test_timetable_solver",
+      "seconds": 3.54,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_solve_deliberately_infeasible_dataset",
+      "className": "tests.test_timetable_solver",
+      "seconds": 0.208,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_deterministic_seed_produces_identical_schedule",
+      "className": "tests.test_timetable_solver",
+      "seconds": 3.069,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_mandatory_constraints_always_enforced_even_if_disabled",
+      "className": "tests.test_timetable_solver",
+      "seconds": 0.014,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_optional_constraint_h04_capacity_toggle",
+      "className": "tests.test_timetable_solver",
+      "seconds": 2.991,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_optional_constraint_h05_room_type_toggle",
+      "className": "tests.test_timetable_solver",
+      "seconds": 4.198,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_optional_constraint_h06_availability_toggle",
+      "className": "tests.test_timetable_solver",
+      "seconds": 4.694,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_optional_constraint_h07_blocked_slot_toggle",
+      "className": "tests.test_timetable_solver",
+      "seconds": 2.501,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_optional_constraint_h09_lab_contiguity_toggle",
+      "className": "tests.test_timetable_solver",
+      "seconds": 1.111,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_optional_constraint_h10_workload_toggle",
+      "className": "tests.test_timetable_solver",
+      "seconds": 2.647,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_locked_sessions_are_preserved_in_new_run",
+      "className": "tests.test_timetable_solver",
+      "seconds": 1.057,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_validator_rejection_gate_discards_invalid_solution",
+      "className": "tests.test_timetable_solver",
+      "seconds": 2.734,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_input_completeness_check_reports_defects",
+      "className": "tests.test_timetable_solver",
+      "seconds": 0.002,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_soft_constraints_objective_breakdown_and_score_summary",
+      "className": "tests.test_timetable_solver",
+      "seconds": 2.746,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_s01_minimises_batch_idle_gaps_on_a_day",
+      "className": "tests.test_timetable_solver",
+      "seconds": 0.522,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_s02_spreads_offering_sessions_across_different_days",
+      "className": "tests.test_timetable_solver",
+      "seconds": 2.784,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_s03_keeps_batch_daily_sessions_at_or_below_parameter",
+      "className": "tests.test_timetable_solver",
+      "seconds": 7.837,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_s04_keeps_instructor_consecutive_teaching_slots_within_limit",
+      "className": "tests.test_timetable_solver",
+      "seconds": 2.923,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_s05_prefers_previous_schedule_slot_and_room_and_skips_when_none",
+      "className": "tests.test_timetable_solver",
+      "seconds": 4.907,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_s06_prefers_smallest_fitting_room",
+      "className": "tests.test_timetable_solver",
+      "seconds": 0.611,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_zero_weight_or_disabled_soft_constraints_are_ignored",
+      "className": "tests.test_timetable_solver",
+      "seconds": 0.498,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_soft_constraints_never_violate_hard_constraints_even_with_conflicting_previous_schedule",
+      "className": "tests.test_timetable_solver",
+      "seconds": 5.613,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_extensible_soft_constraint_interface_srs_4_3_5",
+      "className": "tests.test_timetable_solver",
+      "seconds": 3.097,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_valid_seed_schedule_has_no_violations",
+      "className": "tests.test_validator",
+      "seconds": 0.002,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_h01_instructor_clash",
+      "className": "tests.test_validator",
+      "seconds": 0.002,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_h02_room_clash",
+      "className": "tests.test_validator",
+      "seconds": 0.002,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_h03_batch_clash",
+      "className": "tests.test_validator",
+      "seconds": 0.002,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_h04_room_capacity",
+      "className": "tests.test_validator",
+      "seconds": 0.002,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_h05_room_type_mismatch",
+      "className": "tests.test_validator",
+      "seconds": 0.002,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_h06_instructor_unavailable",
+      "className": "tests.test_validator",
+      "seconds": 0.002,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_h07_blocked_slot",
+      "className": "tests.test_validator",
+      "seconds": 0.002,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_h08_session_count_mismatch",
+      "className": "tests.test_validator",
+      "seconds": 0.002,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_h09_lab_block_contiguity",
+      "className": "tests.test_validator",
+      "seconds": 0.002,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_h10_instructor_workload_exceeded",
+      "className": "tests.test_validator",
+      "seconds": 0.003,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_mandatory_constraints_cannot_be_disabled_in_validator",
+      "className": "tests.test_validator",
+      "seconds": 0.002,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_valid_seed_exam_schedule_has_no_violations",
+      "className": "tests.test_validator",
+      "seconds": 0.002,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_e01_student_exam_clash",
+      "className": "tests.test_validator",
+      "seconds": 0.002,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_e02_daily_exam_limit_exceeded",
+      "className": "tests.test_validator",
+      "seconds": 0.002,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_e03_exam_seat_allocation_exceeds_room_capacity",
+      "className": "tests.test_validator",
+      "seconds": 0.001,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_e04_exam_room_clash_in_session",
+      "className": "tests.test_validator",
+      "seconds": 0.001,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_e05_single_session_per_course_missing",
+      "className": "tests.test_validator",
+      "seconds": 0.001,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_mandatory_exam_constraints_cannot_be_disabled",
+      "className": "tests.test_validator",
+      "seconds": 0.001,
+      "result": "passed",
+      "message": null
+    }
+  ],
+  "audit": [
+    {
+      "name": "test_unauthenticated_read_requires_login",
+      "className": "audit_reports.test_audit_probes",
+      "seconds": 0.42,
+      "result": "failed",
+      "message": "AssertionError: Unauthenticated GET /courses returned 200\nassert 200 == 401\n +  where 200 = <Response [200 OK]>.status_code"
+    },
+    {
+      "name": "test_unauthenticated_write_requires_login",
+      "className": "audit_reports.test_audit_probes",
+      "seconds": 0.276,
+      "result": "failed",
+      "message": "AssertionError: Unauthenticated room creation returned 201\nassert 201 == 401\n +  where 201 = <Response [201 Created]>.status_code"
+    },
+    {
+      "name": "test_forged_role_is_not_authentication",
+      "className": "audit_reports.test_audit_probes",
+      "seconds": 0.282,
+      "result": "failed",
+      "message": "AssertionError: Forged Administrator header returned 201\nassert 201 == 401\n +  where 201 = <Response [201 Created]>.status_code"
+    },
+    {
+      "name": "test_student_cannot_read_generated_schedule",
+      "className": "audit_reports.test_audit_probes",
+      "seconds": 0.348,
+      "result": "failed",
+      "message": "AssertionError: Student read Generated schedule with 26 entries\nassert 200 in (401, 403, 404)\n +  where 200 = <Response [200 OK]>.status_code"
+    },
+    {
+      "name": "test_student_list_contains_published_only",
+      "className": "audit_reports.test_audit_probes",
+      "seconds": 0.511,
+      "result": "failed",
+      "message": "AssertionError: [{'schedule_id': 1, 'term_id': 1, 'config_id': 1, 'schedule_type': 'Timetable', 'version_no': 1, 'status': 'Generated', 'solver_status': 'optimal', 'objective_score': 128.0, 'run_seconds': 1.25, 'entry_count': 26, 'conflict_count': 0, 'hard_violation_count': 0, 'generated_by': 1, 'generated_at': '2026-10-20T09:15:00Z', 'approved_by': None, 'published_at': None}, {'schedule_id': 2, 'term_id': 1, 'config_id': 2, 'schedule_type': 'Exam', 'version_no': 1, 'status': 'Generated', 'solv...\n[+3 more lines; full report in element text]"
+    },
+    {
+      "name": "test_faculty_without_identity_cannot_edit_any_instructor",
+      "className": "audit_reports.test_audit_probes",
+      "seconds": 0.373,
+      "result": "failed",
+      "message": "AssertionError: Unlinked Faculty edit returned 200\nassert 200 in (401, 403)\n +  where 200 = <Response [200 OK]>.status_code"
+    },
+    {
+      "name": "test_administrator_cannot_generate",
+      "className": "audit_reports.test_audit_probes",
+      "seconds": 0.352,
+      "result": "failed",
+      "message": "AssertionError: Administrator generation returned 202\nassert 202 == 403\n +  where 202 = <Response [202 Accepted]>.status_code"
+    },
+    {
+      "name": "test_required_endpoint_exists[post-/auth/login-payload0]",
+      "className": "audit_reports.test_audit_probes",
+      "seconds": 0.449,
+      "result": "failed",
+      "message": "AssertionError: POST /auth/login: 404\nassert 404 not in (404, 405)\n +  where 404 = <Response [404 Not Found]>.status_code"
+    },
+    {
+      "name": "test_required_endpoint_exists[post-/auth/logout-payload1]",
+      "className": "audit_reports.test_audit_probes",
+      "seconds": 0.68,
+      "result": "failed",
+      "message": "AssertionError: POST /auth/logout: 404\nassert 404 not in (404, 405)\n +  where 404 = <Response [404 Not Found]>.status_code"
+    },
+    {
+      "name": "test_required_endpoint_exists[get-/users-None]",
+      "className": "audit_reports.test_audit_probes",
+      "seconds": 0.452,
+      "result": "failed",
+      "message": "AssertionError: GET /users: 404\nassert 404 not in (404, 405)\n +  where 404 = <Response [404 Not Found]>.status_code"
+    },
+    {
+      "name": "test_required_endpoint_exists[get-/audit-None]",
+      "className": "audit_reports.test_audit_probes",
+      "seconds": 0.475,
+      "result": "failed",
+      "message": "AssertionError: GET /audit: 404\nassert 404 not in (404, 405)\n +  where 404 = <Response [404 Not Found]>.status_code"
+    },
+    {
+      "name": "test_required_endpoint_exists[post-/import/courses-payload4]",
+      "className": "audit_reports.test_audit_probes",
+      "seconds": 0.451,
+      "result": "failed",
+      "message": "AssertionError: POST /import/courses: 404\nassert 404 not in (404, 405)\n +  where 404 = <Response [404 Not Found]>.status_code"
+    },
+    {
+      "name": "test_required_endpoint_exists[post-/schedules/1/publish-payload5]",
+      "className": "audit_reports.test_audit_probes",
+      "seconds": 0.478,
+      "result": "failed",
+      "message": "AssertionError: POST /schedules/1/publish: 404\nassert 404 not in (404, 405)\n +  where 404 = <Response [404 Not Found]>.status_code"
+    },
+    {
+      "name": "test_required_endpoint_exists[get-/schedules/1/export?format=csv-None]",
+      "className": "audit_reports.test_audit_probes",
+      "seconds": 0.437,
+      "result": "failed",
+      "message": "AssertionError: GET /schedules/1/export?format=csv: 404\nassert 404 not in (404, 405)\n +  where 404 = <Response [404 Not Found]>.status_code"
+    },
+    {
+      "name": "test_required_endpoint_exists[get-/schedules/1/export?format=pdf-None]",
+      "className": "audit_reports.test_audit_probes",
+      "seconds": 0.587,
+      "result": "failed",
+      "message": "AssertionError: GET /schedules/1/export?format=pdf: 404\nassert 404 not in (404, 405)\n +  where 404 = <Response [404 Not Found]>.status_code"
+    },
+    {
+      "name": "test_weekly_slot_overlap_rejected",
+      "className": "audit_reports.test_audit_probes",
+      "seconds": 0.409,
+      "result": "failed",
+      "message": "AssertionError: Overlapping slot accepted: 201\nassert 201 in (409, 422)\n +  where 201 = <Response [201 Created]>.status_code"
+    },
+    {
+      "name": "test_unequal_slot_length_rejected",
+      "className": "audit_reports.test_audit_probes",
+      "seconds": 0.314,
+      "result": "failed",
+      "message": "AssertionError: Unequal length accepted: 201\nassert 201 in (409, 422)\n +  where 201 = <Response [201 Created]>.status_code"
+    },
+    {
+      "name": "test_bad_time_returns_validation_error",
+      "className": "audit_reports.test_audit_probes",
+      "seconds": 0.549,
+      "result": "failed",
+      "message": "AssertionError: Malformed time returned 500\nassert 500 == 422\n +  where 500 = <Response [500 Internal Server Error]>.status_code"
+    },
+    {
+      "name": "test_grid_over_midnight_returns_validation_error",
+      "className": "audit_reports.test_audit_probes",
+      "seconds": 0.316,
+      "result": "failed",
+      "message": "AssertionError: Cross-midnight grid returned 500\nassert 500 == 422\n +  where 500 = <Response [500 Internal Server Error]>.status_code"
+    },
+    {
+      "name": "test_invalid_day_returns_validation_error",
+      "className": "audit_reports.test_audit_probes",
+      "seconds": 0.261,
+      "result": "failed",
+      "message": "AssertionError: Invalid day returned 409\nassert 409 == 422\n +  where 409 = <Response [409 Conflict]>.status_code"
+    },
+    {
+      "name": "test_generated_schedule_immutable_through_master_data",
+      "className": "audit_reports.test_audit_probes",
+      "seconds": 0.284,
+      "result": "failed",
+      "message": "AssertionError: Published metadata mutated: HTTP 200; violations=['H04']\n[+2 more lines; full report in element text]"
+    },
+    {
+      "name": "test_lab_contiguity_uses_clock_time",
+      "className": "audit_reports.test_audit_probes",
+      "seconds": 0.002,
+      "result": "failed",
+      "message": "AssertionError: Nonadjacent clock-time lab accepted; violations=[]\nassert False\n +  where False = any(<generator object test_lab_contiguity_uses_clock_time.<locals>.<genexpr> at 0x000001CA3ECBE260>)"
+    },
+    {
+      "name": "test_mixed_enrollment_fallback_has_cohort_conflict",
+      "className": "audit_reports.test_audit_probes",
+      "seconds": 0.002,
+      "result": "failed",
+      "message": "AssertionError: Fully enumerated course and missing-enrollment course in same batch have no edge\nassert False\n +  where False = has_edge(1, 2)\n +    where has_edge = <networkx.classes.graph.Graph object at 0x000001CA3EF0C980>.has_edge\n +    and   1 = CourseOffering(offering_id=1, term_id=1, course_id=1, batch_id=1, instructor_id=1, enrolled_count=45).course_id\n +    and   2 = CourseOffering(offering_id=2, term_id=1, course_id=2, batch_id=1, instructor_id=2, enrolled_count=45).course_id"
+    },
+    {
+      "name": "test_exam_manual_override_persisted",
+      "className": "audit_reports.test_audit_probes",
+      "seconds": 0.296,
+      "result": "failed",
+      "message": "AssertionError: Exam response/model cannot preserve manual override flag\nassert 'is_manual_override' in {'exam_entry_id': 1, 'schedule_id': 2, 'course_id': 1, 'course_code': 'CS-326', ...}\n +  where {'exam_entry_id': 1, 'schedule_id': 2, 'course_id': 1, 'course_code': 'CS-326', ...} = json()\n +    where json = <Response [200 OK]>.json"
+    },
+    {
+      "name": "test_published_direct_edit_rejected",
+      "className": "audit_reports.test_audit_probes",
+      "seconds": 0.435,
+      "result": "passed",
+      "message": null
+    },
+    {
+      "name": "test_mutation_audit_written",
+      "className": "audit_reports.test_audit_probes",
+      "seconds": 0.415,
+      "result": "failed",
+      "message": "AssertionError: Room creation has no persistent audit event\nassert []"
+    },
+    {
+      "name": "test_solver_rejects_overlapping_clock_slots",
+      "className": "audit_reports.test_extra_probes",
+      "seconds": 0.011,
+      "result": "failed",
+      "message": "AssertionError: Solver returned optimal: [(1, 1, 1, 2), (2, 1, 1, 2)] in identical clock windows; validator=[]\nassert not True\n[+1 more line; full report in element text]"
+    },
+    {
+      "name": "test_default_app_recovers_orphan_on_startup",
+      "className": "audit_reports.test_extra_probes",
+      "seconds": 0.44,
+      "result": "failed",
+      "message": "AssertionError: Default lazy app left status=Generating\nassert 'Generating' == 'Infeasible'\n  \n  - Infeasible\n  + Generating"
+    }
+  ]
+}

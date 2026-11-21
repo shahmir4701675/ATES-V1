@@ -1,0 +1,2889 @@
+=== PDF PAGE 1 ===
+SOFTWARE REQUIREMENTS SPECIFICATION (SRS)
+AUTO TIMETABLE / EXAM SCHEDULER
+Prepared by
+Name Seat No.
+Mohammad Shahmir CS-24145
+Syed Huzaifa Hasan CS-24142
+Abdul Kabeer CS-24146
+Arbab Ali CS-24141
+Department of Computer and Information Systems Engineering
+NED University of Engineering and Technology
+Course: CS-326 Software Engineering –
+Fall Semester 2026
+Submitted to
+Dr. Fakhra Aftab
+October 20, 2026
+=== PDF PAGE 2 ===
+Contents
+1 Introduction 1
+1.1 Document Purpose . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 1
+1.2 Product Scope . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 1
+1.3 Intended Audience and Document Overview . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 3
+1.4 Definitions, Acronyms and Abbreviations . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 4
+1.5 Document Conventions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+1.6 References . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+2 Overall Description 8
+2.1 Product Perspective . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+2.2 Product Functionality . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+2.3 Users and Characteristics . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+2.4 Operating Environment . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+2.5 Design and Implementation Constraints . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11
+2.6 User Documentation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+2.7 Assumptions and Dependencies . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+3 Specific Requirements 14
+3.1 External Interface Requirements . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14
+3.2 Functional Requirements . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 17
+3.3 Behaviour Requirements . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 27
+4 Other Non-functional Requirements 39
+4.1 Performance Requirements . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 39
+4.2 Safety and Security Requirements . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 39
+4.3 Software Quality Attributes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 41
+5 Other Requirements 44
+5.1 Database Requirements . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 44
+5.2 Legal and Regulatory Requirements . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 53
+5.3 Internationalisation and Localisation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 53
+5.4 Reuse Objectives . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 53
+Appendix A – Data Dictionary 55
+A.1 Constants and Configuration Parameters . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 55
+A.2 State Variables . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 55
+A.3 Inputs . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 56
+A.4 Outputs . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 57
+A.5 Constraint Catalogue . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 57
+ii
+=== PDF PAGE 3 ===
+List of Figures
+1 Context diagram of the Auto Timetable / Exam Scheduler . . . . . . . . . . . . . . . . 8
+2 Data flow diagram, level 1 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 9
+3 Major components, interconnections and deployment tiers . . . . . . . . . . . . . . . 11
+4 Wireframe of the Timetable View screen . . . . . . . . . . . . . . . . . . . . . . . . . 15
+5 Wireframe of the Generate screen . . . . . . . . . . . . . . . . . . . . . . . . . . . . 15
+6 Use case diagram of the Auto Timetable / Exam Scheduler. All actors are associated
+with UC-01 (Log In); these association lines are omitted for clarity. The Coordinator and
+the Approver may also use UC-14 to UC-16. . . . . . . . . . . . . . . . . . . . . . . . 29
+7 Sequence diagram: generating a timetable (UC-08; FR-6.1 to FR-6.8) . . . . . . . . . 32
+8 Sequence diagram: generating an exam schedule with graph colouring (UC-09; FR-7.1
+to FR-7.7) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 33
+9 Sequence diagram: manual adjustment with immediate re-validation (UC-12; FR-8.3 to
+FR-8.5) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 34
+10 Sequence diagram: review and publishing (UC-13; FR-9.2, FR-9.3) . . . . . . . . . . 35
+11 State diagram of a schedule (FR-9.1) . . . . . . . . . . . . . . . . . . . . . . . . . . 35
+12 Activity diagram: timetable generation (UC-08) . . . . . . . . . . . . . . . . . . . . . . 37
+13 Activity diagram: exam schedule generation with graph colouring (UC-09) . . . . . . . 38
+14 Entity–relationship diagram of the ATES database . . . . . . . . . . . . . . . . . . . . 45
+iii
+=== PDF PAGE 4 ===
+List of Tables
+1 In-scope and out-of-scope capabilities of the first release . . . . . . . . . . . . . . . . 2
+2 Stakeholders categorised by viewpoint . . . . . . . . . . . . . . . . . . . . . . . . . . 2
+3 Intended readers and suggested reading sequence . . . . . . . . . . . . . . . . . . . 4
+4 Identifier schemes and priority levels . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+5 User classes and their characteristics . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+6 Minimum platform requirements . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11
+7 Screens of the user interface . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14
+8 Software interfaces . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16
+9 Main REST resources . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 17
+10 User functional requirements . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 17
+11 Authentication and Access Control requirements . . . . . . . . . . . . . . . . . . . . . 19
+12 Master Data Management requirements . . . . . . . . . . . . . . . . . . . . . . . . . 20
+13 Instructor Availability requirements . . . . . . . . . . . . . . . . . . . . . . . . . . . . 21
+14 Bulk Data Import requirements . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 21
+15 Constraint and Parameter Configuration requirements . . . . . . . . . . . . . . . . . . 22
+16 Timetable Generation requirements . . . . . . . . . . . . . . . . . . . . . . . . . . . 23
+17 Exam Schedule Generation requirements . . . . . . . . . . . . . . . . . . . . . . . . 23
+18 Conflict Detection and Manual Adjustment requirements . . . . . . . . . . . . . . . . 24
+19 Review, Versioning and Publishing requirements . . . . . . . . . . . . . . . . . . . . . 25
+20 Schedule Viewing requirements . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 25
+21 Export requirements . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 26
+22 Audit Trail requirements . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 26
+23 Traceability from user requirements to system requirements . . . . . . . . . . . . . . . 27
+24 Actors . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 28
+25 Use case summary . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 30
+26 State transitions of a schedule . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 36
+27 Performance requirements . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 39
+28 Safety requirements . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 40
+29 Security requirements . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 40
+30 Foreign-key relationships . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 52
+iv
+=== PDF PAGE 5 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+1 Introduction
+Preparing course timetables and examination schedules is one of the most error-prone administrative
+tasks in a university department. A schedule must satisfy many interacting conditions at once: an
+instructor cannot teach two classes at the same time, a room cannot host two sessions at once, a
+student batch cannot sit in two places, rooms must be large enough and of the right type, and instructors
+have their own availability. When these rules are applied by hand, usually in spreadsheets, clashes are
+discovered late and every correction can create new ones.
+TheAuto Timetable / Exam Scheduler(ATES) is a web-based application that takes basic institutional
+data (courses, instructors, rooms, student batches and time slots) and automatically produces a conflict-
+free timetable and examination schedule. The scheduling rules are modelled as a constraint satisfaction
+problem (CSP), and the examination schedule additionally uses graph colouring, so that clashes are
+removed by construction rather than found afterwards.
+This section states the purpose and scope of the document, identifies the stakeholders, describes the
+intended readers, and explains the notation used. Section 2 describes the product in general terms.
+Section 3 contains the detailed user and system requirements and the behavioural models. Section 4
+gives the non-functional requirements, Section 5 specifies the database, and Appendix A is the data
+dictionary.
+1.1 Document Purpose
+This document is the Software Requirements Specification (SRS) for theAuto Timetable / Exam
+Scheduler. It covers the complete product: the web user interface, the application programming
+interface (API), the scheduling engine and the database. It does not describe a single subsystem in
+isolation.
+The purpose of the SRS is to identify, document and organise all functional, non-functional and data
+requirements of the system so that they are accurate, unambiguous, verifiable and traceable. It is the
+agreed basis for design, implementation and testing, and for evaluating whether the finished product
+meets the needs of its stakeholders. The document follows the structure of the department’s SRS
+template, which is based on IEEE Std 830-1998 and ISO/IEC/IEEE 29148:2018 [1, 2].
+1.2 Product Scope
+ATES is a scheduling engine with a web front end. Users enter or import institutional parameters,
+configure the scheduling rules, and ask the system to generate a timetable or an exam schedule. The
+system then displays the result in filterable views, reports any conflicts it cannot resolve, allows controlled
+manual adjustment, and exports the final schedule as PDF or CSV.
+Objectives and goals.
+• Produce complete timetables and exam schedules that contain no violation of the mandatory (hard)
+scheduling rules.
+• Replace manual, spreadsheet-based drafting with a repeatable process that can be re-run whenever
+data changes.
+• Explain clearly why a schedule cannot be built when the input data is over-constrained, instead of
+failing silently.
+• Give each class of user a suitable view of the published schedule (by batch, instructor or room).
+Benefits.Coordinators spend less time drafting and correcting schedules; clashes between instructors,
+rooms and batches are eliminated by the solver and re-checked by an independent validator; schedule
+1
+=== PDF PAGE 6 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+changes can be regenerated in minutes; students and faculty receive a single, consistent, published
+source of truth; and past schedules are retained for reference.
+1.2.1 Scope Boundaries
+Table 1 lists what is inside and outside the first release.
+Table 1:In-scope and out-of-scope capabilities of the first release
+In scope Out of scope
+Management of courses, instructors, rooms,
+batches, terms, time slots and course offerings
+Student course registration and fee, attendance
+or grade management
+Bulk CSV import with row-level validation Direct integration with a university ERP or student
+information system (planned for a later release)
+Configurable hard and soft scheduling constraints Invigilator (exam duty) rostering and individual
+seat-number allocation
+Automatic weekly timetable generation for one
+academic term
+Multi-campus scheduling with travel time between
+campuses
+Automatic exam schedule generation with room
+allocation
+Native mobile applications (the web interface is
+responsive)
+Conflict detection and reporting, manual adjust-
+ment with re-validation
+Automatic e-mail or SMS notifications
+Review, approval, publishing, versioning and
+archiving of schedules
+Co-taught courses with more than one instructor
+per offering
+Filterable schedule views and PDF/CSV export;
+audit log
+Payment, procurement or any e-commerce func-
+tion
+1.2.2 Stakeholder Identification and Viewpoints
+Stakeholders are the people and organisations that use the system, are affected by it, or influence
+its requirements. They are grouped by viewpoint [ 3]:interactorsuse the system directly,indirect
+stakeholders are affected by or influence it without using it,domainstakeholders impose rules from the
+problem domain, anddevelopmentstakeholders build and maintain it.
+Table 2:Stakeholders categorised by viewpoint
+Viewpoint Stakeholder Interest in the system Typical requirements
+Interactor Scheduling
+Coordinator
+Prepares the data, configures
+rules, generates, adjusts and
+exports schedules; the main
+day-to-day user.
+Fast data entry and
+import, reliable
+generation, clear conflict
+report, manual
+adjustment (UR-04 to
+UR-20).
+Interactor Department Head /
+Exam Controller
+(Approver)
+Reviews the generated
+schedule and decides whether it
+becomes official.
+Review of conflicts,
+approval and publishing
+(UR-21).
+Interactor Faculty Member Teaches the courses; needs to
+know when and where, and
+states when unavailable.
+Own timetable view,
+availability entry (UR-10,
+UR-22 to UR-25).
+2
+=== PDF PAGE 7 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+Viewpoint Stakeholder Interest in the system Typical requirements
+Interactor Student Needs the class timetable and
+exam dates of their batch.
+Read-only batch views,
+PDF export (UR-22 to
+UR-25).
+Interactor System
+Administrator
+Manages accounts and roles,
+monitors activity.
+Account management,
+audit log (UR-01 to
+UR-03, UR-26).
+Indirect Dean / Department
+Chairperson
+Receives the final timetable and
+holds the department
+accountable for it.
+Clash-free, printable
+schedules.
+Indirect Examination Office Relies on the exam schedule to
+prepare papers and halls.
+Accurate exam sessions
+and room allocation
+(UR-16).
+Indirect Facilities / Estate
+Office
+Owns rooms and laboratories
+and their availability.
+Correct room capacity,
+type and blocked periods.
+Indirect IT Department Hosts and supports the
+deployed system.
+Simple deployment,
+security, backup.
+Domain University academic
+regulations
+Define credit-hour norms,
+working days, break periods and
+exam rules.
+Configurable slots, break
+periods and exam limits
+(UR-08, UR-13, UR-14).
+Domain Data-protection and
+privacy
+expectations
+Protect personal data of
+students and staff.
+Role-based access,
+minimal personal data
+(Section 4.2).
+Development Project group G4 Analyses, designs, implements
+and tests the system.
+Verifiable, traceable,
+feasible requirements.
+Development Course instructor
+(client and
+evaluator)
+Evaluates whether the
+specification is complete,
+correct and verifiable.
+Conformance to the SRS
+template and rubric.
+Development Future maintainers Extend the system in later
+semesters.
+Modular design,
+documented constraints,
+design for change
+(Section 4.3).
+1.3 Intended Audience and Document Overview
+Table 3 lists the readers of this document and the suggested order in which each should read it.
+3
+=== PDF PAGE 8 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+Table 3:Intended readers and suggested reading sequence
+Reader Purpose of reading Suggested sequence
+Client and course
+instructor
+Check that the requirements are complete, correct
+and verifiable.
+1, 2, 3, 4, 5, Appendix
+A
+Developers Understand what must be built and how the parts
+interact.
+1.4, 2, 3.2, 3.3, 5,
+Appendix A
+Testers Derive test cases from requirements, models and
+constraints.
+3.2, 3.3, 4, Appendix A
+Project manager Plan work packages and track requirement cover-
+age.
+1, 2, 3.2 (traceability),
+4
+Coordinators,
+approvers and other
+users
+Confirm that the system will support their work. 1.2, 2.2, 2.3, 3.1.1,
+3.3.1
+Documentation
+writers
+Prepare manuals and help content. 2.3, 2.6, 3.1.1, 3.3
+The rest of the document is organised as follows.Section 2places the product in context and describes
+its users, environment, constraints and assumptions.Section 3specifies the external interfaces, the
+user functional requirements, the detailed system functional requirements with traceability, and the
+behaviour of the system through use cases, sequence diagrams, a state diagram and activity diagrams.
+Section 4states the performance, safety, security and quality requirements.Section 5defines the
+database tables and relationships and other requirements.Appendix Ais the data dictionary.
+1.4 Definitions, Acronyms and Abbreviations
+Acronyms and abbreviations(alphabetical order)
+Term Meaning
+API Application Programming Interface
+ATES Auto Timetable / Exam Scheduler (this product)
+CP-SAT Constraint Programming – Satisfiability solver in Google OR-Tools
+CRUD Create, Read, Update, Delete
+CSP Constraint Satisfaction Problem
+CSV Comma-Separated Values
+DBMS Database Management System
+DFD Data Flow Diagram
+DSATUR Degree of Saturation, a graph colouring heuristic
+ER Entity–Relationship
+FK Foreign Key
+FR System Functional Requirement
+GUI Graphical User Interface
+HTTP(S) Hypertext Transfer Protocol (Secure)
+IEEE Institute of Electrical and Electronics Engineers
+4
+=== PDF PAGE 9 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+Term Meaning
+JSON JavaScript Object Notation
+JWT JSON Web Token
+NFR Non-Functional Requirement
+ORM Object–Relational Mapping
+PDF Portable Document Format
+PK Primary Key
+RBAC Role-Based Access Control
+REST Representational State Transfer
+SQL Structured Query Language
+SRS Software Requirements Specification
+TLS Transport Layer Security
+UC Use Case
+UI User Interface
+UML Unified Modeling Language
+UR User (functional) Requirement
+Glossary of domain terms(alphabetical order)
+Term Meaning
+Academic term A semester for which one timetable and one exam schedule are produced.
+Batch / section A group of students of one programme and admission year (for example,
+BSCS 2024, Section A) that attends the same classes.
+Conflict A violation of a scheduling rule, such as an instructor or room assigned to two
+sessions at the same time.
+Course offering A course taught to one batch by one instructor in one term. It is the unit that
+is scheduled.
+Exam session A date together with a start and end time during which exams may be held.
+Graph colouring Assigning a colour to every vertex of a graph so that adjacent vertices differ;
+here, assigning exam sessions to courses that share students.
+Hard constraint A rule that every valid schedule must satisfy.
+Published schedule A schedule approved by the Approver and visible to faculty and students.
+Session (class) One scheduled meeting of a course offering (a lecture or a lab block) in a
+room and slot.
+Soft constraint A preference that the solver tries to satisfy as far as possible; violating it does
+not invalidate the schedule.
+Time slot One period in the weekly grid, identified by day and slot index.
+Version One generated variant of the schedule of a term, identified by a version
+number.
+5
+=== PDF PAGE 10 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+1.5 Document Conventions
+1.5.1 Formatting Conventions
+This document follows the department’s SRS template and IEEE formatting guidance. The text is set
+in an Arial-compatible sans-serif font (Helvetica) at 11 pt, single-spaced, with 1-inch margins. Section
+and subsection titles follow the template numbering. Bold text marks defined terms and key words in
+requirement statements; monospaced text marks database tables, columns, API paths and constraint
+codes. Figures and tables are numbered consecutively and are referred to by number. UML 2.x notation
+is used for all behavioural models.
+1.5.2 Requirement Identification and Priority
+Requirements are written in the form “The systemshall. . . ” (mandatory) or “The systemshould. . . ”
+(desirable), following ISO/IEC/IEEE 29148. Each requirement has a unique identifier.
+Table 4:Identifier schemes and priority levels
+Identifier Meaning
+UR-nn User functional requirement, written in natural language from the user’s point of
+view (Section 3.2.1)
+FR-a.b System functional requirement number b in functional area a, each traced to one or
+more UR (Section 3.2.2)
+UC-nn Use case (Section 3.3.1)
+H nn / S nn Hard constraint / soft constraint of the scheduling model (Appendix A)
+P-n, SAF-n,
+SEC-n
+Performance, safety and security requirements (Section 4)
+C-n, A-n Design and implementation constraint, assumption (Sections 2.5 and 2.7)
+Priority: H= High (essential for the first release),M= Medium (important, can be reduced if
+time is short),L= Low (desirable).
+1.5.3 Naming Conventions
+Database tables use lower-case plural snake_case names and primary keys are named <entity>_-
+id. Course codes follow the university format (for example, CS-326). Seat numbers follow the format
+CS-24nnn. Times are shown in 24-hour format and dates as DD/MM/YYYY unless stated otherwise.
+1.6 References
+[1] IEEE Recommended Practice for Software Requirements Specifications, IEEE Std 830-1998, 1998.
+[2] Systems and Software Engineering – Life Cycle Processes – Requirements Engineering,
+ISO/IEC/IEEE 29148:2018, 2018.
+[3] I. Sommerville,Software Engineering, 10th ed. Harlow, U.K.: Pearson, 2016.
+[4] A. Schaerf, “A survey of automated timetabling,”Artificial Intelligence Review, vol. 13, no. 2, pp.
+87–127, 1999.
+[5] D. J. A. Welsh and M. B. Powell, “An upper bound for the chromatic number of a graph and its
+application to timetabling problems,”The Computer Journal, vol. 10, no. 1, pp. 85–86, 1967.
+6
+=== PDF PAGE 11 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+[6] D. Brélaz, “New methods to color the vertices of a graph,”Communications of the ACM, vol. 22, no.
+4, pp. 251–256, 1979.
+[7] F . Rossi, P . van Beek, and T. Walsh, Eds.,Handbook of Constraint Programming. Amsterdam, The
+Netherlands: Elsevier, 2006.
+[8] Google, “OR-Tools: Operations research tools,” [Online]. Available: https://developers.
+google.com/optimization
+[9] NetworkX Developers, “NetworkX documentation,” [Online]. Available: https://networkx.
+org
+[10] S. Ramírez, “FastAPI documentation,” [Online]. Available: https://fastapi.tiangolo.
+com
+[11] Meta Platforms, “React documentation,” [Online]. Available:https://react.dev
+[12] The PostgreSQL Global Development Group, “PostgreSQL documentation,” [Online]. Available:
+https://www.postgresql.org/docs/
+[13] SQLite Consortium, “SQLite documentation,” [Online]. Available:https://www.sqlite.org/
+docs.html
+7
+=== PDF PAGE 12 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+2 Overall Description
+2.1 Product Perspective
+The Auto Timetable / Exam Scheduler is a new, self-contained product. It does not replace a software
+system; it replaces the manual practice in which a timetable coordinator drafts timetables and exam
+date-sheets in spreadsheets or on paper and then corrects clashes one by one. It is not a member of an
+existing product family and is not a component of a larger system in the first release. In a later release it
+may be connected to the university’s student information system, which is why all master data is held in
+a clean relational schema (Section 5) and can already be imported from CSV files.
+ATES is delivered as a web application. Users work in a web browser; the browser communicates over
+HTTPS with an application server that exposes a REST API. The server stores all data in a relational
+database and hands scheduling problems to a scheduling engine built on constraint programming
+(Google OR-Tools CP-SAT) and graph algorithms (NetworkX) [8, 9]. Figure 1 shows the system in its
+environment: the people who interact with it and the files that enter and leave it.
+Auto Timetable / Exam Scheduler
+(ATES)
+Scheduling
+Coordinator
+System
+Administrator
+Approver
+(Dept. Head / Exam Controller)
+Faculty
+Member
+Student
+Input CSV files
+(master data)
+Exported PDF / CSV
+schedules
+data, rules, requests,
+adjustments / schedules,
+conflict reports
+accounts, roles /
+audit log
+review decision / schedules
+for approval
+availability /
+own timetable and
+exam schedule
+batch timetable
+and exam schedule
+uploaded rows generated files
+Figure 1:Context diagram of the Auto Timetable / Exam Scheduler
+2.1.1 Relationship to Other Systems
+•Web browser:the only client; no software installation is needed on user computers.
+• File system:CSV files are uploaded by coordinators; PDF and CSV files are produced by the export
+functions.
+• Relational database:PostgreSQL in production, SQLite for development and demonstration [ 12, 13].
+•Future systems (not in the first release):student information system and e-mail gateway.
+2.2 Product Functionality
+The major functions of the system are summarised below. They are specified in detail in Section 3.2.
+• F1 – Account and access management:secure login and role-based permissions for five user roles.
+8
+=== PDF PAGE 13 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+• F2 – Master data management:create, edit, search and deactivate courses, instructors, rooms,
+batches, academic terms, time slots and course offerings.
+•F3 – Instructor availability:record the slots in which each instructor cannot teach.
+• F4 – Bulk data import:load master data from CSV files with row-level validation and an error report.
+• F5 – Constraint and parameter configuration:choose hard constraints, soft-constraint weights,
+solver limits and exam session parameters.
+• F6 – Automatic timetable generation:compute a conflict-free weekly timetable using constraint
+satisfaction.
+• F7 – Automatic exam schedule generation:compute a conflict-free exam schedule using graph
+colouring and allocate rooms.
+• F8 – Conflict detection and manual adjustment:validate any schedule, report conflicts, and allow
+controlled manual changes and locked sessions.
+• F9 – Review, publishing and versioning:approve, publish, keep versions of, and archive schedules.
+• F10 – Schedule viewing:filterable timetable and exam views by batch, instructor, room, course, day
+or date.
+•F11 – Export:produce PDF and CSV files of schedules.
+•F12 – Audit trail:record important actions for accountability.
+Data Flow Diagram
+Figure 1 is the level-0 data flow diagram (DFD) of the system. Figure 2 decomposes it into seven main
+processes and four data stores, showing how data moves between the users, the processes and the
+database.
+Administrator
+Coordinator
+Approver
+Faculty /
+Student
+1.0
+Manage accounts
+and access
+2.0
+Manage master data
+and import CSV
+3.0
+Configure
+constraints
+4.0
+Generate timetable /
+exam schedule
+5.0
+Validate and adjust
+schedule
+6.0
+Review and
+publish
+7.0
+View and export
+schedules
+D1 Master data
+D2 Constraint configurations
+D3 Schedules and conflicts
+D4 Users and audit log
+account data
+data, CSV files
+rules, weights
+generation request
+moves, locks
+publish decision
+filters,
+availability
+courses, rooms,
+offerings
+entries, score
+updated entries
+status, conflicts
+published schedules
+timetables, exam
+schedules, PDF / CSV
+Figure 2:Data flow diagram, level 1
+9
+=== PDF PAGE 14 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+2.3 Users and Characteristics
+Five classes of user are anticipated. Table 5 describes their characteristics. Users are differentiated
+by frequency of use, the subset of functions they use, technical expertise and privilege level. The
+viewpoints and wider stakeholders are listed in Section 1.2.2.
+Table 5:User classes and their characteristics
+User class Functions used Frequency and
+expertise
+Privilege level Importance
+Scheduling
+Coordinator
+Master data, import, constraints,
+generation of timetable and ex-
+ams, conflict reports, manual ad-
+justment, export (F2–F11)
+Heavy use at term
+start and before
+exams;
+comfortable with
+spreadsheets, not
+a programmer
+High: edits all
+scheduling data
+and generates
+schedules
+Most
+important
+Approver (Dept.
+Head / Exam
+Controller)
+Review of schedules and conflict
+reports, approval and publishing,
+viewing and export (F9–F11)
+Occasional;
+limited time,
+expects clear
+summaries
+Medium:
+approves and
+publishes; cannot
+edit master data
+Very
+important
+Faculty Member Own timetable and exam duties,
+availability entry, export (F3, F10,
+F11)
+Regular, short
+sessions; basic
+computer skills
+Low: own
+availability and
+read-only views
+of published
+schedules
+Important
+Student Batch timetable and exam sched-
+ule, export (F10, F11)
+Frequent, short,
+often on a phone;
+basic skills
+Lowest:
+read-only views
+of the own batch
+Important
+System
+Administrator
+Accounts, roles, audit log (F1,
+F12)
+Occasional;
+strong technical
+skills
+Highest for
+administration,
+but cannot
+generate or
+approve
+schedules
+Less critical
+to schedule
+quality
+Priority of users.The Coordinator is the most important user: the product exists to remove the
+coordinator’s manual work, so usability and correctness for this role take precedence. The Approver
+comes next because a schedule has no value until it is published. Faculty and students are consumers
+of the result; their needs are met by clear, correct and accessible views. The Administrator role is
+necessary for operation but does not affect schedule quality.
+2.4 Operating Environment
+The system runs as a three-tier web application, shown in Figure 3. The client tier is a browser running
+a React single-page application styled with Tailwind CSS [11]. The application tier is a Python server
+(FastAPI) containing the REST API, the authentication service, the import and export services and the
+scheduling engine [10]. The data tier is a relational database. The tiers can be deployed on one server
+for a department or on separate machines.
+10
+=== PDF PAGE 15 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+Client tier
+Application tier
+Data tier
+React UI
+Tailwind CSS
+(web browser)
+FastAPI server
+REST API, authentication
+and RBAC, import / export
+Scheduling engine
+Python, OR-Tools CP-SAT,
+NetworkX
+Relational database
+PostgreSQL (production)
+SQLite (development)
+File storage
+CSV uploads,
+PDF / CSV exports
+HTTPS, JSON
+solve / status
+SQL (ORM)
+read data /
+write schedule
+Figure 3:Major components, interconnections and deployment tiers
+Table 6 gives the minimum platform requirements.
+Table 6:Minimum platform requirements
+Component Minimum requirement
+Client device Any computer, tablet or phone with a current browser (Chrome, Firefox, Edge
+or Safari, released within the last two years); screen width of at least 360 px for
+viewing and 1280 px recommended for data entry and adjustment.
+Server hardware 2 CPU cores, 4 GB RAM, 10 GB free disk; 4 cores and 8 GB RAM recommended
+for large datasets.
+Server operating
+system
+Linux (Ubuntu 22.04 LTS or later) or Windows 10/11 Server editions; macOS
+for development.
+Runtime Python 3.11 or later; Node.js 18 or later (build of the front end only).
+Database PostgreSQL 15 or later for deployment; SQLite 3.35 or later for development
+and demonstration.
+Network Institutional network or internet access to the server over HTTPS (TCP port
+443).
+2.5 Design and Implementation Constraints
+ID Constraint Description and impact
+C-1 Implementation languages and
+libraries
+The scheduling engine is written in Python using
+OR-Tools CP-SAT for the timetable CSP and NetworkX
+for graph colouring; the user interface is written in
+React with Tailwind CSS. Only open-source
+components are used.
+C-2 Web and REST architecture All functions are reached through a REST/JSON API
+over HTTPS; the front end holds no business rules, so
+rules can be tested without the browser.
+11
+=== PDF PAGE 16 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+ID Constraint Description and impact
+C-3 Relational database Data is kept in a relational DBMS accessed through an
+ORM, so that PostgreSQL and SQLite can both be
+used without changing application code.
+C-4 Bounded solver time A CSP can take unbounded time. Every generation run
+has a configurable time limit (default 120 s); the system
+returns the best solution found or reports that none was
+found.
+C-5 Security considerations Passwords are stored only as salted hashes, all traffic
+is encrypted, and every API call is authorised by role
+(Section 4.2).
+C-6 Fixed weekly grid The timetable repeats weekly over a grid of
+equal-length slots (default 60 min) defined per term;
+sessions occupy whole slots, and lab sessions occupy
+consecutive slots.
+C-7 Project resources and schedule A team of four students must deliver within one
+semester using free tools; this limits scope to the first
+release (Table 1).
+C-8 Documentation standard The SRS is prepared in LATEX, models follow UML 2.x,
+and requirements follow the identifier scheme of
+Table 4.
+C-9 Browser compatibility The user interface must work in the current versions of
+Chrome, Firefox, Edge and Safari without plug-ins.
+2.6 User Documentation
+The following user documentation will be delivered with the software, although the documents themselves
+are not written as part of this SRS: arole-based user manualin PDF format (one chapter each for
+Coordinator, Approver, Faculty/Student and Administrator, with screenshots and step-by-step tasks);
+in-application helpwith tooltips on every form field and a help page on each screen;CSV template
+fileswith sample rows and a field-by-field explanation for each importable data type; aquick-start
+guide(two pages) covering the path from data entry to a published timetable; aninstallation and
+administration guidefor the IT department; and theinteractive API documentationthat FastAPI
+generates automatically in OpenAPI format. Manuals are delivered as PDF and the help content as part
+of the web interface.
+2.7 Assumptions and Dependencies
+Assumptions.The design is sized for one department or faculty with the following typical and maximum
+values (these numbers drive performance requirements in Section 4.1).
+ID Assumption
+A-1 One installation serves one institution. The largest term to be scheduled has at most 40
+batches, 150 course offerings, 80 instructors, 60 rooms, a weekly grid of at most 6 days
+with 8 slots per day (48 slots), and 3,000 enrolled students.
+A-2 Every course offering has exactly one instructor and one batch, and the weekly contact
+hours of each course are known before generation.
+12
+=== PDF PAGE 17 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+ID Assumption
+A-3 The data supplied by the institution (course lists, room capacities, instructor load limits) is
+accurate and complete; the system validates format and consistency but cannot detect
+factual errors.
+A-4 Enrollment records (which students take which course) are available for the exam schedule.
+Where they are not, students are assumed to take every course offered to their batch.
+A-5 Slots are of equal length within a term, and break periods (for example, lunch and Friday
+prayer) are defined as blocked slots.
+A-6 Users have a reliable network connection to the server and a current browser.
+A-7 The timetable is the same every week of the term; week-specific exceptions are handled
+outside the system.
+Dependencies.The product depends on Google OR-Tools (CP-SAT solver), NetworkX, FastAPI,
+SQLAlchemy and a PostgreSQL or SQLite driver on the server side, on React and Tailwind CSS on the
+client side, and on a PDF generation library (for example, ReportLab) for export. A change of licence or
+an incompatible release of any of these would affect the design and would have to be handled through
+version pinning (Section 4.3). If assumptions A-1 to A-7 prove wrong, performance targets, the data
+model and the viewing screens may need to change.
+13
+=== PDF PAGE 18 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+3 Specific Requirements
+3.1 External Interface Requirements
+3.1.1 User Interfaces
+The user interface is a single-page web application with a top navigation bar, a content area and a status
+line for messages. The screens available to each role are listed in Table 7.
+Table 7:Screens of the user interface
+Screen Description Roles
+Login User name and password fields, aLog inbutton and an error
+message area; locked accounts show the remaining lock time.
+All
+Dashboard Active term, status of the timetable and exam schedule, counts
+of courses, instructors, rooms, batches and offerings, and short-
+cuts to the next step.
+All (content depends
+on role)
+Master Data Tabbed lists (Courses, Instructors, Rooms, Batches, Terms and
+Slots, Offerings, Enrollments) with search, sort and paging; an
+Addform per tab;Deactivateinstead of delete; anImport CSV
+button.
+Coordinator
+(read-only for
+Approver)
+Import Wizard Choose data type, download template, upload file, view the
+validation report (rows accepted and rejected with reasons),
+and confirm.
+Coordinator
+Availability Weekly grid of slots in which cells are toggled betweenavailable
+andunavailable.
+Faculty (own),
+Coordinator (any)
+Constraints and
+Settings
+List of constraints with type (hard or soft), an enable switch,
+a weight slider (0–10) and a parameter box; solver time limit;
+exam session editor.
+Coordinator
+Generate Selection of term, schedule type and configuration,Generate
+andCancelbuttons, progress indicator and result summary
+(Figure 5).
+Coordinator
+Timetable View Weekly grid with filters by batch, instructor, room, course and
+day; version selector;Export PDFandExport CSVbuttons;
+drag-and-drop adjustment for the Coordinator (Figure 4).
+All (own scope for
+Faculty and Student)
+Exam Schedule View Date-ordered list or calendar of exams with course, session,
+rooms and seat counts; filters and export.
+All (own scope for
+Faculty and Student)
+Conflict Report Table of conflicts with type, severity, affected entities and de-
+scription; filter by type; export.
+Coordinator,
+Approver
+Review and Publish Summary of a generated version (sessions, score, conflicts)
+withPublishbutton.
+Approver
+Users and Audit Log Account list and form (role, status, links to instructor or batch);
+read-only audit log with filters.
+Administrator
+GUI standards.All screens share one layout and the following rules: (1) the primary action of a form is a
+coloured button on the right andCancelis always shown next to it; (2) destructive or irreversible actions
+ask for confirmation; (3) validation errors appear in red directly beside the field and as a summary at the
+top of the form; (4) system messages (success, warning, error) appear in a fixed status area and use
+both colour and an icon; (5) tables show 25 rows per page by default; (6) text and background colours
+meet WCAG 2.1 AA contrast; (7) every form field has a visible label and a tooltip; (8) the layout adapts
+to screen widths from 360 px.
+14
+=== PDF PAGE 19 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+ATES Dashboard Data Generate Timetable Exams Admin Coordinator|Log out
+View by: Batch▽ BSCS-24 A▽ Term: Fall 2026 Version: v3 Published PDF CSV
+Mon Tue Wed Thu Fri
+08:00
+09:00
+10:00
+11:00
+12:00
+13:00
+Break (blocked slot)
+CS-326Lecture
+Rm 301 – Dr. Aftab
+CS-326Lecture
+Rm 301 – Dr. Aftab
+CS-310Lecture
+Rm 301
+CS-310Lecture
+Rm 301
+MT-212Lecture
+Rm 204
+CS-326Tutorial
+Rm 301
+CS-327Lab
+(2-slot block)
+Lab 2
+Legend: Lecture Lab block
+Figure 4:Wireframe of the Timetable View screen
+ATES Dashboard Data Generate Timetable Exams Admin
+Generate schedule
+Term Fall 2026 (Active)▽
+Schedule type Timetable Exam schedule
+Configuration Default timetable▽
+Time limit (s) 120
+Generate Cancel
+Run status
+Completed (100%)
+Status:Generated(version 4)
+Solver status: optimal within limit
+Run time: 41 s
+Hard-constraint violations:0
+Soft-constraint score: 128 (87% of maximum)
+View schedule Conflict report
+Figure 5:Wireframe of the Generate screen
+3.1.2 Hardware Interfaces
+ATES controls no special hardware. It uses the standard input and output devices of the client and
+server computers through the operating system and the browser: display, keyboard, mouse or touch
+screen on the client; network adapter and disk storage on the server. Printing is performed by the user
+from the exported PDF file through the browser or operating system print dialog. No device drivers or
+special hardware libraries are required.
+15
+=== PDF PAGE 20 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+3.1.3 Software Interfaces
+The interface with the operating system is the main one: the server process reads configuration from
+environment variables, stores uploaded and exported files in a working directory of the file system,
+writes log files, and runs the solver in a separate worker process so that a long solver run does not block
+other requests. The server must run on Linux or Windows. Table 8 lists the other software components
+with which the product communicates.
+Table 8:Software interfaces
+Component Version Purpose and data exchanged
+Operating system Linux (Ubuntu
+22.04+) or
+Windows 10/11
+File access for CSV uploads and PDF/CSV exports, process man-
+agement for solver workers, environment variables, logging.
+Python runtime 3.11 or later Execution of the API server and the scheduling engine.
+PostgreSQL /
+SQLite
+15+ / 3.35+ Storage of all data of Section 5; accessed through an ORM
+(SQLAlchemy) with SQL statements and result sets; data is shared
+between the API and the engine only through the database.
+OR-Tools CP-SAT Pinned release Receives the CSP model (variables, hard constraints, objective) and
+returns a solution, a status (optimal, feasible, infeasible, unknown)
+and statistics.
+NetworkX Pinned release Receives the course conflict graph and returns a colouring and graph
+statistics.
+FastAPI and web
+server
+Pinned release Receives HTTP requests with JSON or multipart data and returns
+JSON or file responses.
+PDF library e.g. ReportLab,
+pinned
+Receives schedule data and returns PDF files.
+Web browser Current Chrome,
+Firefox, Edge,
+Safari
+Runs the React application; receives JSON and files, sends user
+input.
+3.1.4 Communications Interfaces
+All communication between the browser and the server uses HTTP over TLS 1.2 or later (HTTPS).
+The API follows REST conventions: resources are addressed by URL, data is exchanged as UTF-8
+JSON, CSV files are uploaded with multipart/form-data (maximum 10 MB), and exported files
+are downloaded with the appropriate content type. Every request except login carries a JSON Web
+Token in the Authorization header. Cross-origin requests are accepted only from the configured
+front-end address. Because a generation run can take up to several minutes, the browser starts a run
+with one request and polls a status resource every two seconds; no persistent connection is required.
+The database connection is internal to the server and uses the driver’s own encrypted or local channel.
+Specific cipher suites and token algorithms will be chosen at design time from current recommendations.
+Table 9 lists the main resources.
+16
+=== PDF PAGE 21 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+Table 9:Main REST resources
+Method Path Purpose
+POST /auth/login,/auth/logout Start and end a session.
+GET, POST,
+PUT
+/courses,/instructors,
+/rooms,
+/batches,/terms,/offerings
+List, create and update master data.
+POST /import/{type} Upload and validate a CSV file.
+GET, PUT /configs,
+/configs/{id}/rules
+Read and change constraint configurations.
+POST /schedules/generate Start a generation run; returns the schedule identi-
+fier.
+GET /schedules/{id}/status Poll the progress of a run.
+GET, PUT /schedules/{id}/entries View and move sessions or exams.
+GET /schedules/{id}/conflicts Conflict report.
+POST /schedules/{id}/publish Approve and publish.
+GET /schedules/{id}/export
+(query: format=pdf or csv)
+Download a schedule.
+GET /audit Audit log (Administrator).
+3.2 Functional Requirements
+This section is the continuation of Section 2.2. It first states what the users need (user requirements, in
+natural language) and then refines each of these needs into precise system requirements, grouped by
+functional area. Every system requirement names the user requirements it implements, and Section 3.2.3
+gives the reverse view so that coverage can be checked.
+3.2.1 User Functional Requirements
+Table 10 lists the 27 user requirements. They are written from the user’s point of view in natural language.
+Table 10:User functional requirements
+ID Requirement Actor Pri.
+UR-01 The usershallbe able to log in with a user name and
+password in order to use the functions permitted to their
+role.
+All H
+UR-02 The Administratorshallbe able to create, edit, deactivate
+and reactivate user accounts and assign each account one
+role.
+Administrator H
+UR-03 The usershallonly see and be able to use the functions
+permitted to their role.
+All H
+UR-04 The Coordinatorshallbe able to add, edit, search and
+deactivate courses with code, title, credit hours and weekly
+lecture and lab contact hours.
+Coordinator H
+UR-05 The Coordinatorshallbe able to add, edit, search and
+deactivate instructors with department and maximum daily
+and weekly teaching hours.
+Coordinator H
+17
+=== PDF PAGE 22 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+ID Requirement Actor Pri.
+UR-06 The Coordinatorshallbe able to add, edit, search and
+deactivate rooms with code, building, capacity and type
+(lecture room, laboratory, exam hall).
+Coordinator H
+UR-07 The Coordinatorshallbe able to add, edit, search and
+deactivate student batches with programme, admission year,
+section and strength.
+Coordinator H
+UR-08 The Coordinatorshallbe able to define an academic term
+with its working days, daily slot grid, slot length and blocked
+slots such as break periods.
+Coordinator H
+UR-09 The Coordinatorshallbe able to define course offerings by
+assigning a course, a batch and an instructor in a term.
+Coordinator H
+UR-10 Faculty membersshallbe able to mark the slots in which
+they are unavailable, and the Coordinatorshallbe able to
+edit the availability of any instructor.
+Faculty,
+Coordinator
+M
+UR-11 The Coordinatorshallbe able to record which students are
+enrolled in which course offering, so that exam clashes of
+electives and repeated courses can be avoided.
+Coordinator M
+UR-12 The Coordinatorshallbe able to import courses, instructors,
+rooms, batches, offerings and enrollments from CSV files
+and receive a clear list of every rejected row.
+Coordinator H
+UR-13 The Coordinatorshallbe able to choose which optional
+constraints apply, set the importance of each preference,
+and set the solver time limit.
+Coordinator H
+UR-14 The Coordinatorshallbe able to define exam sessions
+(date, start and end time) and exam rules such as the
+maximum number of exams per student per day.
+Coordinator H
+UR-15 The Coordinatorshallbe able to generate a complete
+weekly timetable for a term automatically, with no clash of
+instructors, rooms or batches.
+Coordinator H
+UR-16 The Coordinatorshallbe able to generate an exam
+schedule automatically that assigns every exam to a
+session and to one or more rooms with no student having
+two exams in the same session.
+Coordinator H
+UR-17 If a schedule cannot be generated, the systemshalltell the
+Coordinator why, by identifying the conflicting data or rules.
+Coordinator H
+UR-18 The Coordinatorshallbe able to generate further versions
+of a schedule after changing data or settings, and keep
+earlier versions.
+Coordinator M
+UR-19 The Coordinatorshallbe able to move a session or an
+exam manually and be warned immediately if the move
+breaks a rule.
+Coordinator H
+UR-20 The Coordinatorshallbe able to lock selected sessions so
+that they stay unchanged when the schedule is regenerated.
+Coordinator M
+UR-21 The Approvershallbe able to review a generated schedule
+and approve and publish it.
+Approver H
+18
+=== PDF PAGE 23 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+ID Requirement Actor Pri.
+UR-22 Usersshallbe able to view a timetable filtered by batch,
+instructor, room, course or day.
+All H
+UR-23 Usersshallbe able to view the exam schedule filtered by
+date, batch, course or room.
+All H
+UR-24 Faculty members and studentsshallsee only published
+schedules, and by default only their own timetable and
+exams.
+Faculty, Student H
+UR-25 Usersshallbe able to export the schedule they are viewing
+as a PDF file and as a CSV file.
+All H
+UR-26 The Administratorshallbe able to view a log of important
+actions showing who did what and when.
+Administrator M
+UR-27 The systemshallkeep previously published schedules in an
+archive that can still be viewed after a new schedule is
+published.
+All M
+3.2.2 System Functional Requirements
+The system requirements are organised into 12 functional areas. The columnTraces togives the user
+requirements that each system requirement implements. The terms hard constraint and soft constraint
+refer to the catalogue in Appendix A.5.
+FA-1 Authentication and Access Control (UR: UR-01, UR-02, UR-03)
+Table 11:Authentication and Access Control requirements
+ID Requirement Traces to Pri.
+FR-1.1 The systemshallauthenticate a user by user name and
+password and issue a session token (JWT) that expires
+after 30 minutes of inactivity.
+UR-01 H
+FR-1.2 The systemshallstore passwords only as salted hashes
+(bcrypt, cost factor of at least 12) andshallrequire
+passwords of at least 8 characters.
+UR-01, UR-02 H
+FR-1.3 The systemshalllock an account for 15 minutes after 5
+consecutive failed login attempts andshallrecord the
+event.
+UR-01 M
+FR-1.4 The systemshalllet a logged-in user log out, which ends
+the session, and change their own password.
+UR-01 M
+FR-1.5 The systemshallcheck every API request against the role
+of the requesting user andshallreject an unauthorised
+request with HTTP status 403.
+UR-03 H
+FR-1.6 The systemshalllet the Administrator create, edit,
+deactivate and reactivate accounts, assign one of the five
+roles (Administrator, Coordinator, Approver, Faculty,
+Student), reset passwords, and link a Faculty account to
+an instructor record and a Student account to a batch.
+UR-02 H
+19
+=== PDF PAGE 24 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+ID Requirement Traces to Pri.
+FR-1.7 The systemshallnot delete an account that has recorded
+actions; such an account is deactivated instead.
+UR-02 M
+FR-1.8 The user interfaceshallshow only the menu items and
+buttons that the role of the user permits.
+UR-03 M
+FA-2 Master Data Management (UR: UR-04, UR-05, UR-06, UR-07, UR-08, UR-09, UR-11, UR-15)
+Table 12:Master Data Management requirements
+ID Requirement Traces to Pri.
+FR-2.1 The systemshalllet the Coordinator create, view, edit and
+deactivate courses with a unique course code, title, credit
+hours, lecture contact hours per week, lab contact hours
+per week and department.
+UR-04 H
+FR-2.2 The systemshallreject a course whose total weekly
+contact hours are zero or whose hours or credit values are
+negative.
+UR-04 M
+FR-2.3 The systemshalllet the Coordinator create, view, edit and
+deactivate instructors with name, unique e-mail address,
+department, maximum daily hours and maximum weekly
+hours.
+UR-05 H
+FR-2.4 The systemshalllet the Coordinator create, view, edit and
+deactivate rooms with a unique room code, building,
+capacity greater than zero and type (Lecture, Lab or Exam
+Hall).
+UR-06 H
+FR-2.5 The systemshalllet the Coordinator create, view, edit and
+deactivate batches with programme code, admission year,
+section and strength greater than zero.
+UR-07 H
+FR-2.6 The systemshalllet the Coordinator create academic
+terms (name, start date, end date) and mark exactly one
+term as Active.
+UR-08 H
+FR-2.7 The systemshallgenerate the slot grid of a term from the
+working days, first start time, slot length (default 60
+minutes) and number of slots per day, andshalllet the
+Coordinator mark individual slots as blocked with a reason.
+UR-08 H
+FR-2.8 The systemshalllet the Coordinator create course
+offerings (term, course, batch, instructor, enrolled count)
+andshallreject a second offering of the same course to
+the same batch in the same term.
+UR-09 H
+FR-2.9 The systemshallderive the number of lecture sessions
+and lab blocks to be scheduled per week for an offering
+from the contact hours of its course and the slot length of
+the term.
+UR-09, UR-15 H
+20
+=== PDF PAGE 25 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+ID Requirement Traces to Pri.
+FR-2.10 The systemshalllet the Coordinator add, view and
+remove enrollment records that link students to course
+offerings.
+UR-11 M
+FR-2.11 The systemshallnot permanently delete any record that
+is referenced by a schedule andshalloffer deactivation
+instead.
+UR-04,
+UR-05,
+UR-06,
+UR-07, UR-09
+H
+FR-2.12 The systemshallprovide search, sorting and paging (25
+rows per page by default) on every master data list.
+UR-04,
+UR-05,
+UR-06, UR-07
+L
+FA-3 Instructor Availability (UR: UR-10, UR-18)
+Table 13:Instructor Availability requirements
+ID Requirement Traces to Pri.
+FR-3.1 The systemshallshow the weekly slot grid to a Faculty
+user, who can mark slots as unavailable in the own
+instructor record.
+UR-10 M
+FR-3.2 The systemshalllet the Coordinator view and edit the
+availability of any instructor.
+UR-10 M
+FR-3.3 The systemshalltreat every slot as available unless it has
+been marked unavailable.
+UR-10 M
+FR-3.4 The systemshallwarn the user that a change of
+availability does not alter an existing schedule until a new
+version is generated.
+UR-10, UR-18 L
+FA-4 Bulk Data Import (UR: UR-11, UR-12, UR-26)
+Table 14:Bulk Data Import requirements
+ID Requirement Traces to Pri.
+FR-4.1 The systemshallaccept UTF-8 CSV files of at most 10
+MB for courses, instructors, rooms, batches, course
+offerings and enrollments, andshallprovide a
+downloadable template for each type.
+UR-12, UR-11 H
+FR-4.2 The systemshallvalidate every row for required fields,
+data types, value ranges, uniqueness and existence of
+referenced records before any row is stored.
+UR-12 H
+FR-4.3 The systemshallshow a validation report that lists each
+rejected row with its line number, column and reason.
+UR-12 H
+FR-4.4 The systemshalllet the Coordinator choose either to
+import only the valid rows or to cancel the whole import if
+any row is invalid.
+UR-12 M
+21
+=== PDF PAGE 26 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+ID Requirement Traces to Pri.
+FR-4.5 The systemshallrecord each import with file name, user,
+time, rows read, rows imported and rows rejected.
+UR-12, UR-26 M
+FA-5 Constraint and Parameter Configuration (UR: UR-13, UR-14, UR-15, UR-16)
+Table 15:Constraint and Parameter Configuration requirements
+ID Requirement Traces to Pri.
+FR-5.1 The systemshallprovide a default set of timetable
+constraints (H01–H10, S01–S06) and exam constraints
+(E01–E05, ES01–ES03) as listed in Appendix A, each with
+type, enabled flag, weight (soft constraints) and optional
+parameter.
+UR-13 H
+FR-5.2 The systemshallnot allow the constraints H01, H02, H03,
+H08, E01, E04 and E05 to be disabled.
+UR-13,
+UR-15, UR-16
+H
+FR-5.3 The systemshallallow another hard constraint to be
+disabled only after a confirmation warning andshall
+record the change.
+UR-13 M
+FR-5.4 The systemshalllet the Coordinator set a weight from 0
+to 10 for each soft constraint and an integer parameter
+where one is defined (for example, maximum sessions per
+batch per day, maximum consecutive teaching hours,
+maximum exams per student per day).
+UR-13, UR-14 H
+FR-5.5 The systemshalllet the Coordinator set the solver time
+limit (10 to 600 seconds, default 120) and a random seed.
+UR-13 M
+FR-5.6 The systemshalllet the Coordinator save several named
+configurations per term and schedule type, clone them,
+and delete those that no schedule uses.
+UR-13 M
+FR-5.7 The systemshalllet the Coordinator define exam
+sessions (date, start time, end time, label) for a term and
+shallreject overlapping sessions on the same date.
+UR-14 H
+FR-5.8 The systemshallvalidate a configuration (weights and
+time limit in range, at least one exam session for an exam
+run) before a run is started.
+UR-13, UR-14 M
+FA-6 Timetable Generation (UR: UR-13, UR-15, UR-17, UR-18, UR-20)
+22
+=== PDF PAGE 27 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+Table 16:Timetable Generation requirements
+ID Requirement Traces to Pri.
+FR-6.1 The systemshallcheck the completeness of the input
+before solving (every offering has course, batch and
+instructor; enough unblocked slots; at least one suitable
+room for every session) andshallreport each defect
+found.
+UR-15, UR-17 H
+FR-6.2 The systemshallstart a generation run for a chosen term
+and configuration on request of the Coordinator andshall
+create a new schedule version with status Generating.
+UR-15, UR-18 H
+FR-6.3 The systemshallmodel each required session as a CSP
+variable whose value is a pair of time slot and room, and
+shallenforce all enabled hard constraints H01–H10.
+UR-15 H
+FR-6.4 The systemshallmaximise the weighted sum of satisfied
+soft constraints among the feasible schedules within the
+time limit.
+UR-13, UR-15 H
+FR-6.5 The systemshallstop at the time limit and return the best
+feasible schedule found, or mark the run Infeasible if none
+was found.
+UR-15, UR-17 H
+FR-6.6 The systemshallshow the progress and elapsed time of a
+run andshalllet the Coordinator cancel it; cancelling a run
+shallleave all existing schedules unchanged.
+UR-15 M
+FR-6.7 The systemshallcheck every solution with an
+independent validator before saving it; a solution that
+violates a hard constraintshallnot be saved with status
+Generated.
+UR-15 H
+FR-6.8 The systemshallstore the schedule entries, the objective
+score, the solver status and the run time, and set the
+status to Generated.
+UR-15, UR-18 H
+FR-6.9 The systemshouldproduce the same schedule when the
+data, configuration and random seed are the same.
+UR-15, UR-18 L
+FR-6.10 The systemshallkeep every locked session in its slot and
+room in a new run.
+UR-20 M
+FA-7 Exam Schedule Generation (UR: UR-13, UR-14, UR-16, UR-17)
+Table 17:Exam Schedule Generation requirements
+ID Requirement Traces to Pri.
+FR-7.1 The systemshallbuild a conflict graph whose vertices are
+the courses that have an exam in the term and whose
+edges join two courses that have at least one enrolled
+student in common.
+UR-16 H
+23
+=== PDF PAGE 28 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+ID Requirement Traces to Pri.
+FR-7.2 The systemshallassign every course to an exam session
+so that adjacent vertices never share a session, using the
+DSATUR heuristic, followed by an exact CP-SAT step
+when the heuristic needs more sessions than are defined.
+UR-16 H
+FR-7.3 The systemshallensure that no student has more exams
+on one day than the configured maximum.
+UR-14, UR-16 H
+FR-7.4 The systemshallallocate one or more rooms to every
+exam so that the allocated seats equal the number of
+students and no room is used twice in one session.
+UR-16 H
+FR-7.5 If more sessions are needed than are defined, the system
+shallreport the shortfall and the courses that cannot be
+placed, andshallmark the run Infeasible.
+UR-16, UR-17 H
+FR-7.6 The systemshalltry to spread the exams of one batch
+over different days and to use as few rooms per exam as
+possible (soft constraints ES01 and ES02).
+UR-13, UR-16 M
+FR-7.7 The systemshallstore the exam entries, room allocations
+and run statistics (courses, sessions used, rooms used)
+and set the status to Generated.
+UR-16 H
+FA-8 Conflict Detection and Manual Adjustment (UR: UR-17, UR-19, UR-20)
+Table 18:Conflict Detection and Manual Adjustment requirements
+ID Requirement Traces to Pri.
+FR-8.1 The systemshallvalidate any schedule against all
+enabled hard constraints and list each violation with type,
+severity, affected entities and description.
+UR-17, UR-19 H
+FR-8.2 The systemshalldisplay the conflict report of a schedule,
+allow filtering by conflict type and allow export as CSV.
+UR-17 M
+FR-8.3 The systemshalllet the Coordinator move a session or an
+exam to another slot or session and room in a schedule
+with status Generated.
+UR-19 H
+FR-8.4 The systemshallre-validate a manual move within 1
+second andshallrefuse to save a move that violates a
+hard constraint, naming the violated constraint.
+UR-19 H
+FR-8.5 The systemshallmark manually changed entries as
+manual overrides.
+UR-19 M
+FR-8.6 The systemshalllet the Coordinator lock and unlock
+individual sessions or exams.
+UR-20 M
+FR-8.7 The systemshouldlet the Coordinator undo all manual
+changes of a version.
+UR-19 L
+FA-9 Review, Versioning and Publishing (UR: UR-18, UR-21, UR-24, UR-27)
+24
+=== PDF PAGE 29 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+Table 19:Review, Versioning and Publishing requirements
+ID Requirement Traces to Pri.
+FR-9.1 The systemshallgive every schedule one of the statuses
+Draft, Generating, Infeasible, Generated, Published or
+Archived andshallpermit only the transitions shown in
+Figure 11.
+UR-18, UR-21 H
+FR-9.2 The systemshalllet only the Approver publish a schedule,
+and only when its status is Generated and it has no
+hard-constraint violation.
+UR-21 H
+FR-9.3 The systemshallallow at most one Published timetable
+and one Published exam schedule per term; publishing a
+new oneshallchange the previous one to Archived.
+UR-21, UR-27 H
+FR-9.4 The systemshallshow Published schedules to Faculty
+and Students andshallhide schedules of every other
+status from them.
+UR-24 H
+FR-9.5 The systemshallkeep all versions of the schedules of a
+term (numbered 1, 2, 3, . . . ), let a version be duplicated
+into a new draft, and let archived versions be viewed.
+UR-18, UR-27 M
+FR-9.6 The systemshallshow the Approver a review summary
+(number of sessions or exams, soft-constraint score,
+number of conflicts) before publishing.
+UR-21 M
+FA-10 Schedule Viewing (UR: UR-19, UR-20, UR-22, UR-23, UR-24)
+Table 20:Schedule Viewing requirements
+ID Requirement Traces to Pri.
+FR-10.1 The systemshalldisplay a timetable as a weekly grid of
+days and slots for a selected batch, instructor, room or
+course.
+UR-22 H
+FR-10.2 The systemshallshow for every session the course code
+and title, session type, instructor, room, day and time.
+UR-22 H
+FR-10.3 The systemshalllet the user filter a timetable by term,
+version (where permitted), batch, instructor, room, course
+and day.
+UR-22 H
+FR-10.4 The systemshalldisplay the exam schedule as a list
+ordered by date and time andshalllet the user filter it by
+date, batch, course and room.
+UR-23 H
+FR-10.5 The systemshallshow a Faculty user the own timetable
+and exams by default, and a Student user the timetable
+and exams of the own batch by default.
+UR-24 H
+FR-10.6 The systemshoulddistinguish lab sessions, locked
+entries and manual overrides visually in the Coordinator’s
+view.
+UR-19,
+UR-20, UR-22
+L
+25
+=== PDF PAGE 30 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+ID Requirement Traces to Pri.
+FR-10.7 The systemshouldprovide a dashboard that shows the
+active term, the status of its schedules and the number of
+master data records.
+UR-22 L
+FR-10.8 The schedule viewsshallremain usable on screens that
+are at least 360 px wide.
+UR-22,
+UR-23, UR-24
+M
+FA-11 Export (UR: UR-24, UR-25, UR-26)
+Table 21:Export requirements
+ID Requirement Traces to Pri.
+FR-11.1 The systemshallexport the displayed timetable or exam
+schedule as an A4 landscape PDF that shows the
+institution, term, version, active filter and generation date.
+UR-25 H
+FR-11.2 The systemshallexport the displayed schedule as a CSV
+file with one row per session or exam and the columns day,
+start time, end time, course code, session type, instructor,
+room and batch.
+UR-25 H
+FR-11.3 The systemshalllet the Coordinator export the schedules
+of all batches or of all instructors in one PDF file, one per
+page.
+UR-25 M
+FR-11.4 The systemshallallow a user to export only schedules
+that the user is allowed to view.
+UR-24, UR-25 H
+FR-11.5 The systemshallrecord each export in the audit log. UR-25, UR-26 L
+FA-12 Audit Trail (UR: UR-26)
+Table 22:Audit Trail requirements
+ID Requirement Traces to Pri.
+FR-12.1 The systemshallrecord login, failed login, account
+change, import, configuration change, generation, manual
+adjustment, publication and export events with user, time,
+action and affected entity.
+UR-26 H
+FR-12.2 The systemshalllet only the Administrator view the audit
+log, filtered by user, date range and action.
+UR-26 M
+FR-12.3 The systemshallnot allow any user to modify or delete an
+audit entry.
+UR-26 H
+3.2.3 Requirements Traceability Matrix
+Table 23 shows, for every user requirement, the system requirements that implement it. No user
+requirement is without at least one system requirement, and every system requirement traces to at least
+one user requirement.
+26
+=== PDF PAGE 31 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+Table 23:Traceability from user requirements to system requirements
+UR Actor Implemented by
+UR-01 All FR-1.1, FR-1.2, FR-1.3, FR-1.4
+UR-02 Administrator FR-1.2, FR-1.6, FR-1.7
+UR-03 All FR-1.5, FR-1.8
+UR-04 Coordinator FR-2.1, FR-2.2, FR-2.11, FR-2.12
+UR-05 Coordinator FR-2.3, FR-2.11, FR-2.12
+UR-06 Coordinator FR-2.4, FR-2.11, FR-2.12
+UR-07 Coordinator FR-2.5, FR-2.11, FR-2.12
+UR-08 Coordinator FR-2.6, FR-2.7
+UR-09 Coordinator FR-2.8, FR-2.9, FR-2.11
+UR-10 Faculty, Coordinator FR-3.1, FR-3.2, FR-3.3, FR-3.4
+UR-11 Coordinator FR-2.10, FR-4.1
+UR-12 Coordinator FR-4.1, FR-4.2, FR-4.3, FR-4.4, FR-4.5
+UR-13 Coordinator FR-5.1, FR-5.2, FR-5.3, FR-5.4, FR-5.5, FR-5.6, FR-5.8,
+FR-6.4, FR-7.6
+UR-14 Coordinator FR-5.4, FR-5.7, FR-5.8, FR-7.3
+UR-15 Coordinator FR-2.9, FR-5.2, FR-6.1, FR-6.2, FR-6.3, FR-6.4, FR-6.5,
+FR-6.6, FR-6.7, FR-6.8, FR-6.9
+UR-16 Coordinator FR-5.2, FR-7.1, FR-7.2, FR-7.3, FR-7.4, FR-7.5, FR-7.6,
+FR-7.7
+UR-17 Coordinator FR-6.1, FR-6.5, FR-7.5, FR-8.1, FR-8.2
+UR-18 Coordinator FR-3.4, FR-6.2, FR-6.8, FR-6.9, FR-9.1, FR-9.5
+UR-19 Coordinator FR-8.1, FR-8.3, FR-8.4, FR-8.5, FR-8.7, FR-10.6
+UR-20 Coordinator FR-6.10, FR-8.6, FR-10.6
+UR-21 Approver FR-9.1, FR-9.2, FR-9.3, FR-9.6
+UR-22 All FR-10.1, FR-10.2, FR-10.3, FR-10.6, FR-10.7, FR-10.8
+UR-23 All FR-10.4, FR-10.8
+UR-24 Faculty, Student FR-9.4, FR-10.5, FR-10.8, FR-11.4
+UR-25 All FR-11.1, FR-11.2, FR-11.3, FR-11.4, FR-11.5
+UR-26 Administrator FR-4.5, FR-11.5, FR-12.1, FR-12.2, FR-12.3
+UR-27 All FR-9.3, FR-9.5
+Total: 27 user requirements and 83 system requirements.
+3.3 Behaviour Requirements
+The behaviour of the system is described with four kinds of UML model: a use case diagram (who uses
+the system and for what), sequence diagrams (how the components interact over time), a state diagram
+(the life cycle of a schedule) and activity diagrams (the logic of the two generation algorithms). Each
+model uses the identifiers of the requirements it realises.
+27
+=== PDF PAGE 32 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+3.3.1 Use Case View
+Table 24 describes the actors and Figure 6 shows the use case diagram of the whole system. Table 25
+gives a short description of every use case. Detailed use case descriptions will be written for the Test
+Plan.
+Table 24:Actors
+Actor Description
+Administrator Manages user accounts and roles and reads the audit log.
+Coordinator Maintains master data, configures constraints, generates, adjusts and exports sched-
+ules. Also the primary viewer of schedules while working.
+Approver Department Head or Exam Controller; reviews and publishes schedules and inspects
+conflict reports.
+Faculty Member Views own published timetable and exam duties, sets own availability, exports sched-
+ules.
+Student Views and exports the published timetable and exam schedule of the own batch.
+28
+=== PDF PAGE 33 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+Auto Timetable / Exam Scheduler (ATES)
+Administrator
+Coordinator
+Approver
+Faculty
+Member
+Student
+UC-02 Manage User Accounts
+UC-03 View Audit Log
+UC-04 Manage Master Data
+UC-05 Import Data from CSV
+UC-06 Configure Constraints
+UC-07 Define Exam Sessions
+UC-01 Log In
+UC-08 Generate Timetable
+UC-10 Validate Input Data
+UC-09 Generate
+Exam Schedule
+UC-12 Adjust
+Schedule Manually
+UC-13 Approve and
+Publish Schedule
+UC-11 View Conflict Report
+UC-14 View Timetable
+UC-15 View Exam Schedule
+UC-16 Export
+Schedule (PDF / CSV)
+UC-17 Set
+Instructor Availability
+≪extend≫
+≪include≫
+≪include≫
+≪extend≫
+≪extend≫
+Figure 6:Use case diagram of the Auto Timetable / Exam Scheduler. All actors are associated with UC-01 (Log In); these association lines are omitted for clarity. The
+Coordinator and the Approver may also use UC-14 to UC-16.
+29
+=== PDF PAGE 34 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+Table 25:Use case summary
+ID Use case Actors Short description
+UC-01 Log In All The user authenticates with user name and
+password and obtains a session limited to
+the permissions of the role. (UR-01, UR-03)
+UC-02 Manage User
+Accounts
+Administrator Create, edit, deactivate and reactivate
+accounts and assign roles. (UR-02)
+UC-03 View Audit Log Administrator Inspect who performed which action and
+when, with filters. (UR-26)
+UC-04 Manage Master Data Coordinator Add, edit, search and deactivate courses,
+instructors, rooms, batches, terms, slots,
+offerings and enrollments. (UR-04 to UR-09,
+UR-11)
+UC-05 Import Data from
+CSV
+Coordinator Upload a CSV file, review the validation
+report and import valid rows; extends UC-04
+as an alternative to typing. (UR-12)
+UC-06 Configure Constraints Coordinator Enable constraints, set weights, parameters
+and solver limits, and manage
+configurations. (UR-13)
+UC-07 Define Exam
+Sessions
+Coordinator Define exam dates and time windows and
+exam rules for a term. (UR-14)
+UC-08 Generate Timetable Coordinator Run the solver for a term and configuration
+and store the result as a new version.
+(UR-15, UR-18)
+UC-09 Generate Exam
+Schedule
+Coordinator Build the conflict graph, colour it, allocate
+rooms and store the exam schedule.
+(UR-16)
+UC-10 Validate Input Data (included) Check completeness and consistency of the
+input before solving; included by UC-08 and
+UC-09. (UR-17)
+UC-11 View Conflict Report Approver,
+Coordinator
+Show conflicts or the reason why a run was
+infeasible; extends UC-08 and UC-09.
+(UR-17)
+UC-12 Adjust Schedule
+Manually
+Coordinator Move or lock sessions and exams with
+immediate re-validation. (UR-19, UR-20)
+UC-13 Approve and Publish
+Schedule
+Approver Review the summary and publish a
+Generated schedule; the previous one is
+archived. (UR-21, UR-27)
+UC-14 View Timetable Faculty, Student,
+Coordinator,
+Approver
+Display the weekly timetable with filters.
+(UR-22, UR-24)
+UC-15 View Exam Schedule Faculty, Student,
+Coordinator,
+Approver
+Display the exam schedule with filters.
+(UR-23, UR-24)
+30
+=== PDF PAGE 35 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+ID Use case Actors Short description
+UC-16 Export Schedule Faculty, Student,
+Coordinator,
+Approver
+Download the displayed schedule as PDF or
+CSV. (UR-25)
+UC-17 Set Instructor
+Availability
+Faculty,
+Coordinator
+Mark slots in which an instructor cannot
+teach. (UR-10)
+3.3.2 Interaction Models: Sequence Diagrams
+Figures 7 to 10 show the main interactions between the actors and the system components. Solid
+arrows are calls, dashed arrows are returns, and a frame labelledaltcontains alternative flows with their
+conditions in square brackets.
+31
+=== PDF PAGE 36 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+Coordinator Web UI(React) API server(FastAPI) Schedulingengine Database
+select term and
+configuration; Generate
+POST
+/schedules/generate
+create schedule (status = Generating)
+schedule_id
+start solver run
+(schedule_id)
+202 Accepted
+load data, rules,
+availability
+dataset
+check input, build CSP , solve
+alt [solution found and validated]
+[infeasible or time limit without solution]
+save entries and score;
+status = Generated
+save conflict report;
+status = Infeasible
+poll GET
+/schedules/id/status
+Generated or Infeasible
+show timetable
+or conflict report
+Figure 7:Sequence diagram: generating a timetable (UC-08; FR-6.1 to FR-6.8)
+32
+=== PDF PAGE 37 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+Coordinator Web UI andAPI server Examscheduler Graph module(NetworkX) Database
+request exam schedule
+(term, configuration)
+start run
+(schedule_id)
+load courses, enrollments, exam sessions, rooms, rules
+dataset
+build conflict graph
+(courses, shared students)
+graph G(V, E)
+colour G (DSATUR)
+colouring with k colours
+map colours to sessions; check daily limit
+alt [k≤number of sessions]
+[k>number of sessions]
+allocate rooms per session
+save exam entries and room allocations; status = Generated
+save shortfall report; status = Infeasible
+result
+show exam schedule
+or shortfall report
+Figure 8:Sequence diagram: generating an exam schedule with graph colouring (UC-09; FR-7.1 to FR-7.7)
+33
+=== PDF PAGE 38 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+Coordinator Web UI(React) API server(FastAPI) Database
+drag session to
+new slot and room
+PUT /schedules/id/
+entries/entry_id
+check status; validate H01–H10
+alt [no violation]
+[hard constraint violated]
+update entry; mark manual
+override; write audit
+200 OK, updated entry
+409, violated constraint named
+show updated timetable
+or warning
+Figure 9:Sequence diagram: manual adjustment with immediate re-validation (UC-12; FR-8.3 to FR-8.5)
+34
+=== PDF PAGE 39 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+Approver Web UI(React) API server(FastAPI) Database
+open review summary;
+click Publish
+POST /schedules/id/
+publish
+read status and
+conflict count
+Generated, 0 conflicts
+alt [Generated and no hard violation]
+[otherwise]
+set Published; previous
+Published→Archived
+200 OK
+422, cannot be published
+confirmation or error
+Figure 10:Sequence diagram: review and publishing (UC-13; FR-9.2, FR-9.3)
+3.3.3 State Model: Life Cycle of a Schedule
+Every generated timetable or exam schedule (one record in theschedulestable) is always in exactly
+one of six states (Figure 11). Table 26 lists each transition with its trigger and guard.
+Draft Generating Generated Published
+Infeasible Archived
+create
+version
+start generation
+[inputs valid]
+solution found,
+validator OK
+no solution or
+time limit
+change data
+or settings
+approve and publish
+[Approver, no hard
+violation]
+discard or regenerate
+manual adjustment
+[re-validated, no violation]
+superseded by a newer
+published version
+or term closed
+Figure 11:State diagram of a schedule (FR-9.1)
+35
+=== PDF PAGE 40 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+Table 26:State transitions of a schedule
+From Trigger Guard and effect To
+(start) Coordinator creates a
+version
+A term and configuration are selected. Draft
+Draft Coordinator starts
+generation
+Input check (FR-6.1) passes; the run starts. Generating
+Generating Solver finishes with a
+solution
+Independent validator finds no hard violation
+(FR-6.7); entries and score are saved.
+Generated
+Generating Solver finds no solution or
+reaches the time limit
+without one
+Conflict report is stored (FR-6.5, FR-7.5). Infeasible
+Infeasible Coordinator changes data
+or settings
+The failed version is kept for reference. Draft
+Generated Coordinator moves or
+locks an entry
+Move is re-validated; refused if a hard constraint
+would be violated (FR-8.4).
+Generated
+Generated Coordinator discards or
+regenerates
+A new Draft version is created from the settings
+(FR-9.5).
+Draft
+Generated Approver publishes Zero hard violations (FR-9.2); previous Pub-
+lished schedule becomes Archived (FR-9.3).
+Published
+Published A newer schedule is
+published, or the term is
+closed
+Visible only in the archive afterwards (UR-27). Archived
+3.3.4 Activity Models
+Figures 12 and 13 show the control flow of the two generation algorithms. Together with the sequence
+diagrams, they define the order in which the checks of Section 3.2 must be performed.
+36
+=== PDF PAGE 41 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+Load term data, constraint
+rules and instructor availability
+Check completeness of input
+(FR-6.1)
+Input
+complete?
+Build CSP model: slot-room variables,
+hard constraints H01–H10 (FR-6.3)
+Add soft-constraint objective;
+solve with CP-SAT within time limit
+(FR-6.4, FR-6.5)
+Feasible
+solution found?
+Check solution with independent
+validator (FR-6.7)
+No hard
+violation?
+Save entries, score and run time;
+status = Generated (FR-6.8)
+Report input defects
+(status stays Draft)
+Save conflict report;
+status = Infeasible
+Discard solution, log defect;
+status = Infeasible
+yes
+yes
+yes
+no
+no
+no
+Figure 12:Activity diagram: timetable generation (UC-08)
+37
+=== PDF PAGE 42 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+Load courses, enrollments, exam sessions,
+rooms and exam rules
+Build conflict graph G(V, E):
+edge if two courses share a student (FR-7.1)
+Order vertices by saturation degree
+(DSATUR)
+Give the next vertex the lowest session
+that no neighbour uses and that keeps
+the daily exam limit (FR-7.2, FR-7.3)
+Uncoloured
+vertices left?
+Sessions needed
+≤sessions defined?
+Allocate rooms to each exam within
+its session (FR-7.4)
+All exams
+seated?
+Save exam entries and allocations;
+status = Generated (FR-7.7)
+Report shortfall and unplaced
+courses; status = Infeasible
+Report capacity shortfall;
+status = Infeasible
+yes
+no
+yes
+yes
+no
+no
+Figure 13:Activity diagram: exam schedule generation with graph colouring (UC-09)
+38
+=== PDF PAGE 43 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+4 Other Non-functional Requirements
+4.1 Performance Requirements
+The performance targets are based on the reference dataset of assumption A-1 (up to 150 course
+offerings, 60 rooms, 48 weekly slots, 80 courses with exams and 3,000 students) and on a server that
+meets the minimum platform of Table 6. Each requirement can be tested by measurement.
+Table 27:Performance requirements
+ID Requirement Rationale
+P-1 Ordinary page loads and API requests (lists, views,
+filters, forms) shall complete within 2 seconds for
+at least 95% of requests with up to 50 concurrent
+users.
+Users abandon or repeat slow
+actions; a department has far fewer
+than 50 simultaneous users.
+P-2 A timetable generation run for the reference
+dataset shall finish within the configured time limit
+(default 120 seconds) and shall return a feasible
+schedule whenever one exists that the solver can
+find within that limit; a typical run should finish
+within 60 seconds.
+Coordinators regenerate several
+times while tuning; long waits would
+defeat the purpose of automation.
+P-3 Exam schedule generation (conflict graph,
+colouring and room allocation) for the reference
+dataset shall finish within 30 seconds.
+Graph colouring on a few hundred
+vertices is fast; the limit keeps
+interaction responsive.
+P-4 Validation of a manual move (FR-8.4) shall
+complete within 1 second.
+Drag-and-drop adjustment needs
+immediate feedback.
+P-5 Importing a CSV file of 5,000 rows, including
+validation, shall complete within 15 seconds.
+Enrollment files are the largest
+imports.
+P-6 Export of a single timetable or exam schedule to
+PDF or CSV shall complete within 5 seconds;
+export of all batches in one PDF within 30
+seconds.
+Users export immediately before
+printing or meetings.
+P-7 Database queries behind the schedule views shall
+return within 500 ms for the reference dataset.
+Views are the most frequently used
+functions.
+P-8 A running generation shall not slow other requests
+by more than 20%, because the solver runs in a
+separate worker process.
+Faculty and students must be able to
+view schedules while the Coordinator
+generates a new version.
+4.2 Safety and Security Requirements
+4.2.1 Safety Requirements
+ATES cannot cause physical harm, but wrong or lost schedules can cause real damage: students
+missing exams, double-booked halls or lost working time. The safety requirements therefore protect the
+correctness and the availability of schedule data.
+39
+=== PDF PAGE 44 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+Table 28:Safety requirements
+ID Requirement
+SAF-1 The system shall never publish a schedule that violates a hard constraint; publishing
+shall be refused if the independent validator reports any violation (FR-6.7, FR-9.2).
+SAF-2 A failed, cancelled or timed-out generation run shall not change or delete any existing
+schedule. All results of a run shall be saved in one database transaction so that a run is
+either stored completely or not at all (FR-6.6).
+SAF-3 Destructive actions (deactivating a record that is in use, disabling a hard constraint,
+discarding a version, replacing the Published schedule) shall ask for explicit confirmation
+naming the consequence.
+SAF-4 The Published schedule shall never be edited in place. A change requires a new version
+that passes validation and approval, so that students and faculty never see a half-edited
+schedule.
+SAF-5 The database shall be backed up automatically at least once per day and the last 7
+backups shall be kept. A restored backup shall allow all schedules and master data to
+be recovered.
+SAF-6 Previous schedule versions shall be retained so that the institution can return to an
+earlier published schedule (FR-9.5).
+4.2.2 Security Requirements
+The client expects amoderatelevel of security: the system holds names, e-mail addresses and
+class schedules of staff and students and the institution’s academic plan, but no financial data or
+grades. Unauthorised changes to schedules and exposure of personal data must be prevented, and
+accountability for every change must be possible. The major security requirements are listed below.
+Table 29:Security requirements
+ID Requirement
+SEC-1 Authentication.Every user shall log in with a user name and a password of at least 8
+characters before any function other than the login page is available (FR-1.1, FR-1.2).
+SEC-2 Password protection.Passwords shall be stored only as salted hashes produced by a
+slow, adaptive algorithm (bcrypt with a cost factor of at least 12) and shall never be
+written to logs or returned by the API.
+SEC-3 Authorisation.Access shall be controlled by role (RBAC) on the server for every
+request; hiding a button in the user interface is not sufficient (FR-1.5).
+SEC-4 Session management.Sessions shall expire after 30 minutes of inactivity and an
+account shall be locked for 15 minutes after 5 failed logins (FR-1.1, FR-1.3).
+SEC-5 Transport security.All communication between browser and server shall use HTTPS
+(TLS 1.2 or later); plain HTTP shall be redirected or refused.
+SEC-6 Input validation.All input shall be validated on the server. Database access shall use
+parameterised queries through the ORM to prevent SQL injection, and all user-supplied
+text shall be escaped on output to prevent cross-site scripting.
+SEC-7 File upload safety.Uploaded files shall be limited to CSV type and 10 MB, parsed as
+data and never executed, and stored outside the web root (FR-4.1).
+40
+=== PDF PAGE 45 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+ID Requirement
+SEC-8 Least privilege.The database account used by the application shall have only the
+rights it needs, and secrets (database password, token key) shall be read from
+environment variables, not stored in source code.
+SEC-9 Accountability.Security-relevant events (logins, failed logins, account changes,
+imports, publication, exports) shall be written to an audit log that no user can modify
+(FR-12.1, FR-12.3).
+SEC-10 Privacy.The system shall store only the personal data needed for scheduling (name,
+e-mail address, role, batch or instructor link). Students shall see only their own batch’s
+published schedule, and faculty only published schedules.
+4.3 Software Quality Attributes
+The most important quality attributes, in order of preference, are:correctness(a published schedule
+has no hard-constraint violation),reliability,usability for the Coordinator,maintainability and design
+for change, andportability. Where two attributes conflict, the earlier one in this list wins; for example,
+the solver is allowed to use its full time limit rather than return an unverified fast answer. Ease of use for
+the Coordinator is preferred over ease of learning for occasional users.
+4.3.1 Correctness
+The correctness of every schedule is established twice: by constructing the schedule from the constraint
+model, and by checking it afterwards with a validator that is written independently of the solver model
+(FR-6.7). Acceptance requires zero hard-constraint violations on every test dataset, including at least
+one generated dataset of the reference size (A-1). A set of unit tests with one deliberately violating
+schedule per constraint (H01–H10, E01–E05) shall prove that the validator detects each violation.
+4.3.2 Reliability
+The system shall complete 99% of generation runs on valid input without an internal error, and shall
+report the cause of any failure instead of terminating silently. Database transactions guarantee that a
+failure leaves the data consistent (SAF-2). After a server restart, runs that were Generating shall be
+marked Infeasible with the reason “interrupted” so that no schedule remains in an undefined state.
+4.3.3 Availability
+During working hours (08:00–18:00 on working days) the system shall be available at least 99% of the
+time, measured per month. Planned maintenance shall be done outside these hours.
+4.3.4 Usability
+A Coordinator who has read the two-page quick-start guide shall be able to go from an imported dataset
+to a generated timetable in under 15 minutes without help. Faculty and students shall find their own
+timetable within two clicks after login. Every error message shall say what is wrong and what the user
+can do about it. Colour is never the only carrier of meaning (conflicts also carry an icon and text), and
+the interface meets WCAG 2.1 level AA contrast.
+41
+=== PDF PAGE 46 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+4.3.5 Maintainability and Design for Change
+Scheduling rules change from semester to semester, so the main design aim is that a rule can be added
+or changed without touching the rest of the system. This is achieved as follows.
+• Constraint modules.Each constraint (H01, S02, E01, . . . ) is a separate class with one shared
+interface (add to model, validate, describe). Adding a rule means adding one class and one row in
+constraint_rules; no other module changes.
+• Layered architecture.The user interface, API, scheduling engine and data access are separate layers
+that communicate only through defined interfaces, so each can be tested and replaced independently.
+• Configuration instead of code.Slot length, working days, weights, limits and thresholds are stored
+as configuration (Appendix A.1), never hard-coded.
+•Exporter interface.A new output format is added by implementing one exporter class.
+• Standards and tests.Python code follows PEP 8, public functions have docstrings, and at least 70%
+of the engine and validator code is covered by automated unit tests.
+• Pinned dependencies.Library versions are pinned and recorded so the system can be rebuilt later.
+4.3.6 Portability
+The server shall run unchanged on Linux and Windows. Because data access uses an ORM, the same
+code runs on PostgreSQL and on SQLite; a test run against both databases shall pass before release.
+The front end shall work in current versions of Chrome, Firefox, Edge and Safari. The system shall be
+packaged so that it can be started with one command (for example, with a container description file).
+4.3.7 Testability
+Generation shall be repeatable for a given dataset, configuration and seed (FR-6.9), a sample dataset
+with expected results shall be delivered, and every requirement shall be written so that a test case can
+be derived from it (traceability in Section 3.2.3).
+4.3.8 Interoperability
+The system shall exchange data only in open formats: UTF-8 CSV for import and export, JSON for the
+API with an OpenAPI description, and PDF for printable output. These formats allow a later connection
+to the student information system without changing the core.
+4.3.9 Adaptability
+The system shall adapt to changes in institutional data without code changes. Courses, instructors,
+rooms, batches, terms, slot grids, constraint weights and exam rules are all stored as data or configu-
+ration (Appendix A.1), so a new semester, a new room or a changed break period needs only a data
+update and a new generation run. Existing master data and constraint configurations shall remain
+usable after such changes (FR-5.6, FR-9.5).
+4.3.10 Flexibility
+The system shall allow its requirements to change in future releases at low cost. A new scheduling rule
+is added as one constraint module and one row in constraint_rules, a new output format as one
+exporter class, and a new user role by extending the role table and the access checks (FR-1.5), without
+redesign of the other layers (Section 4.3.5).
+42
+=== PDF PAGE 47 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+4.3.11 Robustness
+The system shall keep working correctly when it receives invalid, incomplete or unexpected input. All
+input is validated on the server (SEC-6); malformed CSV rows are rejected individually with a reason
+and do not stop the import (FR-4.2, FR-4.3); an over-constrained or incomplete dataset produces an
+explanatory report and never a crash or an invalid schedule (FR-6.1, FR-6.5, FR-7.5); a cancelled or
+timed-out run leaves existing schedules unchanged (SAF-2).
+4.3.12 Reusability
+The scheduling engine, the constraint modules, the validator and the CSV import/export components
+shall be independent of the web layer so that they can be reused in a command-line tool or in another
+institution’s installation (Section 5.4). The database schema and CSV templates are documented so
+that other departments can adopt them.
+4.3.13 Scalability
+Doubling the number of offerings and rooms from the reference dataset shall not require changes to the
+design; run times may grow but remain bounded by the configurable time limit (C-4).
+43
+=== PDF PAGE 48 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+5 Other Requirements
+This section defines the requirements that are not covered by the functional and quality requirements
+above: the database, legal and regulatory aspects, internationalisation and reuse.
+5.1 Database Requirements
+5.1.1 Design Requirements
+ID Requirement
+DB-1 All data of Section 3.2 shall be stored in a relational database with the 21 tables specified
+in Section 5.1.3; no business data shall be kept only in files.
+DB-2 The tables shall be in third normal form. The only deliberate redundancy is the copy of
+instructor_idandbatch_idintimetable_entries, which allows the database
+itself to reject an instructor or batch that is scheduled twice in the same slot.
+DB-3 Every table shall have a single-column integer surrogate primary key named
+<table>_id, and all relationships shall be enforced by foreign key constraints.
+DB-4 Value rules of the tables below (NOT NULL, UNIQUE, CHECK) shall be enforced by the
+database in addition to application validation.
+DB-5 Records referenced by schedules shall not be physically deleted; they carry an
+is_active flag or a status (FR-2.11). Audit and import logs are append-only (FR-12.3).
+DB-6 Saving the result of a generation run shall happen in one transaction (SAF-2).
+DB-7 Indexes shall exist on every foreign key and on the lookup columnsschedule_id,
+slot_id,room_idandinstructor_idof the entry tables to meet P-7.
+DB-8 Text shall be stored as UTF-8. Dates and times of events (created_at,
+generated_at) shall be stored in UTC and displayed in the local time zone
+(Asia/Karachi).
+DB-9 The schema shall be created and changed only through versioned migration scripts, so
+that PostgreSQL and SQLite databases stay equivalent (Section 4.3).
+5.1.2 Entity–Relationship Diagram
+Figure 14 shows the 21 tables and their relationships. A line labelled 1 and N means that one row of the
+first table is referenced by many rows of the second. The foreign keys generated_by, approved_by
+andcreated_bythat point tousersare omitted from the figure for clarity but are listed in Table 30.
+44
+=== PDF PAGE 49 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+departments
+batches courses instructors
+users course_offerings instructor_availability
+enrollments timetable_entries time_slots
+academic_terms schedules rooms
+scheduling_configs exam_entries exam_room_allocationsconstraint_rules
+exam_slots conflict_log
+import_logs
+audit_logs
+1
+N
+1
+N
+1
+N
+1
+N
+1
+N
+1
+N
+1
+N
+1
+N
+1
+0..1
+1
+N
+1
+N
+1
+N
+1
+N
+1
+N
+1
+N
+1N
+1 N
+1
+N
+1
+N
+1
+N
+1
+N
+1N
+1
+N
+1
+N
+1
+N
+1 N
+1
+N
+1
+N
+1N
+1
+N
+1
+N
+Figure 14:Entity–relationship diagram of the ATES database
+45
+=== PDF PAGE 50 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+5.1.3 Table Specifications
+Each table is specified below. PK means primary key and FK foreign key. The linked requirement
+identifiers show which functions use the table. Rows with an empty column name state table-level
+constraints.
+5.1.3.1departments.Academic departments that own courses, batches and instructors.
+Column Data type Constraints and notes
+department_id INTEGER PK, auto-increment
+code VARCHAR(10) NOT NULL, UNIQUE
+name VARCHAR(100) NOT NULL
+5.1.3.2academic_terms.Semesters for which schedules are produced (FR-2.6).
+Column Data type Constraints and notes
+term_id INTEGER PK
+name VARCHAR(50) NOT NULL, UNIQUE (e.g. Fall 2026)
+start_date DATE NOT NULL
+end_date DATE NOT NULL, CHECK (end_date>start_date)
+status VARCHAR(10) NOT NULL, CHECK IN (Planned, Active, Closed); at most
+one Active
+5.1.3.3time_slots.Weekly slot grid of a term (FR-2.7).
+Column Data type Constraints and notes
+slot_id INTEGER PK
+term_id INTEGER NOT NULL, FK→academic_terms
+day_of_week SMALLINT NOT NULL, CHECK 1–7
+slot_index SMALLINT NOT NULL, CHECK>0
+start_time TIME NOT NULL
+end_time TIME NOT NULL, CHECK (end_time>start_time)
+is_blocked BOOLEAN NOT NULL, DEFAULT false (break or prayer slot)
+block_reason VARCHAR(50) NULL; required when is_blocked = true
+Table constraint:UNIQUE (term_id, day_of_week, slot_index)
+5.1.3.4batches.Student batches and sections (FR-2.5).
+Column Data type Constraints and notes
+batch_id INTEGER PK
+department_id INTEGER NOT NULL, FK→departments
+program_code VARCHAR(10) NOT NULL (e.g. BSCS)
+batch_year SMALLINT NOT NULL (admission year)
+section VARCHAR(5) NOT NULL
+46
+=== PDF PAGE 51 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+Column Data type Constraints and notes
+strength SMALLINT NOT NULL, CHECK>0
+is_active BOOLEAN NOT NULL, DEFAULT true
+Table constraint:UNIQUE (program_code, batch_year, section)
+5.1.3.5courses.Course catalogue (FR-2.1, FR-2.2).
+Column Data type Constraints and notes
+course_id INTEGER PK
+course_code VARCHAR(15) NOT NULL, UNIQUE (e.g. CS-326)
+title VARCHAR(150) NOT NULL
+department_id INTEGER NOT NULL, FK→departments
+credit_hours SMALLINT NOT NULL, CHECK≥0
+lecture_hours SMALLINT NOT NULL, DEFAULT 0, CHECK≥0 (contact hours per
+week)
+lab_hours SMALLINT NOT NULL, DEFAULT 0, CHECK≥0
+is_active BOOLEAN NOT NULL, DEFAULT true
+Table constraint:CHECK (lecture_hours + lab_hours>0)
+5.1.3.6instructors.Teaching staff (FR-2.3).
+Column Data type Constraints and notes
+instructor_id INTEGER PK
+department_id INTEGER NOT NULL, FK→departments
+full_name VARCHAR(100) NOT NULL
+email VARCHAR(120) NOT NULL, UNIQUE
+max_daily_hours SMALLINT NOT NULL, DEFAULT 4, CHECK>0
+max_weekly_hours SMALLINT NOT NULL, DEFAULT 18, CHECK≥max_daily_hours
+is_active BOOLEAN NOT NULL, DEFAULT true
+5.1.3.7 instructor_availability.Slots in which an instructor is unavailable (FR-3.1 to FR-3.3).
+Column Data type Constraints and notes
+availability_id INTEGER PK
+instructor_id INTEGER NOT NULL, FK→instructors
+slot_id INTEGER NOT NULL, FK→time_slots
+is_available BOOLEAN NOT NULL, DEFAULT true
+Table constraint:UNIQUE (instructor_id, slot_id)
+5.1.3.8rooms.Lecture rooms, laboratories and exam halls (FR-2.4).
+47
+=== PDF PAGE 52 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+Column Data type Constraints and notes
+room_id INTEGER PK
+room_code VARCHAR(20) NOT NULL, UNIQUE
+building VARCHAR(50) NOT NULL
+capacity SMALLINT NOT NULL, CHECK>0
+room_type VARCHAR(12) NOT NULL, CHECK IN (Lecture, Lab, Exam Hall)
+is_active BOOLEAN NOT NULL, DEFAULT true
+5.1.3.9users.User accounts and roles (FR-1.1 to FR-1.7).
+Column Data type Constraints and notes
+user_id INTEGER PK
+username VARCHAR(40) NOT NULL, UNIQUE
+password_hash VARCHAR(100) NOT NULL (salted hash, never plain text)
+full_name VARCHAR(100) NOT NULL
+email VARCHAR(120) NOT NULL, UNIQUE
+role VARCHAR(15) NOT NULL, CHECK IN (Administrator, Coordinator,
+Approver, Faculty, Student)
+instructor_id INTEGER NULL, UNIQUE, FK→instructors; required for Faculty
+batch_id INTEGER NULL, FK→batches; required for Student
+account_status VARCHAR(12) NOT NULL, DEFAULT Active, CHECK IN (Active, Locked,
+Deactivated)
+failed_attempts SMALLINT NOT NULL, DEFAULT 0
+locked_until TIMESTAMP NULL
+created_at TIMESTAMP NOT NULL, DEFAULT current time
+5.1.3.10 course_offerings.A course taught to one batch by one instructor in one term; the unit
+that is scheduled (FR-2.8, FR-2.9).
+Column Data type Constraints and notes
+offering_id INTEGER PK
+term_id INTEGER NOT NULL, FK→academic_terms
+course_id INTEGER NOT NULL, FK→courses
+batch_id INTEGER NOT NULL, FK→batches
+instructor_id INTEGER NOT NULL, FK→instructors
+enrolled_count SMALLINT NOT NULL, CHECK>0
+Table constraint:UNIQUE (term_id, course_id, batch_id)
+5.1.3.11enrollments.Optional student-to-offering links used for exam clashes (FR-2.10).
+Column Data type Constraints and notes
+enrollment_id INTEGER PK
+offering_id INTEGER NOT NULL, FK→course_offerings
+student_id INTEGER NOT NULL, FK→users (role Student)
+48
+=== PDF PAGE 53 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+Column Data type Constraints and notes
+Table constraint:UNIQUE (offering_id, student_id)
+5.1.3.12 scheduling_configs.Named configuration of a term and schedule type (FR-5.5, FR-5.6).
+Column Data type Constraints and notes
+config_id INTEGER PK
+term_id INTEGER NOT NULL, FK→academic_terms
+schedule_type VARCHAR(10) NOT NULL, CHECK IN (Timetable, Exam)
+name VARCHAR(60) NOT NULL
+solver_time_-
+limit_s
+SMALLINT NOT NULL, DEFAULT 120, CHECK 10–600
+random_seed INTEGER NOT NULL, DEFAULT 1
+created_by INTEGER NOT NULL, FK→users
+created_at TIMESTAMP NOT NULL
+Table constraint:UNIQUE (term_id, schedule_type, name)
+5.1.3.13 constraint_rules.Constraints of a configuration with enable flag, weight and parameter
+(FR-5.1 to FR-5.4).
+Column Data type Constraints and notes
+rule_id INTEGER PK
+config_id INTEGER NOT NULL, FK→scheduling_configs
+rule_code VARCHAR(6) NOT NULL (H01, S02, E01, ES01, . . . )
+rule_type VARCHAR(4) NOT NULL, CHECK IN (Hard, Soft)
+is_enabled BOOLEAN NOT NULL, DEFAULT true
+weight SMALLINT NOT NULL, DEFAULT 0, CHECK 0–10 (soft rules)
+param_value INTEGER NULL (for example, maximum sessions per day)
+Table constraint:UNIQUE (config_id, rule_code)
+5.1.3.14 schedules.One generated version of a timetable or exam schedule (FR-6.2, FR-6.8, FR-
+9.1).
+Column Data type Constraints and notes
+schedule_id INTEGER PK
+term_id INTEGER NOT NULL, FK→academic_terms
+config_id INTEGER NOT NULL, FK→scheduling_configs
+schedule_type VARCHAR(10) NOT NULL, CHECK IN (Timetable, Exam)
+version_no SMALLINT NOT NULL
+status VARCHAR(12) NOT NULL, CHECK IN (Draft, Generating, Infeasible,
+Generated, Published, Archived)
+solver_status VARCHAR(15) NULL (optimal, feasible, infeasible, unknown, interrupted)
+objective_score NUMERIC(10,2) NULL
+run_seconds NUMERIC(8,2) NULL
+49
+=== PDF PAGE 54 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+Column Data type Constraints and notes
+generated_by INTEGER NOT NULL, FK→users
+generated_at TIMESTAMP NOT NULL
+approved_by INTEGER NULL, FK→users
+published_at TIMESTAMP NULL
+Table constraint:UNIQUE (term_id, schedule_type, version_no); at most one Published per (term_id,
+schedule_type)
+5.1.3.15 timetable_entries.One scheduled slot of a class session (a lab block of k slots has k
+rows) (FR-6.3, FR-8.3).
+Column Data type Constraints and notes
+entry_id INTEGER PK
+schedule_id INTEGER NOT NULL, FK→schedules
+offering_id INTEGER NOT NULL, FK→course_offerings
+instructor_id INTEGER NOT NULL, FK→instructors (copied from the offering)
+batch_id INTEGER NOT NULL, FK→batches (copied from the offering)
+room_id INTEGER NOT NULL, FK→rooms
+slot_id INTEGER NOT NULL, FK→time_slots
+session_type VARCHAR(7) NOT NULL, CHECK IN (Lecture, Lab)
+is_locked BOOLEAN NOT NULL, DEFAULT false
+is_manual_-
+override
+BOOLEAN NOT NULL, DEFAULT false
+Table constraint:UNIQUE (schedule_id, room_id, slot_id); UNIQUE (schedule_id, instructor_id, slot_id);
+UNIQUE (schedule_id, batch_id, slot_id)
+5.1.3.16exam_slots.Exam sessions (date and time window) of a term (FR-5.7).
+Column Data type Constraints and notes
+exam_slot_id INTEGER PK
+term_id INTEGER NOT NULL, FK→academic_terms
+exam_date DATE NOT NULL
+start_time TIME NOT NULL
+end_time TIME NOT NULL, CHECK (end_time>start_time)
+label VARCHAR(30) NULL (for example, Morning, Afternoon)
+Table constraint:UNIQUE (term_id, exam_date, start_time)
+5.1.3.17exam_entries.Assignment of a course exam to an exam session (FR-7.2, FR-7.7).
+Column Data type Constraints and notes
+exam_entry_id INTEGER PK
+schedule_id INTEGER NOT NULL, FK→schedules
+course_id INTEGER NOT NULL, FK→courses
+exam_slot_id INTEGER NOT NULL, FK→exam_slots
+50
+=== PDF PAGE 55 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+Column Data type Constraints and notes
+student_count SMALLINT NOT NULL, CHECK>0
+is_locked BOOLEAN NOT NULL, DEFAULT false
+Table constraint:UNIQUE (schedule_id, course_id)
+5.1.3.18exam_room_allocations.Rooms and seats allocated to an exam (FR-7.4).
+Column Data type Constraints and notes
+allocation_id INTEGER PK
+exam_entry_id INTEGER NOT NULL, FK→exam_entries
+room_id INTEGER NOT NULL, FK→rooms
+seats_allocated SMALLINT NOT NULL, CHECK>0 and≤room capacity
+Table constraint:UNIQUE (exam_entry_id, room_id); a room is used by at most one exam per exam
+session (checked by the validator)
+5.1.3.19conflict_log.Conflicts and infeasibility reasons found for a schedule (FR-6.5, FR-8.1).
+Column Data type Constraints and notes
+conflict_id INTEGER PK
+schedule_id INTEGER NOT NULL, FK→schedules
+conflict_type VARCHAR(30) NOT NULL (Instructor, Room, Batch, Capacity, RoomType,
+Availability, Shortfall, . . . )
+severity VARCHAR(8) NOT NULL, CHECK IN (Hard, Warning)
+description TEXT NOT NULL
+entity_ref VARCHAR(100) NULL (identifiers of affected entries)
+detected_at TIMESTAMP NOT NULL
+is_resolved BOOLEAN NOT NULL, DEFAULT false
+5.1.3.20import_logs.History of CSV imports (FR-4.5).
+Column Data type Constraints and notes
+import_id INTEGER PK
+user_id INTEGER NOT NULL, FK→users
+entity_type VARCHAR(20) NOT NULL
+file_name VARCHAR(120) NOT NULL
+rows_total INTEGER NOT NULL
+rows_imported INTEGER NOT NULL
+rows_rejected INTEGER NOT NULL
+imported_at TIMESTAMP NOT NULL
+5.1.3.21audit_logs.Append-only record of important actions (FR-12.1 to FR-12.3).
+51
+=== PDF PAGE 56 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+Column Data type Constraints and notes
+log_id INTEGER PK
+user_id INTEGER NULL, FK→users (NULL for failed logins of unknown
+users)
+action VARCHAR(40) NOT NULL
+entity_type VARCHAR(30) NULL
+entity_id INTEGER NULL
+details TEXT NULL
+created_at TIMESTAMP NOT NULL
+5.1.4 Relationships
+Table 30 lists every foreign-key relationship, the column that implements it and its cardinality (P:C =
+parent to child).
+Table 30:Foreign-key relationships
+Parent table Child table P:C Foreign key column
+departments batches 1:N department_id
+departments courses 1:N department_id
+departments instructors 1:N department_id
+academic_terms time_slots 1:N term_id
+academic_terms course_offerings 1:N term_id
+courses course_offerings 1:N course_id
+batches course_offerings 1:N batch_id
+instructors course_offerings 1:N instructor_id
+instructors users 1:0..1 instructor_id
+batches users 1:N batch_id
+users enrollments 1:N student_id
+course_offerings enrollments 1:N offering_id
+instructors instructor_-
+availability
+1:N instructor_id
+time_slots instructor_-
+availability
+1:N slot_id
+academic_terms scheduling_configs 1:N term_id
+scheduling_-
+configs
+constraint_rules 1:N config_id
+academic_terms schedules 1:N term_id
+scheduling_-
+configs
+schedules 1:N config_id
+users schedules 1:N generated_by,
+approved_by
+schedules timetable_entries 1:N schedule_id
+course_offerings timetable_entries 1:N offering_id
+52
+=== PDF PAGE 57 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+Parent table Child table P:C Foreign key column
+rooms timetable_entries 1:N room_id
+time_slots timetable_entries 1:N slot_id
+academic_terms exam_slots 1:N term_id
+schedules exam_entries 1:N schedule_id
+courses exam_entries 1:N course_id
+exam_slots exam_entries 1:N exam_slot_id
+exam_entries exam_room_-
+allocations
+1:N exam_entry_id
+rooms exam_room_-
+allocations
+1:N room_id
+schedules conflict_log 1:N schedule_id
+users import_logs 1:N user_id
+users audit_logs 1:N user_id
+users scheduling_configs 1:N created_by
+5.1.5 Business Integrity Rules
+The following rules are enforced by the database where possible and otherwise by the validator of
+FR-8.1.
+• A room, an instructor and a batch can occur at most once per slot in one timetable version (UNIQUE
+constraints ontimetable_entries; hard constraints H01–H03).
+• A course occurs at most once per exam schedule (UNIQUE on exam_entries); the seats allocated
+to an exam sum to itsstudent_countand never exceed the capacity of the room (E03).
+• A user with role Faculty has aninstructor_id; a user with role Student has abatch_id.
+• At most one term is Active, and at most one schedule per term and type is Published (FR-9.3).
+• Entries of Published and Archived schedules are read-only; changes require a new version (SAF-4).
+5.2 Legal and Regulatory Requirements
+The system shall comply with the university’s rules on the protection of student and staff records and
+shall store only the personal data listed in SEC-10. All third-party libraries shall be used under their
+open-source licences (OR-Tools, NetworkX, FastAPI, React and Tailwind CSS use permissive licences),
+and licence notices shall be delivered with the software.
+5.3 Internationalisation and Localisation
+The first release provides an English user interface. All text is stored as UTF-8 so that names in Urdu
+script can be stored and shown correctly, and all interface text is kept in a separate resource file so that
+an Urdu interface can be added later without code changes. Times use the 24-hour clock and the time
+zone Asia/Karachi; the first working day of the week is configurable per term.
+5.4 Reuse Objectives
+The scheduling engine and the constraint modules shall be independent of the web layer so that they
+can be reused in a command-line tool or a different institution’s installation. The CSV templates and the
+53
+=== PDF PAGE 58 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+database schema shall be documented well enough for another department to adopt the system with its
+own data.
+54
+=== PDF PAGE 59 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+Appendix A – Data Dictionary
+The data dictionary tracks the constants, state variables, inputs and outputs used in this document,
+with their descriptions and the operations and requirements that relate to them. Database columns are
+specified in Section 5.1.3.
+A.1 Constants and Configuration Parameters
+Name Value Description Related
+SESSION_TIMEOUT_-
+MIN
+30 min Inactivity time after which a
+session expires.
+FR-1.1, SEC-4
+MAX_FAILED_LOGINS 5 Failed logins before an
+account is locked.
+FR-1.3
+LOCKOUT_MIN 15 min Duration of an account lock. FR-1.3
+PASSWORD_MIN_LEN 8 Minimum password length. FR-1.2, SEC-1
+BCRYPT_COST ≥12 Cost factor of password
+hashing.
+FR-1.2, SEC-2
+MAX_UPLOAD_MB 10 Maximum size of an
+uploaded CSV file.
+FR-4.1, SEC-7
+DEFAULT_SLOT_MIN 60 min Default slot length of a term. FR-2.7, C-6
+SOLVER_LIMIT_-
+DEFAULT
+120 s Default solver time limit. FR-5.5, C-4, P-2
+SOLVER_LIMIT_RANGE 10–600 s Allowed range of the solver
+time limit.
+FR-5.5, FR-5.8
+WEIGHT_RANGE 0–10 Allowed weight of a soft
+constraint.
+FR-5.4
+MAX_EXAMS_PER_DAY 2 (default) Maximum exams of one
+student per day.
+FR-5.4, FR-7.3, E02
+MAX_SESSIONS_PER_-
+DAY
+5 (default) Preferred maximum sessions
+of a batch per day.
+S03
+MAX_CONSEC_HOURS 3 (default) Preferred maximum
+consecutive teaching slots of
+an instructor.
+S04
+PAGE_SIZE 25 Default rows per page in lists. FR-2.12
+POLL_INTERVAL 2 s Interval at which the browser
+polls run status.
+Section 3.1.4
+BACKUP_RETENTION 7 days Number of daily backups
+kept.
+SAF-5
+A.2 State Variables
+55
+=== PDF PAGE 60 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+Variable Possible states Description Related
+schedules.status Draft, Generating,
+Infeasible, Generated,
+Published, Archived
+Life-cycle state of a
+schedule version.
+Figure 11,
+FR-9.1 to FR-9.3
+users.account_status Active, Locked,
+Deactivated
+State of a user
+account.
+FR-1.3, FR-1.6,
+FR-1.7
+academic_-
+terms.status
+Planned, Active, Closed State of an academic
+term.
+FR-2.6
+schedules.solver_-
+status
+optimal, feasible, infeasible,
+unknown, interrupted
+Result reported by the
+solver for a run.
+FR-6.5, Section
+4.3.2
+rooms.room_type Lecture, Lab, Exam Hall Kind of room; decides
+which sessions fit
+(H05).
+FR-2.4
+timetable_-
+entries.session_type
+Lecture, Lab Kind of a scheduled
+session.
+FR-2.9, H05,
+H09
+conflict_-
+log.severity
+Hard, Warning Severity of a detected
+conflict.
+FR-8.1
+is_locked,
+is_manual_override
+true, false Entry is pinned; entry
+was changed by hand.
+FR-6.10, FR-8.5,
+FR-8.6
+users.role Administrator, Coordinator,
+Approver, Faculty, Student
+Role that decides
+permissions.
+FR-1.5, FR-1.6
+A.3 Inputs
+Input Description and content Source Related
+Login credentials User name and password. All users FR-1.1
+Master data forms Courses, instructors, rooms,
+batches, terms, slots, offerings,
+enrollments.
+Coordinator FR-2.1 to FR-2.10
+CSV import files UTF-8 files with one row per
+record of a given type (up to 10
+MB).
+Coordinator FR-4.1 to FR-4.5
+Availability grid Slots marked unavailable per
+instructor.
+Faculty,
+Coordinator
+FR-3.1 to FR-3.3
+Constraint
+configuration
+Enable flags, weights,
+parameters, time limit and seed.
+Coordinator FR-5.1 to FR-5.6
+Exam sessions Date, start time, end time and
+label.
+Coordinator FR-5.7
+Generation request Term, schedule type and
+configuration.
+Coordinator FR-6.2
+Manual move or lock Entry, new slot or session and
+room; lock flag.
+Coordinator FR-8.3, FR-8.6
+Publish decision Schedule identifier. Approver FR-9.2
+Filter criteria Term, version, batch, instructor,
+room, course, day or date.
+All users FR-10.3, FR-10.4
+Export request Schedule, filter and format (PDF
+or CSV).
+All users FR-11.1, FR-11.2
+56
+=== PDF PAGE 61 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+Input Description and content Source Related
+Account data User name, role, batch or
+instructor link, status.
+Administrator FR-1.6
+A.4 Outputs
+Output Description and content Recipient Related
+Validation report Rejected rows with line, column
+and reason.
+Coordinator FR-4.3
+Input defect list Problems found before solving. Coordinator FR-6.1
+Generated timetable Entries (offering, instructor, batch,
+room, slot, type), score and run
+time.
+Coordinator,
+Approver
+FR-6.8
+Generated exam
+schedule
+Exam entries with session and
+room allocations, run statistics.
+Coordinator,
+Approver
+FR-7.7
+Conflict report Conflicts with type, severity,
+affected entities and description,
+or infeasibility reasons.
+Coordinator,
+Approver
+FR-8.1, FR-8.2
+Review summary Number of sessions or exams,
+score, number of conflicts.
+Approver FR-9.6
+Timetable and exam
+views
+Grid and list views with filters. All users FR-10.1 to FR-10.5
+PDF file A4 landscape schedule. All users FR-11.1, FR-11.3
+CSV file One row per session or exam. All users FR-11.2
+Audit log Who, what, when, affected entity. Administrator FR-12.1, FR-12.2
+Messages Success, warning and error
+messages.
+All users Section 3.1.1
+A.5 Constraint Catalogue
+The constraints below are the default rules of the scheduling model (FR-5.1). Hard constraints must
+hold in every schedule; those markedmandatorycannot be disabled (FR-5.2). Soft constraints are
+preferences that the solver maximises with the weights set by the Coordinator.
+Code Type Rule Related
+Timetable – hard constraints
+H01 Hard,
+mandatory
+An instructor teaches at most one session in a slot. FR-6.3, SAF-1
+H02 Hard,
+mandatory
+A room hosts at most one session in a slot. FR-6.3
+H03 Hard,
+mandatory
+A batch attends at most one session in a slot. FR-6.3
+H04 Hard Room capacity is at least the enrolled count of the
+offering.
+FR-6.3
+57
+=== PDF PAGE 62 ===
+Software Engineering SRS: Auto Timetable / Exam Scheduler
+NED University of Engineering & Technology – Department of Computer & Information Systems Engineering
+Code Type Rule Related
+H05 Hard Lab sessions are held in Lab rooms and lectures in
+Lecture rooms.
+FR-6.3
+H06 Hard No session in a slot in which the instructor is
+unavailable.
+FR-3.1, FR-6.3
+H07 Hard No session in a blocked slot (break or prayer time). FR-2.7, FR-6.3
+H08 Hard,
+mandatory
+Every offering receives exactly the number of
+lecture sessions and lab blocks required per week.
+FR-2.9, FR-6.3
+H09 Hard A lab block occupies consecutive slots of one day in
+one room.
+FR-6.3
+H10 Hard An instructor does not exceed the daily and weekly
+teaching hours.
+FR-2.3, FR-6.3
+Timetable – soft constraints
+S01 Soft Minimise idle gaps between the sessions of a batch
+on a day.
+FR-6.4
+S02 Soft Spread the sessions of one offering over different
+days.
+FR-6.4
+S03 Soft Keep the number of sessions of a batch per day at
+or below the parameter.
+FR-5.4, FR-6.4
+S04 Soft Keep consecutive teaching slots of an instructor at
+or below the parameter.
+FR-5.4, FR-6.4
+S05 Soft Prefer the same slot and room as in the previous
+version (stability).
+FR-6.4
+S06 Soft Prefer the smallest room that fits the offering. FR-6.4
+Exam schedule – hard constraints
+E01 Hard,
+mandatory
+Two courses that share a student are not in the
+same exam session.
+FR-7.1, FR-7.2
+E02 Hard No student has more exams per day than the
+configured maximum.
+FR-7.3
+E03 Hard Allocated seats equal the student count and never
+exceed room capacity.
+FR-7.4
+E04 Hard,
+mandatory
+A room is used by at most one exam in a session. FR-7.4
+E05 Hard,
+mandatory
+Every course with an exam is assigned to exactly
+one session.
+FR-7.2
+Exam schedule – soft constraints
+ES01 Soft Spread the exams of one batch over different days. FR-7.6
+ES02 Soft Use as few rooms as possible per exam. FR-7.6
+ES03 Soft Keep the rooms of one exam in the same building. FR-7.6
+58

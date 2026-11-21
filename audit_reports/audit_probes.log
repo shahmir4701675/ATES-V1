@@ -1,0 +1,9 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.2, pytest-9.2.0, pluggy-1.7.0 -- C:\Users\DELL\OneDrive\Desktop\ATES-V1\.venv\Scripts\python.exe
+rootdir: C:\Users\DELL\OneDrive\Desktop\ATES-V1
+configfile: pytest.ini
+plugins: anyio-4.16.0
+collecting ... collected 26 items
+
+audit_reports/test_audit_probes.py::test_unauthenticated_read_requires_login FAILED [  3%]
+audit_reports/test_audit_probes.py::test_unauthenticated_write_requires_login 

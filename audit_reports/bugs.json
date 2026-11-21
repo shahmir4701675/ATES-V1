@@ -1,0 +1,222 @@
+[
+  {
+    "id": "B001",
+    "severity": "Critical",
+    "title": "Unauthenticated and spoofed-role access permits writes",
+    "location": "backend/dependencies.py:69-133",
+    "requirements": "FR-1.5; SEC-1/3",
+    "evidence": "test_unauthenticated_write_requires_login; test_forged_role_is_not_authentication",
+    "reproduction": "POST /rooms without a token returns201; X-User-Role:Administrator also returns201. Defaults adapt roles to each route; X-User-Id is trusted.",
+    "impact": "Any caller can change scheduling data and impersonate actor IDs.",
+    "action": "Verify JWT/session; load active user and roles from trusted storage; reject missing identity."
+  },
+  {
+    "id": "B002",
+    "severity": "Critical",
+    "title": "Generated timetable can contain simultaneous instructor, room and batch clashes",
+    "location": "backend/routers/master_data.py:1201-1243; engine/constraints.py:126-293",
+    "requirements": "C-6; H01-H03; FR-6.3",
+    "evidence": "test_weekly_slot_overlap_rejected; test_unequal_slot_length_rejected; test_solver_rejects_overlapping_clock_slots",
+    "reproduction": "API accepts overlapping weekly slot201. A two-slot engine dataset with both windows08:00-09:00 returns optimal, two entries for instructor1/batch1/room2 and validator[].",
+    "impact": "A schedule advertised as conflict-free can double-book all three resources in actual clock time.",
+    "action": "Reject overlapping/irregular grids and independently check real temporal overlap."
+  },
+  {
+    "id": "B003",
+    "severity": "Critical",
+    "title": "Mixed explicit and inferred exam enrollments miss required conflict edges",
+    "location": "engine/models.py:523-550; engine/exam_scheduler.py:141-184; engine/constraints.py:1850-1866",
+    "requirements": "A-4; E01/E02; FR-7.1/7.3",
+    "evidence": "test_mixed_enrollment_fallback_has_cohort_conflict",
+    "reproduction": "Take two same-batch offerings; fully enumerate students for one and leave the other unenumerated. First course has student:* identities; second has batch:* only. Graph edge is absent.",
+    "impact": "Under A-4 the same real cohort can be assigned clashing exams; validator uses same flawed membership helper and will miss the same overlap.",
+    "action": "Represent inferred membership using known batch students plus conservative cohort relations; test mixed, partial, repeater and elective data."
+  },
+  {
+    "id": "B004",
+    "severity": "Critical",
+    "title": "Published timetable can be invalidated through master-data updates",
+    "location": "backend/routers/master_data.py:801-839,1298-1329; backend/adapter.py:106-455",
+    "requirements": "SAF-1/4; H04; FR-9.2",
+    "evidence": "test_generated_schedule_immutable_through_master_data",
+    "reproduction": "In isolated fixture mark schedule1 Published with approval metadata, PUT /rooms/1 capacity1 returns200. Reloading that published version produces H04 violations. Direct entry edits correctly return409.",
+    "impact": "The published schedule ceases to satisfy hard constraints without new generation, validation or approval; historical views use mutable master data.",
+    "action": "Snapshot immutable version inputs or block/version invalidating metadata changes and revalidate authoritative publication."
+  },
+  {
+    "id": "B005",
+    "severity": "High",
+    "title": "Lab validator accepts clock-time gaps as consecutive",
+    "location": "engine/constraints.py:723-768,796-813",
+    "requirements": "H09; C-6",
+    "evidence": "test_lab_contiguity_uses_clock_time",
+    "reproduction": "Keep lab slot indexes consecutive but change final lab slot to18:00-19:00; validator returns[].",
+    "impact": "An hours-long lab interruption passes hard validation.",
+    "action": "Require previous end_time==next start_time for every lab block; validate grid topology."
+  },
+  {
+    "id": "B006",
+    "severity": "High",
+    "title": "Unpublished and other-batch schedules exposed; Administrator permitted scheduling",
+    "location": "backend/routers/schedules.py:343-378,505-585,391; frontend/src/pages/TimetablePage.tsx:40-59",
+    "requirements": "SEC-10; FR-9.4/10.5; SRS2.3",
+    "evidence": "test_student_cannot_read_generated_schedule; test_student_list_contains_published_only; test_administrator_cannot_generate",
+    "reproduction": "Student with X-Batch-Id1 reads Generated schedule with26 entries; list shows Generated; Administrator generation returns202. Pages initialize all scopes.",
+    "impact": "Disclosure of drafts/other cohorts and violation of stated separation of duties.",
+    "action": "Enforce status/ownership at list/detail/entries/export; Coordinator generates, Approver publishes, Administrator administers."
+  },
+  {
+    "id": "B007",
+    "severity": "High",
+    "title": "Unlinked Faculty can edit any instructor availability",
+    "location": "backend/routers/master_data.py:640-688",
+    "requirements": "FR-3.1; SEC-3",
+    "evidence": "test_faculty_without_identity_cannot_edit_any_instructor",
+    "reproduction": "X-User-Role:Faculty with no instructor link PUT instructor2 availability returns200. Read route also lacks own-scope guard.",
+    "impact": "Faculty can alter another instructor input.",
+    "action": "Require trusted non-null Faculty link and scope read/write to it."
+  },
+  {
+    "id": "B008",
+    "severity": "High",
+    "title": "Publication and archiving only exist in browser overlay",
+    "location": "frontend/src/services/api.ts:313-323; frontend/src/pages/ReviewPublishPage.tsx:34",
+    "requirements": "FR-9.1-9.6; UC-13; SAF-1",
+    "evidence": "test_required_endpoint_exists[post-/schedules/1/publish-payload5]",
+    "reproduction": "Publish route404. publishOverlay sets Published and prior Archived in a Map; refresh/new client loses state and no Approver server check executes.",
+    "impact": "Users may believe a version is official while database still says Generated.",
+    "action": "Implement transactional Approver publish/archive with independent live validation."
+  },
+  {
+    "id": "B009",
+    "severity": "High",
+    "title": "CSV import validates mock records and can report inserts it never performs",
+    "location": "frontend/src/services/api.ts:325-333; frontend/src/services/mockApi.ts:307-368",
+    "requirements": "FR-4.1-4.5; UR-12",
+    "evidence": "POST /import/courses404 executed; remaining behavior static inspection",
+    "reproduction": "Real-mode import still calls mock.validateImport/confirmImport. confirmImport has only course/instructor/room/batch insert branches but reports job.rows.length for offerings/enrollments.",
+    "impact": "No imported records reach authoritative database; offering/enrollment imports can report false success even in mock mode.",
+    "action": "Implement staged server validation/confirmation, complete FK checks and truthful counts."
+  },
+  {
+    "id": "B010",
+    "severity": "High",
+    "title": "Schedule PDF/CSV export buttons have no download behavior",
+    "location": "frontend/src/components/ui.tsx:87-89; frontend/src/pages/TimetablePage.tsx:72; frontend/src/pages/ExamSchedulePage.tsx:54",
+    "requirements": "FR-11.1-11.5; UC-16",
+    "evidence": "Both export endpoint probes return404; buttons statically traced",
+    "reproduction": "Both schedule pages use ExportActions, whose callbacks only emit status text. ConflictReportPage has a distinct real client CSV download.",
+    "impact": "Users cannot produce required schedules for printing/distribution.",
+    "action": "Add authorized PDF/CSV exporters, metadata/filters and audit events."
+  },
+  {
+    "id": "B011",
+    "severity": "High",
+    "title": "Login/accounts/audit screens simulate security without server persistence",
+    "location": "frontend/src/services/mockApi.ts:373-391; frontend/src/App.tsx:59-79; frontend/src/services/api.ts:335-338",
+    "requirements": "FR-1.x; FR-12.2; SEC-1/2/4",
+    "evidence": "Auth/users/audit endpoint probes404; static mock login check",
+    "reproduction": "Known mock username plus any nonempty password succeeds; saveUser discards password. UI starts as Administrator and allows arbitrary role switching; no logout/password lifecycle.",
+    "impact": "Prototype identity and security records cannot establish a real authenticated session.",
+    "action": "Replace security mocks with authenticated server workflows, bcrypt>=12, expiry and lockout."
+  },
+  {
+    "id": "B012",
+    "severity": "High",
+    "title": "Cancellation, total deadlines and process isolation are incomplete",
+    "location": "frontend/src/services/api.ts:205-226; backend/routers/schedules.py:473-480; engine/exam_scheduler.py:471,614-688,1150,1364; engine/timetable_solver.py:883-936",
+    "requirements": "C-4; P-2/3/8; FR-6.5/6.6",
+    "evidence": "Static control-flow finding; no stress benchmark executed",
+    "reproduction": "Cancel stops UI following only. BackgroundTasks is same-process execution; repeated5s room/diagnostic solves and unconstrained backtracking exceed a single global deadline; timetable diagnosis adds2s/rule.",
+    "impact": "Run may continue after cancellation and consume shared resources beyond stated budget.",
+    "action": "Use a cancellable process worker and shared monotonic deadline covering preflight/build/search/diagnostics/validation."
+  },
+  {
+    "id": "B013",
+    "severity": "High",
+    "title": "Default production app skips startup recovery of orphaned runs",
+    "location": "backend/main.py:96-109; backend/dependencies.py:38-55",
+    "requirements": "SRS4.3.2; Q-02",
+    "evidence": "test_default_app_recovers_orphan_on_startup",
+    "reproduction": "create_app() has no factory at lifespan start; factory is initialized by first request after recovery phase. Isolated patched engine probe leaves status Generating.",
+    "impact": "Restarted runs remain indefinitely Generating in default deployment.",
+    "action": "Initialize configured engine/session factory before startup recovery and test default entrypoint."
+  },
+  {
+    "id": "B014",
+    "severity": "High",
+    "title": "Backend regeneration never supplies previous timetable to S05",
+    "location": "backend/routers/schedules.py:261-296; engine/timetable_solver.py:1002-1004",
+    "requirements": "S05; FR-6.4",
+    "evidence": "Static call tracing; direct-engine S05 test passes",
+    "reproduction": "Worker discards all unlocked previous entries and calls solve_timetable without previous_schedule/previous_entries; S05 obtains empty list.",
+    "impact": "Configured schedule-stability preference silently does nothing in real API regeneration.",
+    "action": "Pass complete previous timetable to objective separately from mandatory locked entries."
+  },
+  {
+    "id": "B015",
+    "severity": "High",
+    "title": "Manual adjustment workflow lacks state/block/lock/override completeness",
+    "location": "backend/routers/schedules.py:673-681,859-903; backend/models.py:920-966; frontend/src/pages/TimetablePage.tsx:96; frontend/src/pages/ExamSchedulePage.tsx:23-28",
+    "requirements": "FR-8.3/8.5/8.6/8.7; FR-6.10",
+    "evidence": "test_exam_manual_override_persisted; static UI/state inspection",
+    "reproduction": "Only Published/Archived forbidden; Generated-only rule not enforced. Multi-slot Move disabled; no lock/unlock UI; exam room selector/override persistence and undo absent.",
+    "impact": "Core adjustment and repeatability workflow cannot be completed through UI; exam override history lost.",
+    "action": "Atomic lab-block/exam room moves, Generated-only guard, persisted override flags, lock controls and undo snapshot."
+  },
+  {
+    "id": "B016",
+    "severity": "High",
+    "title": "Audit, schema lifecycle and database enforcement incomplete",
+    "location": "backend/models.py:678-716,1096-1125; backend/database.py:170-174; db/schema.sql",
+    "requirements": "DB-5/7/9; FR-12.1-12.3; SEC-9",
+    "evidence": "Runtime metadata inventory; room mutation audit probe fails",
+    "reproduction": "ORM metadata is missing leading FK indexes; schema.sql already defines those indexes and log/overlap/capacity/published-entry triggers, but create_all omits SQL-only definitions. No versioned migrations; ordinary room creation has no audit event; mandatory security services absent.",
+    "impact": "Poor accountability, migration reproducibility and incomplete integrity guarantees.",
+    "action": "Reconcile existing SQL-only indexes/triggers with ORM-created databases through tested migrations; complete trusted audit services and verify installed PostgreSQL grants."
+  },
+  {
+    "id": "B017",
+    "severity": "High",
+    "title": "Malformed time/grid input returns500 or misleading409",
+    "location": "backend/schemas.py:238-281; backend/routers/master_data.py:125-133,1251-1291",
+    "requirements": "SEC-6; Q-11; FR-2.7",
+    "evidence": "test_bad_time_returns_validation_error; test_grid_over_midnight_returns_validation_error; test_invalid_day_returns_validation_error",
+    "reproduction": "not-a-time produces500;23:00 two-hour grid produces500; working_days[8] returns409 described as existing grid overlap.",
+    "impact": "User cannot distinguish validation failure from server failure; robustness requirement violated.",
+    "action": "Use typed time/domain validators and precise422 messages before constructing or committing rows."
+  },
+  {
+    "id": "B018",
+    "severity": "High",
+    "title": "Generation lacks snapshot/concurrency guarantees for versions and saving",
+    "location": "backend/adapter.py:457-465,534-589; backend/routers/schedules.py:239-304,450-461",
+    "requirements": "FR-6.7/9.5; DB-6; SAF-1/2",
+    "evidence": "Static race analysis; not reproduced under concurrent load",
+    "reproduction": "Next version uses max+1 without serialization/retry; data is loaded then session closed before solve, later save does not revalidate against current data. Config/master changes may occur in between.",
+    "impact": "Concurrent runs can collide with unhandled UNIQUE failure; stale input can yield a Generated version invalid against current data.",
+    "action": "Atomically allocate versions, snapshot/hash inputs, reject stale results or validate under save-time consistency guarantees."
+  },
+  {
+    "id": "B019",
+    "severity": "Medium",
+    "title": "Configuration deletion is local and parameters lack domain validation",
+    "location": "frontend/src/services/api.ts:298-310; backend/schemas.py:348-353; backend/routers/master_data.py:1866-1900",
+    "requirements": "FR-5.4/5.6/5.8",
+    "evidence": "Static service/schema inspection",
+    "reproduction": "Deletion only hides ID in a Set; arbitrary negative param_value and unknown rule code/type accepted by schema/service.",
+    "impact": "Configuration may reappear or advertise a rule the engine does not enforce.",
+    "action": "Implement persistent delete and catalogue-specific validation."
+  },
+  {
+    "id": "B020",
+    "severity": "Medium",
+    "title": "UI role, layout, localization and documentation remain incomplete",
+    "location": "frontend/src/components/ui.tsx:45-50; frontend/src/pages/DashboardPage.tsx; frontend/src/pages/TimetablePage.tsx:75-96; frontend/src/data/reference.ts:4; docs/",
+    "requirements": "FR-10.x; UI standards; DB-8; SRS2.6/5.3",
+    "evidence": "Static inspection; no visual/cross-browser/accessibility execution",
+    "reproduction": "All-batch parallel timetable entries share CSS grid cells; explicit term selector absent; dashboard actions not role-scoped; error IDs missing; local timezone rather than explicit Karachi; documentation and resource extraction incomplete.",
+    "impact": "Unverified mobile/accessibility behavior and confusing scope/navigation/display.",
+    "action": "Finish role-specific UX, rendering, explicit timezone/resources/help and execute browser/contrast tests."
+  }
+]

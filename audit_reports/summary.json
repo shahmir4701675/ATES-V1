@@ -1,0 +1,55 @@
+{
+  "date": "2026-11-21",
+  "timezone": "Asia/Karachi",
+  "requirements": {
+    "total": 228,
+    "counts": {
+      "Missing": 22,
+      "Incorrectly Implemented": 44,
+      "Partially Implemented": 110,
+      "Fully Implemented": 38,
+      "Not Verified": 14
+    },
+    "verified": 214,
+    "strictVerifiedCompliancePct": 17.76
+  },
+  "tests": {
+    "existing": {
+      "executed": 79,
+      "passed": 79,
+      "failed": 0,
+      "seconds": 114.7
+    },
+    "audit": {
+      "executed": 28,
+      "passed": 1,
+      "failed": 27,
+      "seconds": 16.09
+    },
+    "total": {
+      "executed": 107,
+      "passed": 80,
+      "failed": 27
+    },
+    "buildChecks": {
+      "executed": 3,
+      "passed": 3,
+      "failed": 0
+    }
+  },
+  "bugs": {
+    "critical": 4,
+    "high": 14,
+    "medium": 2
+  },
+  "functionalRequirements": {
+    "total": 83,
+    "verified": 82,
+    "fully": 16,
+    "partially": 41,
+    "missing": 11,
+    "incorrect": 14,
+    "unverified": 1,
+    "strictVerifiedCompliancePct": 19.51
+  }
+}

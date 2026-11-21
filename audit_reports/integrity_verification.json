@@ -1,0 +1,50 @@
+{
+  "date": "2026-11-21",
+  "originalFilesCompared": 82,
+  "changedOrMissingOriginalFiles": [],
+  "sourceUnchangedSinceManifest": true,
+  "reports": [
+    {
+      "name": "SRS_COMPLIANCE_REPORT.md",
+      "bytes": 78851,
+      "sha256": "62399ad98cd04796f04bb7a1a0d65676c86e6c2e8bcd2006f03e1e768a694e98"
+    },
+    {
+      "name": "FUNCTIONAL_TEST_REPORT.md",
+      "bytes": 23648,
+      "sha256": "8262d0f5454f0fa48cac8289015ae0976ddd88c3a452ff14abbdcfe6f42481d4"
+    },
+    {
+      "name": "ALGORITHM_AUDIT.md",
+      "bytes": 18716,
+      "sha256": "f09ac9bbd5d367c25b89d09b946a5c59e88016839757f4c9328b5f23692b7561"
+    },
+    {
+      "name": "SECURITY_AND_DATABASE_AUDIT.md",
+      "bytes": 16748,
+      "sha256": "a700228dc44a74a63fde3697f826d933987eb03252e37352a7da9e013c39c382"
+    },
+    {
+      "name": "BUG_REPORT.md",
+      "bytes": 15681,
+      "sha256": "b8980686459e47baf6c8cecbeaa27d9924e24884514f090a4da0eb8c06585aa6"
+    },
+    {
+      "name": "IMPLEMENTATION_ROADMAP.md",
+      "bytes": 11703,
+      "sha256": "51a169291818e2af6b0f723b2ab93ebc255c3d086cae77e58f86c8e3d90988ba"
+    },
+    {
+      "name": "README.md",
+      "bytes": 1493,
+      "sha256": "aea44a0006d1d026396ac79d38fc1ed9472bc4ebda4eafae84db85e5242cd254"
+    }
+  ],
+  "requirementsTotal": 228,
+  "duplicateRequirementIds": [],
+  "finalTestCases": 107,
+  "finalTestsPassed": 80,
+  "finalTestsFailed": 27,
+  "canonicalSRSIdsCovered": 193,
+  "uncoveredCanonicalSRSIds": []
+}

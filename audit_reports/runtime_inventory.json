@@ -1,0 +1,816 @@
+{
+  "python": "3.13.2",
+  "packages": {
+    "ortools": "9.15.6755",
+    "networkx": "3.7",
+    "sqlalchemy": "2.1.8",
+    "fastapi": "0.162.2",
+    "pytest": "9.2.0",
+    "uvicorn": "0.54.0",
+    "httpx": "0.28.1"
+  },
+  "unindexed_foreign_keys": [
+    "schedules.approved_by",
+    "schedules.generated_by",
+    "exam_entries.course_id",
+    "timetable_entries.instructor_id",
+    "timetable_entries.batch_id",
+    "timetable_entries.instructor_id",
+    "timetable_entries.batch_id",
+    "timetable_entries.room_id"
+  ],
+  "tables": [
+    {
+      "name": "academic_terms",
+      "columns": [
+        "term_id",
+        "name",
+        "start_date",
+        "end_date",
+        "status"
+      ],
+      "foreign_keys": [],
+      "checks": [
+        "status IN ('Planned', 'Active', 'Closed')",
+        "end_date > start_date"
+      ]
+    },
+    {
+      "name": "departments",
+      "columns": [
+        "department_id",
+        "code",
+        "name"
+      ],
+      "foreign_keys": [],
+      "checks": []
+    },
+    {
+      "name": "rooms",
+      "columns": [
+        "room_id",
+        "room_code",
+        "building",
+        "capacity",
+        "room_type",
+        "is_active"
+      ],
+      "foreign_keys": [],
+      "checks": [
+        "capacity > 0",
+        "room_type IN ('Lecture', 'Lab', 'Exam Hall')"
+      ]
+    },
+    {
+      "name": "batches",
+      "columns": [
+        "batch_id",
+        "department_id",
+        "program_code",
+        "batch_year",
+        "section",
+        "strength",
+        "is_active"
+      ],
+      "foreign_keys": [
+        {
+          "column": "department_id",
+          "target": "departments.department_id",
+          "ondelete": "RESTRICT"
+        }
+      ],
+      "checks": [
+        "batch_year BETWEEN 2000 AND 2100",
+        "strength > 0"
+      ]
+    },
+    {
+      "name": "courses",
+      "columns": [
+        "course_id",
+        "course_code",
+        "title",
+        "department_id",
+        "credit_hours",
+        "lecture_hours",
+        "lab_hours",
+        "is_active"
+      ],
+      "foreign_keys": [
+        {
+          "column": "department_id",
+          "target": "departments.department_id",
+          "ondelete": "RESTRICT"
+        }
+      ],
+      "checks": [
+        "lab_hours >= 0",
+        "lecture_hours >= 0",
+        "credit_hours >= 0",
+        "lecture_hours + lab_hours > 0"
+      ]
+    },
+    {
+      "name": "exam_slots",
+      "columns": [
+        "exam_slot_id",
+        "term_id",
+        "exam_date",
+        "start_time",
+        "end_time",
+        "label"
+      ],
+      "foreign_keys": [
+        {
+          "column": "term_id",
+          "target": "academic_terms.term_id",
+          "ondelete": "RESTRICT"
+        }
+      ],
+      "checks": [
+        "end_time > start_time"
+      ]
+    },
+    {
+      "name": "instructors",
+      "columns": [
+        "instructor_id",
+        "department_id",
+        "full_name",
+        "email",
+        "max_daily_hours",
+        "max_weekly_hours",
+        "is_active"
+      ],
+      "foreign_keys": [
+        {
+          "column": "department_id",
+          "target": "departments.department_id",
+          "ondelete": "RESTRICT"
+        }
+      ],
+      "checks": [
+        "max_daily_hours > 0",
+        "max_weekly_hours >= max_daily_hours"
+      ]
+    },
+    {
+      "name": "time_slots",
+      "columns": [
+        "slot_id",
+        "term_id",
+        "day_of_week",
+        "slot_index",
+        "start_time",
+        "end_time",
+        "is_blocked",
+        "block_reason"
+      ],
+      "foreign_keys": [
+        {
+          "column": "term_id",
+          "target": "academic_terms.term_id",
+          "ondelete": "RESTRICT"
+        }
+      ],
+      "checks": [
+        "slot_index > 0",
+        "(is_blocked = FALSE) OR (block_reason IS NOT NULL AND LENGTH(TRIM(block_reason)) > 0)",
+        "day_of_week BETWEEN 1 AND 7",
+        "end_time > start_time"
+      ]
+    },
+    {
+      "name": "course_offerings",
+      "columns": [
+        "offering_id",
+        "term_id",
+        "course_id",
+        "batch_id",
+        "instructor_id",
+        "enrolled_count"
+      ],
+      "foreign_keys": [
+        {
+          "column": "batch_id",
+          "target": "batches.batch_id",
+          "ondelete": "RESTRICT"
+        },
+        {
+          "column": "instructor_id",
+          "target": "instructors.instructor_id",
+          "ondelete": "RESTRICT"
+        },
+        {
+          "column": "term_id",
+          "target": "academic_terms.term_id",
+          "ondelete": "RESTRICT"
+        },
+        {
+          "column": "course_id",
+          "target": "courses.course_id",
+          "ondelete": "RESTRICT"
+        }
+      ],
+      "checks": [
+        "enrolled_count > 0"
+      ]
+    },
+    {
+      "name": "instructor_availability",
+      "columns": [
+        "availability_id",
+        "instructor_id",
+        "slot_id",
+        "is_available"
+      ],
+      "foreign_keys": [
+        {
+          "column": "instructor_id",
+          "target": "instructors.instructor_id",
+          "ondelete": "RESTRICT"
+        },
+        {
+          "column": "slot_id",
+          "target": "time_slots.slot_id",
+          "ondelete": "CASCADE"
+        }
+      ],
+      "checks": []
+    },
+    {
+      "name": "users",
+      "columns": [
+        "user_id",
+        "username",
+        "password_hash",
+        "full_name",
+        "email",
+        "role",
+        "instructor_id",
+        "batch_id",
+        "account_status",
+        "failed_attempts",
+        "locked_until",
+        "created_at"
+      ],
+      "foreign_keys": [
+        {
+          "column": "instructor_id",
+          "target": "instructors.instructor_id",
+          "ondelete": "RESTRICT"
+        },
+        {
+          "column": "batch_id",
+          "target": "batches.batch_id",
+          "ondelete": "RESTRICT"
+        }
+      ],
+      "checks": [
+        "(role <> 'Student') OR (batch_id IS NOT NULL)",
+        "failed_attempts >= 0",
+        "(role <> 'Faculty') OR (instructor_id IS NOT NULL)",
+        "account_status IN ('Active', 'Locked', 'Deactivated')",
+        "role IN ('Administrator', 'Coordinator', 'Approver', 'Faculty', 'Student')"
+      ]
+    },
+    {
+      "name": "audit_logs",
+      "columns": [
+        "log_id",
+        "user_id",
+        "action",
+        "entity_type",
+        "entity_id",
+        "details",
+        "created_at"
+      ],
+      "foreign_keys": [
+        {
+          "column": "user_id",
+          "target": "users.user_id",
+          "ondelete": "RESTRICT"
+        }
+      ],
+      "checks": []
+    },
+    {
+      "name": "enrollments",
+      "columns": [
+        "enrollment_id",
+        "offering_id",
+        "student_id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "student_id",
+          "target": "users.user_id",
+          "ondelete": "RESTRICT"
+        },
+        {
+          "column": "offering_id",
+          "target": "course_offerings.offering_id",
+          "ondelete": "CASCADE"
+        }
+      ],
+      "checks": []
+    },
+    {
+      "name": "import_logs",
+      "columns": [
+        "import_id",
+        "user_id",
+        "entity_type",
+        "file_name",
+        "rows_total",
+        "rows_imported",
+        "rows_rejected",
+        "imported_at"
+      ],
+      "foreign_keys": [
+        {
+          "column": "user_id",
+          "target": "users.user_id",
+          "ondelete": "RESTRICT"
+        }
+      ],
+      "checks": [
+        "rows_imported >= 0",
+        "rows_rejected >= 0",
+        "rows_imported + rows_rejected <= rows_total",
+        "rows_total >= 0"
+      ]
+    },
+    {
+      "name": "scheduling_configs",
+      "columns": [
+        "config_id",
+        "term_id",
+        "schedule_type",
+        "name",
+        "solver_time_limit_s",
+        "random_seed",
+        "created_by",
+        "created_at"
+      ],
+      "foreign_keys": [
+        {
+          "column": "created_by",
+          "target": "users.user_id",
+          "ondelete": "RESTRICT"
+        },
+        {
+          "column": "term_id",
+          "target": "academic_terms.term_id",
+          "ondelete": "RESTRICT"
+        }
+      ],
+      "checks": [
+        "schedule_type IN ('Timetable', 'Exam')",
+        "solver_time_limit_s BETWEEN 10 AND 600"
+      ]
+    },
+    {
+      "name": "constraint_rules",
+      "columns": [
+        "rule_id",
+        "config_id",
+        "rule_code",
+        "rule_type",
+        "is_enabled",
+        "weight",
+        "param_value"
+      ],
+      "foreign_keys": [
+        {
+          "column": "config_id",
+          "target": "scheduling_configs.config_id",
+          "ondelete": "CASCADE"
+        }
+      ],
+      "checks": [
+        "(rule_code NOT IN ('H01', 'H02', 'H03', 'H08', 'E01', 'E04', 'E05')) OR (is_enabled = TRUE)",
+        "rule_type IN ('Hard', 'Soft')",
+        "weight BETWEEN 0 AND 10"
+      ]
+    },
+    {
+      "name": "schedules",
+      "columns": [
+        "schedule_id",
+        "term_id",
+        "config_id",
+        "schedule_type",
+        "version_no",
+        "status",
+        "solver_status",
+        "objective_score",
+        "run_seconds",
+        "generated_by",
+        "generated_at",
+        "approved_by",
+        "published_at"
+      ],
+      "foreign_keys": [
+        {
+          "column": "approved_by",
+          "target": "users.user_id",
+          "ondelete": "RESTRICT"
+        },
+        {
+          "column": "term_id",
+          "target": "academic_terms.term_id",
+          "ondelete": "RESTRICT"
+        },
+        {
+          "column": "generated_by",
+          "target": "users.user_id",
+          "ondelete": "RESTRICT"
+        },
+        {
+          "column": "config_id",
+          "target": "scheduling_configs.config_id",
+          "ondelete": "RESTRICT"
+        }
+      ],
+      "checks": [
+        "run_seconds IS NULL OR run_seconds >= 0",
+        "status IN ('Draft', 'Generating', 'Infeasible', 'Generated', 'Published', 'Archived')",
+        "(status <> 'Published') OR (approved_by IS NOT NULL AND published_at IS NOT NULL)",
+        "solver_status IS NULL OR solver_status IN ('optimal', 'feasible', 'infeasible', 'unknown', 'interrupted')",
+        "schedule_type IN ('Timetable', 'Exam')",
+        "version_no > 0"
+      ]
+    },
+    {
+      "name": "conflict_log",
+      "columns": [
+        "conflict_id",
+        "schedule_id",
+        "conflict_type",
+        "severity",
+        "description",
+        "entity_ref",
+        "detected_at",
+        "is_resolved"
+      ],
+      "foreign_keys": [
+        {
+          "column": "schedule_id",
+          "target": "schedules.schedule_id",
+          "ondelete": "CASCADE"
+        }
+      ],
+      "checks": [
+        "severity IN ('Hard', 'Warning')"
+      ]
+    },
+    {
+      "name": "exam_entries",
+      "columns": [
+        "exam_entry_id",
+        "schedule_id",
+        "course_id",
+        "exam_slot_id",
+        "student_count",
+        "is_locked"
+      ],
+      "foreign_keys": [
+        {
+          "column": "exam_slot_id",
+          "target": "exam_slots.exam_slot_id",
+          "ondelete": "RESTRICT"
+        },
+        {
+          "column": "schedule_id",
+          "target": "schedules.schedule_id",
+          "ondelete": "CASCADE"
+        },
+        {
+          "column": "course_id",
+          "target": "courses.course_id",
+          "ondelete": "RESTRICT"
+        }
+      ],
+      "checks": [
+        "student_count > 0"
+      ]
+    },
+    {
+      "name": "timetable_entries",
+      "columns": [
+        "entry_id",
+        "schedule_id",
+        "offering_id",
+        "instructor_id",
+        "batch_id",
+        "room_id",
+        "slot_id",
+        "session_type",
+        "is_locked",
+        "is_manual_override"
+      ],
+      "foreign_keys": [
+        {
+          "column": "instructor_id",
+          "target": "course_offerings.instructor_id",
+          "ondelete": "RESTRICT"
+        },
+        {
+          "column": "batch_id",
+          "target": "batches.batch_id",
+          "ondelete": "RESTRICT"
+        },
+        {
+          "column": "offering_id",
+          "target": "course_offerings.offering_id",
+          "ondelete": "RESTRICT"
+        },
+        {
+          "column": "schedule_id",
+          "target": "schedules.schedule_id",
+          "ondelete": "CASCADE"
+        },
+        {
+          "column": "offering_id",
+          "target": "course_offerings.offering_id",
+          "ondelete": "RESTRICT"
+        },
+        {
+          "column": "instructor_id",
+          "target": "instructors.instructor_id",
+          "ondelete": "RESTRICT"
+        },
+        {
+          "column": "batch_id",
+          "target": "course_offerings.batch_id",
+          "ondelete": "RESTRICT"
+        },
+        {
+          "column": "slot_id",
+          "target": "time_slots.slot_id",
+          "ondelete": "RESTRICT"
+        },
+        {
+          "column": "room_id",
+          "target": "rooms.room_id",
+          "ondelete": "RESTRICT"
+        }
+      ],
+      "checks": [
+        "session_type IN ('Lecture', 'Lab')"
+      ]
+    },
+    {
+      "name": "exam_room_allocations",
+      "columns": [
+        "allocation_id",
+        "exam_entry_id",
+        "room_id",
+        "seats_allocated"
+      ],
+      "foreign_keys": [
+        {
+          "column": "exam_entry_id",
+          "target": "exam_entries.exam_entry_id",
+          "ondelete": "CASCADE"
+        },
+        {
+          "column": "room_id",
+          "target": "rooms.room_id",
+          "ondelete": "RESTRICT"
+        }
+      ],
+      "checks": [
+        "seats_allocated > 0"
+      ]
+    }
+  ],
+  "routes": [
+    {
+      "path": "/departments",
+      "methods": [
+        "get",
+        "post"
+      ]
+    },
+    {
+      "path": "/departments/{department_id}",
+      "methods": [
+        "put"
+      ]
+    },
+    {
+      "path": "/courses",
+      "methods": [
+        "get",
+        "post",
+        "put"
+      ]
+    },
+    {
+      "path": "/courses/{course_id}",
+      "methods": [
+        "delete",
+        "get",
+        "put"
+      ]
+    },
+    {
+      "path": "/instructors",
+      "methods": [
+        "get",
+        "post",
+        "put"
+      ]
+    },
+    {
+      "path": "/instructors/{instructor_id}",
+      "methods": [
+        "delete",
+        "get",
+        "put"
+      ]
+    },
+    {
+      "path": "/instructors/{instructor_id}/availability",
+      "methods": [
+        "get",
+        "put"
+      ]
+    },
+    {
+      "path": "/rooms",
+      "methods": [
+        "get",
+        "post",
+        "put"
+      ]
+    },
+    {
+      "path": "/rooms/{room_id}",
+      "methods": [
+        "delete",
+        "get",
+        "put"
+      ]
+    },
+    {
+      "path": "/batches",
+      "methods": [
+        "get",
+        "post",
+        "put"
+      ]
+    },
+    {
+      "path": "/batches/{batch_id}",
+      "methods": [
+        "delete",
+        "get",
+        "put"
+      ]
+    },
+    {
+      "path": "/terms",
+      "methods": [
+        "get",
+        "post",
+        "put"
+      ]
+    },
+    {
+      "path": "/terms/{term_id}",
+      "methods": [
+        "get",
+        "put"
+      ]
+    },
+    {
+      "path": "/terms/{term_id}/slots",
+      "methods": [
+        "get",
+        "post"
+      ]
+    },
+    {
+      "path": "/terms/{term_id}/slots/generate",
+      "methods": [
+        "post"
+      ]
+    },
+    {
+      "path": "/terms/{term_id}/slots/{slot_id}",
+      "methods": [
+        "put"
+      ]
+    },
+    {
+      "path": "/terms/{term_id}/exam-slots",
+      "methods": [
+        "get",
+        "post"
+      ]
+    },
+    {
+      "path": "/offerings",
+      "methods": [
+        "get",
+        "post",
+        "put"
+      ]
+    },
+    {
+      "path": "/offerings/{offering_id}",
+      "methods": [
+        "delete",
+        "get",
+        "put"
+      ]
+    },
+    {
+      "path": "/enrollments",
+      "methods": [
+        "get",
+        "post"
+      ]
+    },
+    {
+      "path": "/enrollments/{enrollment_id}",
+      "methods": [
+        "delete"
+      ]
+    },
+    {
+      "path": "/configs",
+      "methods": [
+        "get",
+        "post",
+        "put"
+      ]
+    },
+    {
+      "path": "/configs/{config_id}",
+      "methods": [
+        "get",
+        "put"
+      ]
+    },
+    {
+      "path": "/configs/{config_id}/rules",
+      "methods": [
+        "get",
+        "put"
+      ]
+    },
+    {
+      "path": "/schedules",
+      "methods": [
+        "get"
+      ]
+    },
+    {
+      "path": "/schedules/{schedule_id}",
+      "methods": [
+        "get"
+      ]
+    },
+    {
+      "path": "/schedules/generate",
+      "methods": [
+        "post"
+      ]
+    },
+    {
+      "path": "/schedules/{schedule_id}/status",
+      "methods": [
+        "get"
+      ]
+    },
+    {
+      "path": "/schedules/{schedule_id}/entries",
+      "methods": [
+        "get",
+        "put"
+      ]
+    },
+    {
+      "path": "/schedules/{schedule_id}/conflicts",
+      "methods": [
+        "get"
+      ]
+    },
+    {
+      "path": "/schedules/{schedule_id}/entries/{entry_id}",
+      "methods": [
+        "put"
+      ]
+    },
+    {
+      "path": "/health",
+      "methods": [
+        "get"
+      ]
+    }
+  ]
+}

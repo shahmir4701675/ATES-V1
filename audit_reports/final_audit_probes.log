@@ -1,0 +1,543 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.2, pytest-9.2.0, pluggy-1.7.0 -- C:\Users\DELL\OneDrive\Desktop\ATES-V1\.venv\Scripts\python.exe
+rootdir: C:\Users\DELL\OneDrive\Desktop\ATES-V1
+configfile: pytest.ini
+plugins: anyio-4.16.0
+collecting ... collected 28 items
+
+audit_reports/test_audit_probes.py::test_unauthenticated_read_requires_login FAILED [  3%]
+audit_reports/test_audit_probes.py::test_unauthenticated_write_requires_login FAILED [  7%]
+audit_reports/test_audit_probes.py::test_forged_role_is_not_authentication FAILED [ 10%]
+audit_reports/test_audit_probes.py::test_student_cannot_read_generated_schedule FAILED [ 14%]
+audit_reports/test_audit_probes.py::test_student_list_contains_published_only FAILED [ 17%]
+audit_reports/test_audit_probes.py::test_faculty_without_identity_cannot_edit_any_instructor FAILED [ 21%]
+audit_reports/test_audit_probes.py::test_administrator_cannot_generate FAILED [ 25%]
+audit_reports/test_audit_probes.py::test_required_endpoint_exists[post-/auth/login-payload0] FAILED [ 28%]
+audit_reports/test_audit_probes.py::test_required_endpoint_exists[post-/auth/logout-payload1] FAILED [ 32%]
+audit_reports/test_audit_probes.py::test_required_endpoint_exists[get-/users-None] FAILED [ 35%]
+audit_reports/test_audit_probes.py::test_required_endpoint_exists[get-/audit-None] FAILED [ 39%]
+audit_reports/test_audit_probes.py::test_required_endpoint_exists[post-/import/courses-payload4] FAILED [ 42%]
+audit_reports/test_audit_probes.py::test_required_endpoint_exists[post-/schedules/1/publish-payload5] FAILED [ 46%]
+audit_reports/test_audit_probes.py::test_required_endpoint_exists[get-/schedules/1/export?format=csv-None] FAILED [ 50%]
+audit_reports/test_audit_probes.py::test_required_endpoint_exists[get-/schedules/1/export?format=pdf-None] FAILED [ 53%]
+audit_reports/test_audit_probes.py::test_weekly_slot_overlap_rejected FAILED [ 57%]
+audit_reports/test_audit_probes.py::test_unequal_slot_length_rejected FAILED [ 60%]
+audit_reports/test_audit_probes.py::test_bad_time_returns_validation_error FAILED [ 64%]
+audit_reports/test_audit_probes.py::test_grid_over_midnight_returns_validation_error FAILED [ 67%]
+audit_reports/test_audit_probes.py::test_invalid_day_returns_validation_error FAILED [ 71%]
+audit_reports/test_audit_probes.py::test_generated_schedule_immutable_through_master_data FAILED [ 75%]
+audit_reports/test_audit_probes.py::test_lab_contiguity_uses_clock_time FAILED [ 78%]
+audit_reports/test_audit_probes.py::test_mixed_enrollment_fallback_has_cohort_conflict FAILED [ 82%]
+audit_reports/test_audit_probes.py::test_exam_manual_override_persisted FAILED [ 85%]
+audit_reports/test_audit_probes.py::test_published_direct_edit_rejected PASSED [ 89%]
+audit_reports/test_audit_probes.py::test_mutation_audit_written FAILED   [ 92%]
+audit_reports/test_extra_probes.py::test_solver_rejects_overlapping_clock_slots FAILED [ 96%]
+audit_reports/test_extra_probes.py::test_default_app_recovers_orphan_on_startup FAILED [100%]
+
+================================== FAILURES ===================================
+__________________ test_unauthenticated_read_requires_login ___________________
+
+env = (<starlette.testclient.TestClient object at 0x000001CA3EBD56A0>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_unauthenticated_read_requires_login(env):
+        c,_=env
+        r=c.get('/courses')
+>       assert r.status_code==401, f'Unauthenticated GET /courses returned {r.status_code}'
+E       AssertionError: Unauthenticated GET /courses returned 200
+E       assert 200 == 401
+E        +  where 200 = <Response [200 OK]>.status_code
+
+audit_reports\test_audit_probes.py:32: AssertionError
+__________________ test_unauthenticated_write_requires_login __________________
+
+env = (<starlette.testclient.TestClient object at 0x000001CA3EFBAFD0>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_unauthenticated_write_requires_login(env):
+        c,_=env
+        r=c.post('/rooms',json=dict(room_code='AUDIT',building='X',capacity=30,room_type='Lecture'))
+>       assert r.status_code==401, f'Unauthenticated room creation returned {r.status_code}'
+E       AssertionError: Unauthenticated room creation returned 201
+E       assert 201 == 401
+E        +  where 201 = <Response [201 Created]>.status_code
+
+audit_reports\test_audit_probes.py:37: AssertionError
+___________________ test_forged_role_is_not_authentication ____________________
+
+env = (<starlette.testclient.TestClient object at 0x000001CA3F2B1A90>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_forged_role_is_not_authentication(env):
+        c,_=env
+        r=c.post('/rooms',headers={'X-User-Role':'Administrator'},json=dict(room_code='FORGED',building='X',capacity=30,room_type='Lecture'))
+>       assert r.status_code==401, f'Forged Administrator header returned {r.status_code}'
+E       AssertionError: Forged Administrator header returned 201
+E       assert 201 == 401
+E        +  where 201 = <Response [201 Created]>.status_code
+
+audit_reports\test_audit_probes.py:42: AssertionError
+_________________ test_student_cannot_read_generated_schedule _________________
+
+env = (<starlette.testclient.TestClient object at 0x000001CA3F41CB00>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_student_cannot_read_generated_schedule(env):
+        c,_=env
+        r=c.get('/schedules/1/entries',headers={'X-User-Role':'Student','X-Batch-Id':'1'})
+>       assert r.status_code in (401,403,404), f'Student read {r.json().get("status")} schedule with {len(r.json().get("timetable_entries",[]))} entries'
+E       AssertionError: Student read Generated schedule with 26 entries
+E       assert 200 in (401, 403, 404)
+E        +  where 200 = <Response [200 OK]>.status_code
+
+audit_reports\test_audit_probes.py:47: AssertionError
+__________________ test_student_list_contains_published_only __________________
+
+env = (<starlette.testclient.TestClient object at 0x000001CA3F41DE00>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_student_list_contains_published_only(env):
+        c,_=env
+        r=c.get('/schedules',headers={'X-User-Role':'Student','X-Batch-Id':'1'})
+>       assert r.status_code in (401,403) or all(x['status']=='Published' for x in r.json()), str(r.json())[:500]
+E       AssertionError: [{'schedule_id': 1, 'term_id': 1, 'config_id': 1, 'schedule_type': 'Timetable', 'version_no': 1, 'status': 'Generated', 'solver_status': 'optimal', 'objective_score': 128.0, 'run_seconds': 1.25, 'entry_count': 26, 'conflict_count': 0, 'hard_violation_count': 0, 'generated_by': 1, 'generated_at': '2026-10-20T09:15:00Z', 'approved_by': None, 'published_at': None}, {'schedule_id': 2, 'term_id': 1, 'config_id': 2, 'schedule_type': 'Exam', 'version_no': 1, 'status': 'Generated', 'solver_status': 'opt
+E       assert (200 in (401, 403) or False)
+E        +  where 200 = <Response [200 OK]>.status_code
+E        +  and   False = all(<generator object test_student_list_contains_published_only.<locals>.<genexpr> at 0x000001CA3F4BFE00>)
+
+audit_reports\test_audit_probes.py:52: AssertionError
+__________ test_faculty_without_identity_cannot_edit_any_instructor ___________
+
+env = (<starlette.testclient.TestClient object at 0x000001CA408EC4D0>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_faculty_without_identity_cannot_edit_any_instructor(env):
+        c,_=env
+        r=c.put('/instructors/2/availability',headers={'X-User-Role':'Faculty'},json={'slots':[{'slot_id':1,'is_available':False}]})
+>       assert r.status_code in (401,403), f'Unlinked Faculty edit returned {r.status_code}'
+E       AssertionError: Unlinked Faculty edit returned 200
+E       assert 200 in (401, 403)
+E        +  where 200 = <Response [200 OK]>.status_code
+
+audit_reports\test_audit_probes.py:57: AssertionError
+_____________________ test_administrator_cannot_generate ______________________
+
+env = (<starlette.testclient.TestClient object at 0x000001CA40B07BD0>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_administrator_cannot_generate(env):
+        c,_=env
+        with patch('backend.routers.schedules.run_schedule_generation_worker'):
+            r=c.post('/schedules/generate',headers={'X-User-Role':'Administrator'},json={'term_id':1,'config_id':1})
+>       assert r.status_code==403, f'Administrator generation returned {r.status_code}'
+E       AssertionError: Administrator generation returned 202
+E       assert 202 == 403
+E        +  where 202 = <Response [202 Accepted]>.status_code
+
+audit_reports\test_audit_probes.py:63: AssertionError
+__________ test_required_endpoint_exists[post-/auth/login-payload0] ___________
+
+env = (<starlette.testclient.TestClient object at 0x000001CA40D838A0>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+method = 'post', path = '/auth/login'
+payload = {'username': 'x', 'password': '12345678'}
+
+    @pytest.mark.parametrize('method,path,payload',[
+     ('post','/auth/login',{'username':'x','password':'12345678'}),
+     ('post','/auth/logout',{}),
+     ('get','/users',None),
+     ('get','/audit',None),
+     ('post','/import/courses',{}),
+     ('post','/schedules/1/publish',{}),
+     ('get','/schedules/1/export?format=csv',None),
+     ('get','/schedules/1/export?format=pdf',None),
+    ])
+    def test_required_endpoint_exists(env,method,path,payload):
+        c,_=env
+        r=getattr(c,method)(path,**({'json':payload} if payload is not None else {}))
+>       assert r.status_code not in (404,405), f'{method.upper()} {path}: {r.status_code}'
+E       AssertionError: POST /auth/login: 404
+E       assert 404 not in (404, 405)
+E        +  where 404 = <Response [404 Not Found]>.status_code
+
+audit_reports\test_audit_probes.py:78: AssertionError
+__________ test_required_endpoint_exists[post-/auth/logout-payload1] __________
+
+env = (<starlette.testclient.TestClient object at 0x000001CA40DCD250>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+method = 'post', path = '/auth/logout', payload = {}
+
+    @pytest.mark.parametrize('method,path,payload',[
+     ('post','/auth/login',{'username':'x','password':'12345678'}),
+     ('post','/auth/logout',{}),
+     ('get','/users',None),
+     ('get','/audit',None),
+     ('post','/import/courses',{}),
+     ('post','/schedules/1/publish',{}),
+     ('get','/schedules/1/export?format=csv',None),
+     ('get','/schedules/1/export?format=pdf',None),
+    ])
+    def test_required_endpoint_exists(env,method,path,payload):
+        c,_=env
+        r=getattr(c,method)(path,**({'json':payload} if payload is not None else {}))
+>       assert r.status_code not in (404,405), f'{method.upper()} {path}: {r.status_code}'
+E       AssertionError: POST /auth/logout: 404
+E       assert 404 not in (404, 405)
+E        +  where 404 = <Response [404 Not Found]>.status_code
+
+audit_reports\test_audit_probes.py:78: AssertionError
+_______________ test_required_endpoint_exists[get-/users-None] ________________
+
+env = (<starlette.testclient.TestClient object at 0x000001CA3EF13B50>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+method = 'get', path = '/users', payload = None
+
+    @pytest.mark.parametrize('method,path,payload',[
+     ('post','/auth/login',{'username':'x','password':'12345678'}),
+     ('post','/auth/logout',{}),
+     ('get','/users',None),
+     ('get','/audit',None),
+     ('post','/import/courses',{}),
+     ('post','/schedules/1/publish',{}),
+     ('get','/schedules/1/export?format=csv',None),
+     ('get','/schedules/1/export?format=pdf',None),
+    ])
+    def test_required_endpoint_exists(env,method,path,payload):
+        c,_=env
+        r=getattr(c,method)(path,**({'json':payload} if payload is not None else {}))
+>       assert r.status_code not in (404,405), f'{method.upper()} {path}: {r.status_code}'
+E       AssertionError: GET /users: 404
+E       assert 404 not in (404, 405)
+E        +  where 404 = <Response [404 Not Found]>.status_code
+
+audit_reports\test_audit_probes.py:78: AssertionError
+_______________ test_required_endpoint_exists[get-/audit-None] ________________
+
+env = (<starlette.testclient.TestClient object at 0x000001CA408F2030>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+method = 'get', path = '/audit', payload = None
+
+    @pytest.mark.parametrize('method,path,payload',[
+     ('post','/auth/login',{'username':'x','password':'12345678'}),
+     ('post','/auth/logout',{}),
+     ('get','/users',None),
+     ('get','/audit',None),
+     ('post','/import/courses',{}),
+     ('post','/schedules/1/publish',{}),
+     ('get','/schedules/1/export?format=csv',None),
+     ('get','/schedules/1/export?format=pdf',None),
+    ])
+    def test_required_endpoint_exists(env,method,path,payload):
+        c,_=env
+        r=getattr(c,method)(path,**({'json':payload} if payload is not None else {}))
+>       assert r.status_code not in (404,405), f'{method.upper()} {path}: {r.status_code}'
+E       AssertionError: GET /audit: 404
+E       assert 404 not in (404, 405)
+E        +  where 404 = <Response [404 Not Found]>.status_code
+
+audit_reports\test_audit_probes.py:78: AssertionError
+________ test_required_endpoint_exists[post-/import/courses-payload4] _________
+
+env = (<starlette.testclient.TestClient object at 0x000001CA408F0E60>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+method = 'post', path = '/import/courses', payload = {}
+
+    @pytest.mark.parametrize('method,path,payload',[
+     ('post','/auth/login',{'username':'x','password':'12345678'}),
+     ('post','/auth/logout',{}),
+     ('get','/users',None),
+     ('get','/audit',None),
+     ('post','/import/courses',{}),
+     ('post','/schedules/1/publish',{}),
+     ('get','/schedules/1/export?format=csv',None),
+     ('get','/schedules/1/export?format=pdf',None),
+    ])
+    def test_required_endpoint_exists(env,method,path,payload):
+        c,_=env
+        r=getattr(c,method)(path,**({'json':payload} if payload is not None else {}))
+>       assert r.status_code not in (404,405), f'{method.upper()} {path}: {r.status_code}'
+E       AssertionError: POST /import/courses: 404
+E       assert 404 not in (404, 405)
+E        +  where 404 = <Response [404 Not Found]>.status_code
+
+audit_reports\test_audit_probes.py:78: AssertionError
+______ test_required_endpoint_exists[post-/schedules/1/publish-payload5] ______
+
+env = (<starlette.testclient.TestClient object at 0x000001CA40F01A90>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+method = 'post', path = '/schedules/1/publish', payload = {}
+
+    @pytest.mark.parametrize('method,path,payload',[
+     ('post','/auth/login',{'username':'x','password':'12345678'}),
+     ('post','/auth/logout',{}),
+     ('get','/users',None),
+     ('get','/audit',None),
+     ('post','/import/courses',{}),
+     ('post','/schedules/1/publish',{}),
+     ('get','/schedules/1/export?format=csv',None),
+     ('get','/schedules/1/export?format=pdf',None),
+    ])
+    def test_required_endpoint_exists(env,method,path,payload):
+        c,_=env
+        r=getattr(c,method)(path,**({'json':payload} if payload is not None else {}))
+>       assert r.status_code not in (404,405), f'{method.upper()} {path}: {r.status_code}'
+E       AssertionError: POST /schedules/1/publish: 404
+E       assert 404 not in (404, 405)
+E        +  where 404 = <Response [404 Not Found]>.status_code
+
+audit_reports\test_audit_probes.py:78: AssertionError
+___ test_required_endpoint_exists[get-/schedules/1/export?format=csv-None] ____
+
+env = (<starlette.testclient.TestClient object at 0x000001CA415575B0>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+method = 'get', path = '/schedules/1/export?format=csv', payload = None
+
+    @pytest.mark.parametrize('method,path,payload',[
+     ('post','/auth/login',{'username':'x','password':'12345678'}),
+     ('post','/auth/logout',{}),
+     ('get','/users',None),
+     ('get','/audit',None),
+     ('post','/import/courses',{}),
+     ('post','/schedules/1/publish',{}),
+     ('get','/schedules/1/export?format=csv',None),
+     ('get','/schedules/1/export?format=pdf',None),
+    ])
+    def test_required_endpoint_exists(env,method,path,payload):
+        c,_=env
+        r=getattr(c,method)(path,**({'json':payload} if payload is not None else {}))
+>       assert r.status_code not in (404,405), f'{method.upper()} {path}: {r.status_code}'
+E       AssertionError: GET /schedules/1/export?format=csv: 404
+E       assert 404 not in (404, 405)
+E        +  where 404 = <Response [404 Not Found]>.status_code
+
+audit_reports\test_audit_probes.py:78: AssertionError
+___ test_required_endpoint_exists[get-/schedules/1/export?format=pdf-None] ____
+
+env = (<starlette.testclient.TestClient object at 0x000001CA419D59B0>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+method = 'get', path = '/schedules/1/export?format=pdf', payload = None
+
+    @pytest.mark.parametrize('method,path,payload',[
+     ('post','/auth/login',{'username':'x','password':'12345678'}),
+     ('post','/auth/logout',{}),
+     ('get','/users',None),
+     ('get','/audit',None),
+     ('post','/import/courses',{}),
+     ('post','/schedules/1/publish',{}),
+     ('get','/schedules/1/export?format=csv',None),
+     ('get','/schedules/1/export?format=pdf',None),
+    ])
+    def test_required_endpoint_exists(env,method,path,payload):
+        c,_=env
+        r=getattr(c,method)(path,**({'json':payload} if payload is not None else {}))
+>       assert r.status_code not in (404,405), f'{method.upper()} {path}: {r.status_code}'
+E       AssertionError: GET /schedules/1/export?format=pdf: 404
+E       assert 404 not in (404, 405)
+E        +  where 404 = <Response [404 Not Found]>.status_code
+
+audit_reports\test_audit_probes.py:78: AssertionError
+______________________ test_weekly_slot_overlap_rejected ______________________
+
+env = (<starlette.testclient.TestClient object at 0x000001CA41DA26D0>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_weekly_slot_overlap_rejected(env):
+        c,_=env
+        r=c.post('/terms/1/slots',json={'day_of_week':1,'slot_index':99,'start_time':'08:30','end_time':'09:30'})
+>       assert r.status_code in (409,422), f'Overlapping slot accepted: {r.status_code}'
+E       AssertionError: Overlapping slot accepted: 201
+E       assert 201 in (409, 422)
+E        +  where 201 = <Response [201 Created]>.status_code
+
+audit_reports\test_audit_probes.py:83: AssertionError
+______________________ test_unequal_slot_length_rejected ______________________
+
+env = (<starlette.testclient.TestClient object at 0x000001CA41FC7CB0>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_unequal_slot_length_rejected(env):
+        c,_=env
+        r=c.post('/terms/1/slots',json={'day_of_week':7,'slot_index':1,'start_time':'08:00','end_time':'08:30'})
+>       assert r.status_code in (409,422), f'Unequal length accepted: {r.status_code}'
+E       AssertionError: Unequal length accepted: 201
+E       assert 201 in (409, 422)
+E        +  where 201 = <Response [201 Created]>.status_code
+
+audit_reports\test_audit_probes.py:88: AssertionError
+___________________ test_bad_time_returns_validation_error ____________________
+
+env = (<starlette.testclient.TestClient object at 0x000001CA419D65F0>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_bad_time_returns_validation_error(env):
+        c,_=env
+        r=c.post('/terms/1/slots',json={'day_of_week':1,'slot_index':99,'start_time':'not-a-time','end_time':'10:00'})
+>       assert r.status_code==422, f'Malformed time returned {r.status_code}'
+E       AssertionError: Malformed time returned 500
+E       assert 500 == 422
+E        +  where 500 = <Response [500 Internal Server Error]>.status_code
+
+audit_reports\test_audit_probes.py:93: AssertionError
+______________ test_grid_over_midnight_returns_validation_error _______________
+
+env = (<starlette.testclient.TestClient object at 0x000001CA3F00ACF0>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_grid_over_midnight_returns_validation_error(env):
+        c,_=env
+        r=c.post('/terms/1/slots/generate',json={'working_days':[7],'first_start_time':'23:00','slot_length_min':60,'slots_per_day':2})
+>       assert r.status_code==422, f'Cross-midnight grid returned {r.status_code}'
+E       AssertionError: Cross-midnight grid returned 500
+E       assert 500 == 422
+E        +  where 500 = <Response [500 Internal Server Error]>.status_code
+
+audit_reports\test_audit_probes.py:98: AssertionError
+__________________ test_invalid_day_returns_validation_error __________________
+
+env = (<starlette.testclient.TestClient object at 0x000001CA41235EF0>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_invalid_day_returns_validation_error(env):
+        c,_=env
+        r=c.post('/terms/1/slots/generate',json={'working_days':[8],'slots_per_day':1})
+>       assert r.status_code==422, f'Invalid day returned {r.status_code}'
+E       AssertionError: Invalid day returned 409
+E       assert 409 == 422
+E        +  where 409 = <Response [409 Conflict]>.status_code
+
+audit_reports\test_audit_probes.py:103: AssertionError
+____________ test_generated_schedule_immutable_through_master_data ____________
+
+env = (<starlette.testclient.TestClient object at 0x000001CA407111D0>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_generated_schedule_immutable_through_master_data(env):
+        c,f=env
+        with f() as s:
+            sch=s.get(Schedule,1); sch.status='Published'; sch.approved_by=1; sch.published_at=datetime(2026,11,21); s.commit()
+        r=c.put('/rooms/1',json={'capacity':1})
+        with f() as s:
+            ds=load_term_dataset(s,term_id=1,config_id=1,schedule_id=1)
+            violations=TimetableValidator().validate(ds,config_id=1)
+>       assert r.status_code in (409,422) or not violations, f'Published metadata mutated: HTTP {r.status_code}; violations={sorted(set(v.rule_code for v in violations))}'
+E       AssertionError: Published metadata mutated: HTTP 200; violations=['H04']
+E       assert (200 in (409, 422) or not [Violation(rule_code='H04', conflict_type='Capacity', severity='Hard', description='H04 Violation: Room Rm 301 capacity (1) is less than enrolled_count (45) for offering_id=1 (CS-326) in entry_id=1.', entity_ref='entry_id=1, offering_id=1 (CS-326), room_id=1 (Rm 301)', affected_entities={'entry_id': 1, 'offering_id': 1, 'course_code': 'CS-326', 'room_id': 1, 'room_code': 'Rm 301', 'room_capacity': 1, 'enrolled_count': 45, 'slot_id': 1}, schedule_id=1), Violation(rule_code='H04', conflict_type='Capacity', severity='Hard', description='H04 Violation: Room Rm 301 capacity (1) is less than enrolled_count (45) for offering_id=1 (CS-326) in entry_id=2.', entity_ref='entry_id=2, offering_id=1 (CS-326), room_id=1 (Rm 301)', affected_entities={'entry_id': 2, 'offering_id': 1, 'course_code': 'CS-326', 'room_id': 1, 'room_code': 'Rm 301', 'room_capacity': 1, 'enrolled_count': 45, 'slot_id': 13}, schedule_id=1), Violation(rule_code='H04', conflict_type='Capacity', severity='Hard', description='H04 Violation: Room Rm 301 capacity (1) is less than enrolled_count (45) for offering_id=1 (CS-326) in entry_id=3.', entity_ref='entry_id=3, offering_id=1 (CS-326), room_id=1 (Rm 301)', affected_entiti...CS-310) in entry_id=6.', entity_ref='entry_id=6, offering_id=2 (CS-310), room_id=1 (Rm 301)', affected_entities={'entry_id': 6, 'offering_id': 2, 'course_code': 'CS-310', 'room_id': 1, 'room_code': 'Rm 301', 'room_capacity': 1, 'enrolled_count': 45, 'slot_id': 3}, schedule_id=1), Violation(rule_code='H04', conflict_type='Capacity', severity='Hard', description='H04 Violation: Room Rm 301 capacity (1) is less than enrolled_count (45) for offering_id=2 (CS-310) in entry_id=7.', entity_ref='entry_id=7, offering_id=2 (CS-310), room_id=1 (Rm 301)', affected_entities={'entry_id': 7, 'offering_id': 2, 'course_code': 'CS-310', 'room_id': 1, 'room_code': 'Rm 301', 'room_capacity': 1, 'enrolled_count': 45, 'slot_id': 20}, schedule_id=1), Violation(rule_code='H04', conflict_type='Capacity', severity='Hard', description='H04 Violation: Room Rm 301 capacity (1) is less than enrolled_count (45) for offering_id=2 (CS-310) in entry_id=8.', entity_ref='entry_id=8, offering_id=2 (CS-310), room_id=1 (Rm 301)', affected_entities={'entry_id': 8, 'offering_id': 2, 'course_code': 'CS-310', 'room_id': 1, 'room_code': 'Rm 301', 'room_capacity': 1, 'enrolled_count': 45, 'slot_id': 26}, schedule_id=1), ...])
+E        +  where 200 = <Response [200 OK]>.status_code
+
+audit_reports\test_audit_probes.py:113: AssertionError
+_____________________ test_lab_contiguity_uses_clock_time _____________________
+
+    def test_lab_contiguity_uses_clock_time():
+        ds=load_dataset_from_json(ROOT/'data/seed_timetable.json')
+        labs=[e for e in ds.timetable_entries if e.session_type=='Lab']
+        off=labs[0].offering_id
+        ids=[e.slot_id for e in labs if e.offering_id==off]
+        last=max((s for s in ds.time_slots if s.slot_id in ids),key=lambda s:s.slot_index)
+        ds.time_slots=[replace(s,start_time='18:00',end_time='19:00') if s.slot_id==last.slot_id else s for s in ds.time_slots]
+        violations=TimetableValidator().validate(ds,config_id=1)
+>       assert any(v.rule_code=='H09' for v in violations), f'Nonadjacent clock-time lab accepted; violations={[v.rule_code for v in violations]}'
+E       AssertionError: Nonadjacent clock-time lab accepted; violations=[]
+E       assert False
+E        +  where False = any(<generator object test_lab_contiguity_uses_clock_time.<locals>.<genexpr> at 0x000001CA3ECBE260>)
+
+audit_reports\test_audit_probes.py:123: AssertionError
+_____________ test_mixed_enrollment_fallback_has_cohort_conflict ______________
+
+    def test_mixed_enrollment_fallback_has_cohort_conflict():
+        ds=load_dataset_from_json(ROOT/'data/seed_exam.json')
+        a=ds.course_offerings[0]
+        b=next(o for o in ds.course_offerings if o.batch_id==a.batch_id and o.course_id!=a.course_id)
+        ds.course_offerings=[a,b]
+        ds.enrollments=[Enrollment(enrollment_id=i+1,offering_id=a.offering_id,student_id=10000+i) for i in range(a.enrolled_count)]
+        graph=build_conflict_graph(ds,term_id=a.term_id)
+>       assert graph.has_edge(a.course_id,b.course_id), 'Fully enumerated course and missing-enrollment course in same batch have no edge'
+E       AssertionError: Fully enumerated course and missing-enrollment course in same batch have no edge
+E       assert False
+E        +  where False = has_edge(1, 2)
+E        +    where has_edge = <networkx.classes.graph.Graph object at 0x000001CA3EF0C980>.has_edge
+E        +    and   1 = CourseOffering(offering_id=1, term_id=1, course_id=1, batch_id=1, instructor_id=1, enrolled_count=45).course_id
+E        +    and   2 = CourseOffering(offering_id=2, term_id=1, course_id=2, batch_id=1, instructor_id=2, enrolled_count=45).course_id
+
+audit_reports\test_audit_probes.py:132: AssertionError
+_____________________ test_exam_manual_override_persisted _____________________
+
+env = (<starlette.testclient.TestClient object at 0x000001CA40DAC830>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_exam_manual_override_persisted(env):
+        c,f=env
+        r=c.put('/schedules/2/entries/1',json={'is_locked':True})
+        assert r.status_code==200, str(r.text)
+>       assert 'is_manual_override' in r.json(), 'Exam response/model cannot preserve manual override flag'
+E       AssertionError: Exam response/model cannot preserve manual override flag
+E       assert 'is_manual_override' in {'exam_entry_id': 1, 'schedule_id': 2, 'course_id': 1, 'course_code': 'CS-326', ...}
+E        +  where {'exam_entry_id': 1, 'schedule_id': 2, 'course_id': 1, 'course_code': 'CS-326', ...} = json()
+E        +    where json = <Response [200 OK]>.json
+
+audit_reports\test_audit_probes.py:138: AssertionError
+_________________________ test_mutation_audit_written _________________________
+
+env = (<starlette.testclient.TestClient object at 0x000001CA4077DEF0>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_mutation_audit_written(env):
+        c,f=env
+        r=c.post('/rooms',json=dict(room_code='LOGTEST',building='X',capacity=30,room_type='Lecture'))
+        assert r.status_code==201
+        with f() as s:
+            logs=s.scalars(select(AuditLog).where(AuditLog.entity_type=='rooms')).all()
+>       assert logs, 'Room creation has no persistent audit event'
+E       AssertionError: Room creation has no persistent audit event
+E       assert []
+
+audit_reports\test_audit_probes.py:153: AssertionError
+_________________ test_solver_rejects_overlapping_clock_slots _________________
+
+    def test_solver_rejects_overlapping_clock_slots():
+     ds=load_dataset_from_json(ROOT/'data/seed_timetable.json')
+     off=ds.course_offerings[0]
+     ds.course_offerings=[off]
+     ds.courses=[replace(c,lecture_hours=2,lab_hours=0) for c in ds.courses if c.course_id==off.course_id]
+     ds.time_slots=[replace(s,day_of_week=1,slot_index=i+1,start_time='08:00',end_time='09:00',is_blocked=False) for i,s in enumerate(ds.time_slots[:2])]
+     ds.instructor_availability=[]
+     ds.timetable_entries=[]
+     ds.constraint_rules=[replace(r,is_enabled=False) if r.rule_type=='Soft' else r for r in ds.constraint_rules]
+     result=solve_timetable(ds,time_limit_s=10,config_id=1)
+>    assert not result.is_feasible, f'Solver returned {result.solver_status}: {[(e.slot_id,e.instructor_id,e.batch_id,e.room_id) for e in result.schedule]} in identical clock windows; validator={result.violations}'
+E    AssertionError: Solver returned optimal: [(1, 1, 1, 2), (2, 1, 1, 2)] in identical clock windows; validator=[]
+E    assert not True
+E     +  where True = TimetableSolveResult(schedule=[TimetableEntry(entry_id=1, schedule_id=1, offering_id=1, instructor_id=1, batch_id=1, room_id=2, slot_id=1, session_type='Lecture', is_locked=False, is_manual_override=False), TimetableEntry(entry_id=2, schedule_id=1, offering_id=1, instructor_id=1, batch_id=1, room_id=2, slot_id=2, session_type='Lecture', is_locked=False, is_manual_override=False)], solver_status='optimal', run_time=0.0089, reasons=[], schedule_record=Schedule(schedule_id=1, term_id=1, config_id=1, schedule_type='Timetable', version_no=1, status='Generated', solver_status='optimal', objective_score=14.0, run_seconds=0.0089, generated_by=1, generated_at='2026-10-20T09:15:00Z', approved_by=None, published_at=None), violations=[], objective_score=14.0, max_score=14.0, soft_breakdown={'S01': SoftConstraintBreakdown(rule_code='S01', description='Minimise idle gaps between the sessions of a batch on a day.', is_enabled=True, weight=8, param_value=None, satisfied_count=0, violated_count=0, total_count=0, weighted_score=0.0, max_weighted_score=0.0, weighted_penalty=0.0), 'S02': SoftConstraintBreakdown(rule_code='S02', description='Spread the sessions of one offering over different days.', ...tion='Keep the sessions of a batch per day at or below a parameter (default 5).', is_enabled=True, weight=6, param_value=5, satisfied_count=1, violated_count=0, total_count=1, weighted_score=6.0, max_weighted_score=6.0, weighted_penalty=0.0), 'S04': SoftConstraintBreakdown(rule_code='S04', description='Keep consecutive teaching slots of an instructor at or below a parameter (default 3).', is_enabled=True, weight=6, param_value=3, satisfied_count=0, violated_count=0, total_count=0, weighted_score=0.0, max_weighted_score=0.0, weighted_penalty=0.0), 'S05': SoftConstraintBreakdown(rule_code='S05', description='Prefer the same slot and room as in a previous schedule version.', is_enabled=False, weight=5, param_value=None, satisfied_count=0, violated_count=0, total_count=0, weighted_score=0.0, max_weighted_score=0.0, weighted_penalty=0.0), 'S06': SoftConstraintBreakdown(rule_code='S06', description='Prefer the smallest room that fits the offering.', is_enabled=True, weight=4, param_value=None, satisfied_count=2, violated_count=0, total_count=2, weighted_score=8.0, max_weighted_score=8.0, weighted_penalty=0.0)}, soft_penalties={'S01': 0, 'S02': 0, 'S03': 0, 'S04': 0, 'S05': 0, 'S06': 0}).is_feasible
+
+audit_reports\test_extra_probes.py:23: AssertionError
+_________________ test_default_app_recovers_orphan_on_startup _________________
+
+    def test_default_app_recovers_orphan_on_startup():
+     e=create_db_engine('sqlite:///:memory:'); init_db(e); f=create_session_factory(e); seed_database(f)
+     with f() as s:
+      s.get(Schedule,1).status='Generating'; s.commit()
+     app=create_app()
+     with patch('backend.dependencies.create_db_engine',return_value=e):
+      with TestClient(app) as c:
+       r=c.get('/schedules/1/status')
+>    assert r.json()['status']=='Infeasible', f'Default lazy app left status={r.json()["status"]}'
+E    AssertionError: Default lazy app left status=Generating
+E    assert 'Generating' == 'Infeasible'
+E      
+E      - Infeasible
+E      + Generating
+
+audit_reports\test_extra_probes.py:33: AssertionError
+============================== warnings summary ===============================
+.venv\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\DELL\OneDrive\Desktop\ATES-V1\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\DELL\OneDrive\Desktop\ATES-V1\audit_reports\final_audit_probes.xml -
+=========================== short test summary info ===========================
+FAILED audit_reports/test_audit_probes.py::test_unauthenticated_read_requires_login
+FAILED audit_reports/test_audit_probes.py::test_unauthenticated_write_requires_login
+FAILED audit_reports/test_audit_probes.py::test_forged_role_is_not_authentication
+FAILED audit_reports/test_audit_probes.py::test_student_cannot_read_generated_schedule
+FAILED audit_reports/test_audit_probes.py::test_student_list_contains_published_only
+FAILED audit_reports/test_audit_probes.py::test_faculty_without_identity_cannot_edit_any_instructor
+FAILED audit_reports/test_audit_probes.py::test_administrator_cannot_generate
+FAILED audit_reports/test_audit_probes.py::test_required_endpoint_exists[post-/auth/login-payload0]
+FAILED audit_reports/test_audit_probes.py::test_required_endpoint_exists[post-/auth/logout-payload1]
+FAILED audit_reports/test_audit_probes.py::test_required_endpoint_exists[get-/users-None]
+FAILED audit_reports/test_audit_probes.py::test_required_endpoint_exists[get-/audit-None]
+FAILED audit_reports/test_audit_probes.py::test_required_endpoint_exists[post-/import/courses-payload4]
+FAILED audit_reports/test_audit_probes.py::test_required_endpoint_exists[post-/schedules/1/publish-payload5]
+FAILED audit_reports/test_audit_probes.py::test_required_endpoint_exists[get-/schedules/1/export?format=csv-None]
+FAILED audit_reports/test_audit_probes.py::test_required_endpoint_exists[get-/schedules/1/export?format=pdf-None]
+FAILED audit_reports/test_audit_probes.py::test_weekly_slot_overlap_rejected
+FAILED audit_reports/test_audit_probes.py::test_unequal_slot_length_rejected
+FAILED audit_reports/test_audit_probes.py::test_bad_time_returns_validation_error
+FAILED audit_reports/test_audit_probes.py::test_grid_over_midnight_returns_validation_error
+FAILED audit_reports/test_audit_probes.py::test_invalid_day_returns_validation_error
+FAILED audit_reports/test_audit_probes.py::test_generated_schedule_immutable_through_master_data
+FAILED audit_reports/test_audit_probes.py::test_lab_contiguity_uses_clock_time
+FAILED audit_reports/test_audit_probes.py::test_mixed_enrollment_fallback_has_cohort_conflict
+FAILED audit_reports/test_audit_probes.py::test_exam_manual_override_persisted
+FAILED audit_reports/test_audit_probes.py::test_mutation_audit_written - Asse...
+FAILED audit_reports/test_extra_probes.py::test_solver_rejects_overlapping_clock_slots
+FAILED audit_reports/test_extra_probes.py::test_default_app_recovers_orphan_on_startup
+================== 27 failed, 1 passed, 1 warning in 16.09s ===================
+

@@ -1,0 +1,1826 @@
+[
+  {
+    "id": "FR-1.1",
+    "description": "Authenticate username/password; JWT expires after 30 minutes inactivity",
+    "status": "Missing",
+    "location": "backend/dependencies.py:69-133; frontend/src/App.tsx:59-79; frontend/src/services/mockApi.ts:386-391",
+    "evidence": "No auth route; loginMock only checks a nonempty password; required endpoint probe returns 404",
+    "action": "Implement server login, JWT verification and inactivity expiry"
+  },
+  {
+    "id": "FR-1.2",
+    "description": "Salted bcrypt cost >=12; minimum password length 8",
+    "status": "Missing",
+    "location": "backend/dependencies.py:69-133; frontend/src/App.tsx:59-79; frontend/src/services/mockApi.ts:386-391",
+    "evidence": "No bcrypt dependency or hashing service; seed contains placeholder hashes; UI password validation is local",
+    "action": "Implement server password validation and salted hashing"
+  },
+  {
+    "id": "FR-1.3",
+    "description": "Lock after five failed logins for 15 minutes and record event",
+    "status": "Missing",
+    "location": "backend/dependencies.py:69-133; frontend/src/App.tsx:59-79; frontend/src/services/mockApi.ts:386-391",
+    "evidence": "Mock returns a fixed 12-minute message; no failed-attempt counter update/login endpoint",
+    "action": "Implement persistent counters, lock expiry and audit events"
+  },
+  {
+    "id": "FR-1.4",
+    "description": "Logout ends session; user can change own password",
+    "status": "Missing",
+    "location": "backend/dependencies.py:69-133; frontend/src/App.tsx:59-79; frontend/src/services/mockApi.ts:386-391",
+    "evidence": "No logout or password-change service/route; shell only switches login screen",
+    "action": "Add logout/revocation and password-change workflow"
+  },
+  {
+    "id": "FR-1.5",
+    "description": "Authorize every API request; forbidden requests return 403",
+    "status": "Incorrectly Implemented",
+    "location": "backend/dependencies.py:69-133; frontend/src/App.tsx:59-79; frontend/src/services/mockApi.ts:386-391",
+    "evidence": "Audit probes: unauthenticated POST returns 201; forged Administrator header returns 201",
+    "action": "Authenticate identity and derive server-side permissions"
+  },
+  {
+    "id": "FR-1.6",
+    "description": "Administrator manages accounts, resets passwords and links Faculty/Student",
+    "status": "Partially Implemented",
+    "location": "backend/dependencies.py:69-133; frontend/src/App.tsx:59-79; frontend/src/services/mockApi.ts:386-391",
+    "evidence": "UsersAuditPage and saveUserMock mutate browser memory; GET /users returns 404",
+    "action": "Add persistent authenticated users API and account lifecycle"
+  },
+  {
+    "id": "FR-1.7",
+    "description": "Deactivate accounts with recorded actions rather than delete",
+    "status": "Partially Implemented",
+    "location": "backend/dependencies.py:69-133; frontend/src/App.tsx:59-79; frontend/src/services/mockApi.ts:386-391",
+    "evidence": "User FK restrictions and mock account statuses exist; no persistent account lifecycle API",
+    "action": "Implement deactivation/reactivation preserving history"
+  },
+  {
+    "id": "FR-1.8",
+    "description": "Show only permitted menus and buttons",
+    "status": "Incorrectly Implemented",
+    "location": "backend/dependencies.py:69-133; frontend/src/App.tsx:59-79; frontend/src/services/mockApi.ts:386-391",
+    "evidence": "App defaults Administrator; unrestricted role switch; Dashboard always offers Generate and conflict links",
+    "action": "Bind UI permissions to verified user and gate all actions"
+  },
+  {
+    "id": "FR-2.1",
+    "description": "Create/view/edit/deactivate courses with unique code and required attributes",
+    "status": "Fully Implemented",
+    "location": "backend/routers/master_data.py:307-1645; backend/schemas.py:39-337; frontend/src/pages/data/",
+    "evidence": "Existing test_master_data_crud_courses_instructors_rooms_batches passed creation, duplicate rejection, update and deactivate; matching UI forms inspected",
+    "action": "Retain behavior; enforce authentication separately under FR-1.5"
+  },
+  {
+    "id": "FR-2.2",
+    "description": "Reject zero total contact hours and negative hour/credit values",
+    "status": "Fully Implemented",
+    "location": "backend/routers/master_data.py:307-1645; backend/schemas.py:39-337; frontend/src/pages/data/",
+    "evidence": "Executed invalid-course test; Pydantic lower bounds and database CHECKs inspected",
+    "action": "Retain validation and database guards"
+  },
+  {
+    "id": "FR-2.3",
+    "description": "Instructor CRUD with unique email, department and workload limits",
+    "status": "Partially Implemented",
+    "location": "backend/routers/master_data.py:307-1645; backend/schemas.py:39-337; frontend/src/pages/data/",
+    "evidence": "Existing create/availability tests pass; email schema is a length-checked string, not an email validator; UI unexercised",
+    "action": "Validate email server-side; verify complete edit/deactivate workflow"
+  },
+  {
+    "id": "FR-2.4",
+    "description": "Room CRUD with unique code, building, positive capacity and permitted type",
+    "status": "Fully Implemented",
+    "location": "backend/routers/master_data.py:307-1645; backend/schemas.py:39-337; frontend/src/pages/data/",
+    "evidence": "Existing room create/update/deactivate test passed; schema and CHECKs enforce type/capacity",
+    "action": "Retain tests; add published-data integrity controls separately"
+  },
+  {
+    "id": "FR-2.5",
+    "description": "Batch CRUD with programme, admission year, section and positive strength",
+    "status": "Partially Implemented",
+    "location": "backend/routers/master_data.py:307-1645; backend/schemas.py:39-337; frontend/src/pages/data/",
+    "evidence": "Existing creation/update pass; deactivate and search UI statically wired, not executed end-to-end",
+    "action": "Exercise all list/edit/deactivate flows with real API"
+  },
+  {
+    "id": "FR-2.6",
+    "description": "Create terms with dates; mark exactly one term Active",
+    "status": "Partially Implemented",
+    "location": "backend/routers/master_data.py:307-1645; backend/schemas.py:39-337; frontend/src/pages/data/",
+    "evidence": "Partial unique index enforces at most one; zero Active remains possible; client activation closes old term in a separate request",
+    "action": "Provide atomic activation and define exactly-one lifecycle"
+  },
+  {
+    "id": "FR-2.7",
+    "description": "Generate equal slot grid and block individual slots with reason",
+    "status": "Incorrectly Implemented",
+    "location": "backend/routers/master_data.py:307-1645; backend/schemas.py:39-337; frontend/src/pages/data/",
+    "evidence": "Overlap and unequal-length slots accepted (201); malformed time and midnight overflow return 500; grid uses unchecked day list",
+    "action": "Validate complete grid shape, time ranges, overlap and equal duration"
+  },
+  {
+    "id": "FR-2.8",
+    "description": "Create offerings; reject duplicate course/batch/term",
+    "status": "Partially Implemented",
+    "location": "backend/routers/master_data.py:307-1645; backend/schemas.py:39-337; frontend/src/pages/data/",
+    "evidence": "CRUD and UNIQUE inspected; tests cover listing but not full duplicate/inactive-reference matrix",
+    "action": "Exercise offering create/edit uniqueness and active references"
+  },
+  {
+    "id": "FR-2.9",
+    "description": "Derive required lecture sessions/lab blocks from course hours and slot length",
+    "status": "Fully Implemented",
+    "location": "backend/routers/master_data.py:307-1645; backend/schemas.py:39-337; frontend/src/pages/data/",
+    "evidence": "Existing solver tests execute required session generation; engine/models.py:127-150 computes ceiling(hours*60/slot length)",
+    "action": "Keep derivation; enforce equal grid duration under C-6"
+  },
+  {
+    "id": "FR-2.10",
+    "description": "Add/view/remove student enrollment links",
+    "status": "Partially Implemented",
+    "location": "backend/routers/master_data.py:307-1645; backend/schemas.py:39-337; frontend/src/pages/data/",
+    "evidence": "Live endpoints and Student role check exist; frontend uses mock account IDs while enrollment API expects numeric users IDs",
+    "action": "Connect account lookup and execute repeater/elective workflow"
+  },
+  {
+    "id": "FR-2.11",
+    "description": "Preserve all schedule-referenced records; offer deactivation",
+    "status": "Partially Implemented",
+    "location": "backend/routers/master_data.py:307-1645; backend/schemas.py:39-337; frontend/src/pages/data/",
+    "evidence": "FK restrict and course/room soft-delete tests pass; offering only has hard-delete rejection, no inactive state",
+    "action": "Add offering retirement and protect indirect exam dependencies"
+  },
+  {
+    "id": "FR-2.12",
+    "description": "Search/sort/page every master list; default 25 rows",
+    "status": "Partially Implemented",
+    "location": "backend/routers/master_data.py:307-1645; backend/schemas.py:39-337; frontend/src/pages/data/",
+    "evidence": "DataTable defaults25 and is used by terms and other master lists; several API lists unpaged; complete real-browser list workflows not executed",
+    "action": "Verify search/sort/page on all master-data tabs and decide consistent API paging"
+  },
+  {
+    "id": "FR-3.1",
+    "description": "Faculty edits only own weekly availability",
+    "status": "Incorrectly Implemented",
+    "location": "backend/routers/master_data.py:640-721; frontend/src/pages/AvailabilityPage.tsx; engine/models.py:585-590",
+    "evidence": "Faculty header without instructor link can edit instructor 2 (HTTP 200); read endpoint has no ownership guard",
+    "action": "Require verified Faculty link and enforce own scope"
+  },
+  {
+    "id": "FR-3.2",
+    "description": "Coordinator edits any instructor availability",
+    "status": "Fully Implemented",
+    "location": "backend/routers/master_data.py:640-721; frontend/src/pages/AvailabilityPage.tsx; engine/models.py:585-590",
+    "evidence": "Existing API test creates instructor, saves two unavailable slots and reads them back successfully",
+    "action": "Retain behavior with trusted user identity"
+  },
+  {
+    "id": "FR-3.3",
+    "description": "All unmarked slots are available",
+    "status": "Fully Implemented",
+    "location": "backend/routers/master_data.py:640-721; frontend/src/pages/AvailabilityPage.tsx; engine/models.py:585-590",
+    "evidence": "Availability helper defaults true; executed availability solver and validator tests pass",
+    "action": "Retain default"
+  },
+  {
+    "id": "FR-3.4",
+    "description": "Warn changes affect schedules only after regeneration",
+    "status": "Partially Implemented",
+    "location": "backend/routers/master_data.py:640-721; frontend/src/pages/AvailabilityPage.tsx; engine/models.py:585-590",
+    "evidence": "AvailabilityPage includes warning copy; not browser-exercised",
+    "action": "Verify warning timing and persistence workflow"
+  },
+  {
+    "id": "FR-4.1",
+    "description": "UTF-8 CSV up to 10 MB; six entity types and downloadable templates",
+    "status": "Partially Implemented",
+    "location": "frontend/src/services/api.ts:325-333; frontend/src/services/mockApi.ts:307-368; backend/routers/",
+    "evidence": "Templates and client size/extension checks exist; POST /import/courses returns 404",
+    "action": "Implement server multipart imports, encoding/type/size checks"
+  },
+  {
+    "id": "FR-4.2",
+    "description": "Validate every row including referenced records before storing",
+    "status": "Incorrectly Implemented",
+    "location": "frontend/src/services/api.ts:325-333; frontend/src/services/mockApi.ts:307-368; backend/routers/",
+    "evidence": "Validation only against mock data; offerings/enrollments do not check all FK references; neither type is persisted by confirmImport",
+    "action": "Add authoritative staged validation against live database"
+  },
+  {
+    "id": "FR-4.3",
+    "description": "Rejected-row report includes line, column and reason",
+    "status": "Partially Implemented",
+    "location": "frontend/src/services/api.ts:325-333; frontend/src/services/mockApi.ts:307-368; backend/routers/",
+    "evidence": "Local mock parser/report structure exists; no server report or executed browser workflow",
+    "action": "Return server row reports with reliable CSV parsing"
+  },
+  {
+    "id": "FR-4.4",
+    "description": "Import valid rows or cancel the whole operation",
+    "status": "Incorrectly Implemented",
+    "location": "frontend/src/services/api.ts:325-333; frontend/src/services/mockApi.ts:307-368; backend/routers/",
+    "evidence": "confirmImport reports all valid rows imported but has no insert branches for offerings/enrollments; real-mode master lists remain unchanged",
+    "action": "Implement transactional server confirmation and accurate counts"
+  },
+  {
+    "id": "FR-4.5",
+    "description": "Persist filename, user, time and import/rejection counts",
+    "status": "Missing",
+    "location": "frontend/src/services/api.ts:325-333; frontend/src/services/mockApi.ts:307-368; backend/routers/",
+    "evidence": "ImportLog model exists, but no import endpoint or ImportLog write path",
+    "action": "Write persistent import audit metadata"
+  },
+  {
+    "id": "FR-5.1",
+    "description": "Default H01-H10/S01-S06/E01-E05/ES01-ES03 rules and metadata",
+    "status": "Fully Implemented",
+    "location": "backend/routers/master_data.py:1702-1919; backend/schemas.py:348-410; frontend/src/pages/ConstraintsSettingsPage.tsx",
+    "evidence": "Catalogue, seed rules, API config retrieval and engine tests cover all 24 rules",
+    "action": "Keep shared catalogue consistent"
+  },
+  {
+    "id": "FR-5.2",
+    "description": "Never disable H01/H02/H03/H08/E01/E04/E05",
+    "status": "Fully Implemented",
+    "location": "backend/routers/master_data.py:1702-1919; backend/schemas.py:348-410; frontend/src/pages/ConstraintsSettingsPage.tsx",
+    "evidence": "Existing API test rejects H01 disable; solver/validator mandatory-toggle tests pass for timetable and exams; DB CHECK exists",
+    "action": "Retain guards at all layers"
+  },
+  {
+    "id": "FR-5.3",
+    "description": "Warn before disabling optional hard rule and log change",
+    "status": "Partially Implemented",
+    "location": "backend/routers/master_data.py:1702-1919; backend/schemas.py:348-410; frontend/src/pages/ConstraintsSettingsPage.tsx",
+    "evidence": "UI ConfirmDialog and CONFIG_CHANGE audit exist; direct API accepts disable without explicit acknowledgement",
+    "action": "Add server acknowledgement and persist before/after details"
+  },
+  {
+    "id": "FR-5.4",
+    "description": "Weights 0-10 and integer parameters for soft/exam limits",
+    "status": "Partially Implemented",
+    "location": "backend/routers/master_data.py:1702-1919; backend/schemas.py:348-410; frontend/src/pages/ConstraintsSettingsPage.tsx",
+    "evidence": "Weight schema/check and optimization tests pass; param_value permits arbitrary negative values",
+    "action": "Validate catalogue-specific parameter domains and code/type"
+  },
+  {
+    "id": "FR-5.5",
+    "description": "Solver limit 10-600 seconds default120 and random seed",
+    "status": "Fully Implemented",
+    "location": "backend/routers/master_data.py:1702-1919; backend/schemas.py:348-410; frontend/src/pages/ConstraintsSettingsPage.tsx",
+    "evidence": "Pydantic/DB range checks plus executed default and deterministic solver tests; UI wired",
+    "action": "Keep ranges; total wall-clock budget is separately deficient"
+  },
+  {
+    "id": "FR-5.6",
+    "description": "Save/clone configs and delete unused configs",
+    "status": "Partially Implemented",
+    "location": "backend/routers/master_data.py:1702-1919; backend/schemas.py:348-410; frontend/src/pages/ConstraintsSettingsPage.tsx",
+    "evidence": "Create/clone are API-backed; deleteConfigMock only hides ID in browser session",
+    "action": "Implement authenticated DELETE with reference check"
+  },
+  {
+    "id": "FR-5.7",
+    "description": "Define exam windows; reject same-date overlap",
+    "status": "Fully Implemented",
+    "location": "backend/routers/master_data.py:1702-1919; backend/schemas.py:348-410; frontend/src/pages/ConstraintsSettingsPage.tsx",
+    "evidence": "Existing test created first session and rejected overlap with HTTP409; code checks interval intersection",
+    "action": "Retain overlap validation; exercise concurrent creates before deployment"
+  },
+  {
+    "id": "FR-5.8",
+    "description": "Validate config before run incl at least one exam session",
+    "status": "Partially Implemented",
+    "location": "backend/routers/master_data.py:1702-1919; backend/schemas.py:348-410; frontend/src/pages/ConstraintsSettingsPage.tsx",
+    "evidence": "Time/weight checks exist; generation creates Generating record before checking exam-slot existence and input completeness",
+    "action": "Reject incomplete config before queueing"
+  },
+  {
+    "id": "FR-6.1",
+    "description": "Check input completeness and report every defect before solving",
+    "status": "Partially Implemented",
+    "location": "engine/timetable_solver.py:323-605,938-1215; backend/routers/schedules.py:231-482; backend/adapter.py:512-613",
+    "evidence": "Existing defect tests pass; irregular grid not rejected; backend queues before diagnosis; first structural missing items may return early",
+    "action": "Expand preflight validation; aggregate all defects before queueing"
+  },
+  {
+    "id": "FR-6.2",
+    "description": "Start chosen term/config run with new Generating version",
+    "status": "Fully Implemented",
+    "location": "engine/timetable_solver.py:323-605,938-1215; backend/routers/schedules.py:231-482; backend/adapter.py:512-613",
+    "evidence": "Executed API test observes Generating with worker mocked then real completion; version row persisted",
+    "action": "Retain behavior; race-safe version allocation still required"
+  },
+  {
+    "id": "FR-6.3",
+    "description": "CP-SAT slot-room variable per session; enforce enabled H01-H10",
+    "status": "Incorrectly Implemented",
+    "location": "engine/timetable_solver.py:323-605,938-1215; backend/routers/schedules.py:231-482; backend/adapter.py:512-613",
+    "evidence": "Real CP-SAT and ordinary tests pass; malformed grid permits actual clock overlap and H09 gap",
+    "action": "Fix C-6/H09 blind spots and re-run adversarial datasets"
+  },
+  {
+    "id": "FR-6.4",
+    "description": "Maximize weighted satisfied soft constraints within limit",
+    "status": "Partially Implemented",
+    "location": "engine/timetable_solver.py:323-605,938-1215; backend/routers/schedules.py:231-482; backend/adapter.py:512-613",
+    "evidence": "S01-S06 objective tests pass; worker omits previous_schedule so S05 is inactive in normal backend regeneration",
+    "action": "Pass complete prior timetable and enforce global deadline"
+  },
+  {
+    "id": "FR-6.5",
+    "description": "Stop at configured limit; best feasible result or Infeasible",
+    "status": "Partially Implemented",
+    "location": "engine/timetable_solver.py:323-605,938-1215; backend/routers/schedules.py:231-482; backend/adapter.py:512-613",
+    "evidence": "CP-SAT max_time set; infeasible fixture tests pass; model build/diagnostic probes run outside solve time budget",
+    "action": "Use a monotonic end-to-end deadline including diagnosis"
+  },
+  {
+    "id": "FR-6.6",
+    "description": "Progress/elapsed display and actual safe cancellation",
+    "status": "Incorrectly Implemented",
+    "location": "engine/timetable_solver.py:323-605,938-1215; backend/routers/schedules.py:231-482; backend/adapter.py:512-613",
+    "evidence": "cancelGeneration sets only local runMeta; server keeps solving; progress estimates elapsed/limit",
+    "action": "Add cancellable isolated worker and truthful progress/status"
+  },
+  {
+    "id": "FR-6.7",
+    "description": "Independent validator before save; invalid result never Generated",
+    "status": "Partially Implemented",
+    "location": "engine/timetable_solver.py:323-605,938-1215; backend/routers/schedules.py:231-482; backend/adapter.py:512-613",
+    "evidence": "Validator rejection gate test passes; validator shares flawed enrollment/grid assumptions; adapter trusts precomputed violations without fresh snapshot validation",
+    "action": "Strengthen independent validation and revalidate against save-time inputs"
+  },
+  {
+    "id": "FR-6.8",
+    "description": "Persist entries, objective, status and runtime; mark Generated",
+    "status": "Fully Implemented",
+    "location": "engine/timetable_solver.py:323-605,938-1215; backend/routers/schedules.py:231-482; backend/adapter.py:512-613",
+    "evidence": "Existing API/database integration tests execute atomic 26-entry save with status/objective/runtime",
+    "action": "Keep transactional persistence; persist extended score breakdown if required"
+  },
+  {
+    "id": "FR-6.9",
+    "description": "Same data/config/seed should produce same schedule",
+    "status": "Fully Implemented",
+    "location": "engine/timetable_solver.py:323-605,938-1215; backend/routers/schedules.py:231-482; backend/adapter.py:512-613",
+    "evidence": "Executed deterministic timetable repeatability test; one CP-SAT search worker",
+    "action": "Retain reproducibility test with pinned solver"
+  },
+  {
+    "id": "FR-6.10",
+    "description": "Preserve locked slot/room in new run",
+    "status": "Fully Implemented",
+    "location": "engine/timetable_solver.py:323-605,938-1215; backend/routers/schedules.py:231-482; backend/adapter.py:512-613",
+    "evidence": "Executed locked timetable session test; worker loads locked previous entries",
+    "action": "Retain; expose locking controls under FR-8.6"
+  },
+  {
+    "id": "FR-7.1",
+    "description": "Conflict graph course vertices; edge for any shared student",
+    "status": "Incorrectly Implemented",
+    "location": "engine/exam_scheduler.py:141-195,1246-1531; engine/models.py:523-576; backend/adapter.py:616-728",
+    "evidence": "NetworkX graph tests pass for fixture; mixed complete/missing enrollment probe loses required same-cohort edge",
+    "action": "Unify explicit students and inferred cohort membership"
+  },
+  {
+    "id": "FR-7.2",
+    "description": "DSATUR then exact CP-SAT fallback when sessions insufficient",
+    "status": "Partially Implemented",
+    "location": "engine/exam_scheduler.py:141-195,1246-1531; engine/models.py:523-576; backend/adapter.py:616-728",
+    "evidence": "Executed DSATUR and fallback success/failure tests; genuine greedy_color strategy DSATUR; graph input defect remains",
+    "action": "Fix graph membership; retain exact fallback tests"
+  },
+  {
+    "id": "FR-7.3",
+    "description": "Maximum configured exams per student per day",
+    "status": "Partially Implemented",
+    "location": "engine/exam_scheduler.py:141-195,1246-1531; engine/models.py:523-576; backend/adapter.py:616-728",
+    "evidence": "Executed E02 validator/toggle tests pass; synthetic cohort versus explicit IDs can split one real student into different identities",
+    "action": "Make daily counts use complete student membership"
+  },
+  {
+    "id": "FR-7.4",
+    "description": "Rooms cover exact student count; no session room reuse",
+    "status": "Fully Implemented",
+    "location": "engine/exam_scheduler.py:141-195,1246-1531; engine/models.py:523-576; backend/adapter.py:616-728",
+    "evidence": "Executed room capacity, room collision, fallback and feasible allocation tests; allocation sums/capacities independently checked",
+    "action": "Retain; protect room metadata after publication"
+  },
+  {
+    "id": "FR-7.5",
+    "description": "Infeasible reports session shortfall and unplaced courses",
+    "status": "Partially Implemented",
+    "location": "engine/exam_scheduler.py:141-195,1246-1531; engine/models.py:523-576; backend/adapter.py:616-728",
+    "evidence": "Executed overconstrained tests pass; DSATUR colour count labelled chromatic_number though heuristic does not prove minimum; diagnostics use extra time",
+    "action": "Distinguish proven minimum from heuristic bound and bound diagnosis"
+  },
+  {
+    "id": "FR-7.6",
+    "description": "Prefer batch exams on different days and minimal rooms",
+    "status": "Fully Implemented",
+    "location": "engine/exam_scheduler.py:141-195,1246-1531; engine/models.py:523-576; backend/adapter.py:616-728",
+    "evidence": "Executed ES01/ES02 and score-breakdown tests pass for supported fixtures",
+    "action": "Retain preferences; do not claim global DSATUR optimum"
+  },
+  {
+    "id": "FR-7.7",
+    "description": "Persist exams/allocations and run stats; mark Generated",
+    "status": "Partially Implemented",
+    "location": "engine/exam_scheduler.py:141-195,1246-1531; engine/models.py:523-576; backend/adapter.py:616-728",
+    "evidence": "Executed real API persistence passes; course/session/room run summary and per-rule score metadata not all persisted in schema/status",
+    "action": "Persist or expose all required exam run statistics"
+  },
+  {
+    "id": "FR-8.1",
+    "description": "Validate any schedule; report type/severity/entities/description",
+    "status": "Partially Implemented",
+    "location": "backend/routers/schedules.py:619-966; engine/validator.py; frontend/src/pages/TimetablePage.tsx:13-96; frontend/src/pages/ExamSchedulePage.tsx:13-74",
+    "evidence": "All deliberate ordinary H/E validator tests pass; no validate-any-schedule endpoint and validators have grid/enrollment blind spots",
+    "action": "Add explicit revalidation service and fix validator gaps"
+  },
+  {
+    "id": "FR-8.2",
+    "description": "Display/filter conflict report and export CSV",
+    "status": "Partially Implemented",
+    "location": "backend/routers/schedules.py:619-966; engine/validator.py; frontend/src/pages/TimetablePage.tsx:13-96; frontend/src/pages/ExamSchedulePage.tsx:13-74",
+    "evidence": "Live conflict endpoint and local conflict CSV download exist; browser workflow unexecuted",
+    "action": "Exercise filter/download with real conflicts"
+  },
+  {
+    "id": "FR-8.3",
+    "description": "Coordinator moves session/exam slot and room only when Generated",
+    "status": "Incorrectly Implemented",
+    "location": "backend/routers/schedules.py:619-966; engine/validator.py; frontend/src/pages/TimetablePage.tsx:13-96; frontend/src/pages/ExamSchedulePage.tsx:13-74",
+    "evidence": "API guard excludes only Published/Archived; permits other states; UI disables multi-slot labs and exam dialog has no room selector",
+    "action": "Enforce Generated state and support atomic lab/exam room moves"
+  },
+  {
+    "id": "FR-8.4",
+    "description": "Revalidate moves within1s; reject hard violations by name",
+    "status": "Partially Implemented",
+    "location": "backend/routers/schedules.py:619-966; engine/validator.py; frontend/src/pages/TimetablePage.tsx:13-96; frontend/src/pages/ExamSchedulePage.tsx:13-74",
+    "evidence": "Existing real move tests pass 409/valid saves; no reference-size1s benchmark; H09/graph defects survive validation",
+    "action": "Fix validator assumptions and benchmark reference dataset"
+  },
+  {
+    "id": "FR-8.5",
+    "description": "Persist manual override marker on changed entries",
+    "status": "Incorrectly Implemented",
+    "location": "backend/routers/schedules.py:619-966; engine/validator.py; frontend/src/pages/TimetablePage.tsx:13-96; frontend/src/pages/ExamSchedulePage.tsx:13-74",
+    "evidence": "Timetable flag persists; exam ORM has no flag, response omits it and adapter restores false",
+    "action": "Add persistent exam manual-override representation"
+  },
+  {
+    "id": "FR-8.6",
+    "description": "Coordinator can lock/unlock sessions/exams",
+    "status": "Partially Implemented",
+    "location": "backend/routers/schedules.py:619-966; engine/validator.py; frontend/src/pages/TimetablePage.tsx:13-96; frontend/src/pages/ExamSchedulePage.tsx:13-74",
+    "evidence": "API supports is_locked and engine locked tests pass; UI shows flags without lock/unlock controls",
+    "action": "Wire explicit lock/unlock controls including lab blocks"
+  },
+  {
+    "id": "FR-8.7",
+    "description": "Undo all manual changes of version",
+    "status": "Missing",
+    "location": "backend/routers/schedules.py:619-966; engine/validator.py; frontend/src/pages/TimetablePage.tsx:13-96; frontend/src/pages/ExamSchedulePage.tsx:13-74",
+    "evidence": "No undo route, snapshot history or UI action",
+    "action": "Add original-version snapshot and atomic restore"
+  },
+  {
+    "id": "FR-9.1",
+    "description": "Six schedule statuses with only specified transitions",
+    "status": "Partially Implemented",
+    "location": "backend/models.py:678-765; backend/routers/schedules.py; frontend/src/services/api.ts:313-323; frontend/src/pages/ReviewPublishPage.tsx",
+    "evidence": "Status CHECK and generation transitions exist; no complete Draft/publish/archive workflow; manual guard too broad",
+    "action": "Centralize allowed state transitions"
+  },
+  {
+    "id": "FR-9.2",
+    "description": "Only Approver publishes Generated zero-hard-violation schedule",
+    "status": "Incorrectly Implemented",
+    "location": "backend/models.py:678-765; backend/routers/schedules.py; frontend/src/services/api.ts:313-323; frontend/src/pages/ReviewPublishPage.tsx",
+    "evidence": "Publish endpoint404; client overlay claims publication without server validator/authentication",
+    "action": "Implement validated transactional Approver publish"
+  },
+  {
+    "id": "FR-9.3",
+    "description": "One published per term/type; previous becomes Archived",
+    "status": "Partially Implemented",
+    "location": "backend/models.py:678-765; backend/routers/schedules.py; frontend/src/services/api.ts:313-323; frontend/src/pages/ReviewPublishPage.tsx",
+    "evidence": "Partial UNIQUE index exists; client overlay archives locally, no server publication transaction",
+    "action": "Archive previous and publish target atomically"
+  },
+  {
+    "id": "FR-9.4",
+    "description": "Faculty/Students can view Published only",
+    "status": "Incorrectly Implemented",
+    "location": "backend/models.py:678-765; backend/routers/schedules.py; frontend/src/services/api.ts:313-323; frontend/src/pages/ReviewPublishPage.tsx",
+    "evidence": "Student probe reads Generated timetable26 entries; list exposes Generated statuses",
+    "action": "Enforce publication visibility on all read endpoints"
+  },
+  {
+    "id": "FR-9.5",
+    "description": "Retain numbered versions; duplicate draft; view archives",
+    "status": "Partially Implemented",
+    "location": "backend/models.py:678-765; backend/routers/schedules.py; frontend/src/services/api.ts:313-323; frontend/src/pages/ReviewPublishPage.tsx",
+    "evidence": "Version persistence tests pass; duplication route/UI missing; cross-term version ordering ambiguous",
+    "action": "Add draft duplication, archive view and race-safe versions"
+  },
+  {
+    "id": "FR-9.6",
+    "description": "Approver sees sessions/score/conflict summary before publish",
+    "status": "Partially Implemented",
+    "location": "backend/models.py:678-765; backend/routers/schedules.py; frontend/src/services/api.ts:313-323; frontend/src/pages/ReviewPublishPage.tsx",
+    "evidence": "ReviewPublishPage consumes live schedule/conflicts; not browser-exercised, publication local only",
+    "action": "Verify review summary with authoritative validation"
+  },
+  {
+    "id": "FR-10.1",
+    "description": "Weekly timetable grid by selected batch/instructor/room/course",
+    "status": "Partially Implemented",
+    "location": "frontend/src/pages/TimetablePage.tsx; frontend/src/pages/ExamSchedulePage.tsx; frontend/src/services/api.ts:124-182",
+    "evidence": "Grid/filter rendering code exists and API entry tests pass; simultaneous all-batch sessions share CSS grid cells",
+    "action": "Verify browser display with collisions and selected scopes"
+  },
+  {
+    "id": "FR-10.2",
+    "description": "Show code/title/type/instructor/room/day/time on every session",
+    "status": "Partially Implemented",
+    "location": "frontend/src/pages/TimetablePage.tsx; frontend/src/pages/ExamSchedulePage.tsx; frontend/src/services/api.ts:124-182",
+    "evidence": "API enriches fields; rendered cells include code/title/type/instructor/room, time indicated by grid; no browser verification",
+    "action": "Verify actual labels and lab end times"
+  },
+  {
+    "id": "FR-10.3",
+    "description": "Filter timetable by term/version/batch/instructor/room/course/day",
+    "status": "Partially Implemented",
+    "location": "frontend/src/pages/TimetablePage.tsx; frontend/src/pages/ExamSchedulePage.tsx; frontend/src/services/api.ts:124-182",
+    "evidence": "Page filters/version selector exist; explicit term selector absent; all terms versions mixed",
+    "action": "Add term selection and execute filter matrix"
+  },
+  {
+    "id": "FR-10.4",
+    "description": "Date/time ordered exams filtered by date/batch/course/room",
+    "status": "Partially Implemented",
+    "location": "frontend/src/pages/TimetablePage.tsx; frontend/src/pages/ExamSchedulePage.tsx; frontend/src/services/api.ts:124-182",
+    "evidence": "Service sorts; page filters exist; browser workflow not executed",
+    "action": "Verify filters and room/seat rendering"
+  },
+  {
+    "id": "FR-10.5",
+    "description": "Own Faculty/Student timetable/exams by default",
+    "status": "Incorrectly Implemented",
+    "location": "frontend/src/pages/TimetablePage.tsx; frontend/src/pages/ExamSchedulePage.tsx; frontend/src/services/api.ts:124-182",
+    "evidence": "Pages receive role only; filters initialize all; App does not pass current user batch/instructor to views",
+    "action": "Derive default and allowed scope from authenticated account"
+  },
+  {
+    "id": "FR-10.6",
+    "description": "Visually distinguish labs/locked/manual entries",
+    "status": "Partially Implemented",
+    "location": "frontend/src/pages/TimetablePage.tsx; frontend/src/pages/ExamSchedulePage.tsx; frontend/src/services/api.ts:124-182",
+    "evidence": "Lab CSS, lock and manual badges exist for timetable; exam override unavailable",
+    "action": "Persist exam overrides and verify rendered badges"
+  },
+  {
+    "id": "FR-10.7",
+    "description": "Dashboard active term, schedule status and master counts",
+    "status": "Partially Implemented",
+    "location": "frontend/src/pages/TimetablePage.tsx; frontend/src/pages/ExamSchedulePage.tsx; frontend/src/services/api.ts:124-182",
+    "evidence": "Live API-backed summary exists; conflict retrieval catches all errors as empty and can assert no violations",
+    "action": "Show errors/unknown health explicitly; verify role-specific actions"
+  },
+  {
+    "id": "FR-10.8",
+    "description": "Schedule views usable at360px",
+    "status": "Not Verified",
+    "location": "frontend/src/pages/TimetablePage.tsx; frontend/src/pages/ExamSchedulePage.tsx; frontend/src/services/api.ts:124-182",
+    "evidence": "Responsive CSS breakpoints exist; no executed viewport, keyboard or touch test",
+    "action": "Run360px browser tests with real datasets"
+  },
+  {
+    "id": "FR-11.1",
+    "description": "A4 landscape PDF with institution/term/version/filter/date",
+    "status": "Missing",
+    "location": "frontend/src/components/ui.tsx:87-89; backend/routers/; frontend/src/pages/ConflictReportPage.tsx:24-32",
+    "evidence": "Shared ExportActions only emits a status message; required PDF export endpoint404",
+    "action": "Implement real filtered PDF exporter and verify layout"
+  },
+  {
+    "id": "FR-11.2",
+    "description": "Schedule CSV with specified columns and row granularity",
+    "status": "Missing",
+    "location": "frontend/src/components/ui.tsx:87-89; backend/routers/; frontend/src/pages/ConflictReportPage.tsx:24-32",
+    "evidence": "Schedule CSV button only emits message; export endpoint404; conflict CSV is separate",
+    "action": "Implement real schedule CSV download"
+  },
+  {
+    "id": "FR-11.3",
+    "description": "All batches or instructors in one PDF one per page",
+    "status": "Missing",
+    "location": "frontend/src/components/ui.tsx:87-89; backend/routers/; frontend/src/pages/ConflictReportPage.tsx:24-32",
+    "evidence": "No batch PDF exporter/API or working control",
+    "action": "Add authorized multi-page export"
+  },
+  {
+    "id": "FR-11.4",
+    "description": "Exports restricted to permitted schedules",
+    "status": "Missing",
+    "location": "frontend/src/components/ui.tsx:87-89; backend/routers/; frontend/src/pages/ConflictReportPage.tsx:24-32",
+    "evidence": "No schedule export service; underlying read authorization also bypassed",
+    "action": "Apply authenticated schedule scope to export"
+  },
+  {
+    "id": "FR-11.5",
+    "description": "Audit every export",
+    "status": "Missing",
+    "location": "frontend/src/components/ui.tsx:87-89; backend/routers/; frontend/src/pages/ConflictReportPage.tsx:24-32",
+    "evidence": "No persistent export events or schedule exporter",
+    "action": "Write export audit records"
+  },
+  {
+    "id": "FR-12.1",
+    "description": "Audit login/failure/account/import/config/generation/move/publish/export",
+    "status": "Partially Implemented",
+    "location": "backend/adapter.py:599-609,714-724; backend/routers/master_data.py:1903-1910; frontend/src/services/api.ts:335-338",
+    "evidence": "Generation/move/rule-change logs exist; other services absent; master room mutation probe has no audit event",
+    "action": "Implement complete trusted event coverage"
+  },
+  {
+    "id": "FR-12.2",
+    "description": "Administrator-only audit with user/date/action filters",
+    "status": "Partially Implemented",
+    "location": "backend/adapter.py:599-609,714-724; backend/routers/master_data.py:1903-1910; frontend/src/services/api.ts:335-338",
+    "evidence": "Mock audit page/filter only; GET /audit404",
+    "action": "Add protected live audit query API"
+  },
+  {
+    "id": "FR-12.3",
+    "description": "Users cannot modify/delete audit entries",
+    "status": "Partially Implemented",
+    "location": "backend/adapter.py:599-609,714-724; backend/routers/master_data.py:1903-1910; frontend/src/services/api.ts:335-338",
+    "evidence": "No HTTP mutation route; PostgreSQL schema.sql:472-490 defines immutable-log triggers, but ORM create_all does not install them and deployed installation is unverified",
+    "action": "Install/test log immutability through versioned migrations for both database paths"
+  },
+  {
+    "id": "UR-01",
+    "description": "Secure role-scoped username/password login",
+    "status": "Incorrectly Implemented",
+    "location": "SRS Table23; see corresponding FR rows and their evidence",
+    "evidence": "FR-1.1-1.5; backend auth absent and mock accepts nonempty password",
+    "action": "Complete authentication"
+  },
+  {
+    "id": "UR-02",
+    "description": "Administrator manages accounts and one role",
+    "status": "Partially Implemented",
+    "location": "SRS Table23; see corresponding FR rows and their evidence",
+    "evidence": "FR-1.6-1.7; mock-only account management",
+    "action": "Persist account lifecycle"
+  },
+  {
+    "id": "UR-03",
+    "description": "Only permitted functions visible and usable",
+    "status": "Incorrectly Implemented",
+    "location": "SRS Table23; see corresponding FR rows and their evidence",
+    "evidence": "FR-1.5/1.8; header role spoofing/default Administrator UI",
+    "action": "Enforce server and UI permissions"
+  },
+  {
+    "id": "UR-04",
+    "description": "Manage/search/deactivate courses",
+    "status": "Partially Implemented",
+    "location": "SRS Table23; see corresponding FR rows and their evidence",
+    "evidence": "FR-2.1/2.2/2.11/2.12; CRUD tested, full UI workflow unverified",
+    "action": "Complete list workflow verification"
+  },
+  {
+    "id": "UR-05",
+    "description": "Manage/search/deactivate instructors with workload",
+    "status": "Partially Implemented",
+    "location": "SRS Table23; see corresponding FR rows and their evidence",
+    "evidence": "FR-2.3/2.11/2.12; live path partly tested",
+    "action": "Validate email and exercise complete flow"
+  },
+  {
+    "id": "UR-06",
+    "description": "Manage/search/deactivate rooms",
+    "status": "Partially Implemented",
+    "location": "SRS Table23; see corresponding FR rows and their evidence",
+    "evidence": "FR-2.4/2.11/2.12; CRUD tested, list controls uneven",
+    "action": "Verify complete role-scoped UI flow"
+  },
+  {
+    "id": "UR-07",
+    "description": "Manage/search/deactivate batches",
+    "status": "Partially Implemented",
+    "location": "SRS Table23; see corresponding FR rows and their evidence",
+    "evidence": "FR-2.5/2.11/2.12; creation/update tested",
+    "action": "Verify complete batch lifecycle"
+  },
+  {
+    "id": "UR-08",
+    "description": "Define term/working days/grid/blocked slots",
+    "status": "Incorrectly Implemented",
+    "location": "SRS Table23; see corresponding FR rows and their evidence",
+    "evidence": "FR-2.6/2.7; API accepts overlapping unequal grids",
+    "action": "Validate atomic term/grid lifecycle"
+  },
+  {
+    "id": "UR-09",
+    "description": "Assign course/batch/instructor offering per term",
+    "status": "Partially Implemented",
+    "location": "SRS Table23; see corresponding FR rows and their evidence",
+    "evidence": "FR-2.8/2.9/2.11; no offering deactivate",
+    "action": "Implement retirement and validate references"
+  },
+  {
+    "id": "UR-10",
+    "description": "Faculty own and Coordinator any availability",
+    "status": "Incorrectly Implemented",
+    "location": "SRS Table23; see corresponding FR rows and their evidence",
+    "evidence": "FR-3.1-3.4; unlinked Faculty arbitrary instructor write200",
+    "action": "Enforce verified ownership"
+  },
+  {
+    "id": "UR-11",
+    "description": "Record student course enrollment including electives/repeats",
+    "status": "Partially Implemented",
+    "location": "SRS Table23; see corresponding FR rows and their evidence",
+    "evidence": "FR-2.10/4.1; live enrollment API but mock users/imports",
+    "action": "Unify student account IDs with enrollment flow"
+  },
+  {
+    "id": "UR-12",
+    "description": "CSV imports with every rejected row explained",
+    "status": "Incorrectly Implemented",
+    "location": "SRS Table23; see corresponding FR rows and their evidence",
+    "evidence": "FR-4.1-4.5; mock-only, offering/enrollment false success",
+    "action": "Implement persistent authoritative CSV service"
+  },
+  {
+    "id": "UR-13",
+    "description": "Optional rules/weights/time limits configuration",
+    "status": "Partially Implemented",
+    "location": "SRS Table23; see corresponding FR rows and their evidence",
+    "evidence": "FR-5.x/6.4; config delete local and params unchecked",
+    "action": "Finish configuration lifecycle"
+  },
+  {
+    "id": "UR-14",
+    "description": "Define exam sessions and daily exam maximum",
+    "status": "Partially Implemented",
+    "location": "SRS Table23; see corresponding FR rows and their evidence",
+    "evidence": "FR-5.7 passes; E02 membership identity gap",
+    "action": "Correct mixed cohort membership"
+  },
+  {
+    "id": "UR-15",
+    "description": "Generate complete conflict-free weekly timetable",
+    "status": "Incorrectly Implemented",
+    "location": "SRS Table23; see corresponding FR rows and their evidence",
+    "evidence": "FR-6.x; valid fixtures pass, clock-grid blind spots remain",
+    "action": "Fix hard constraints and validate input"
+  },
+  {
+    "id": "UR-16",
+    "description": "Generate all exams with rooms and no student clash",
+    "status": "Incorrectly Implemented",
+    "location": "SRS Table23; see corresponding FR rows and their evidence",
+    "evidence": "FR-7.x; mixed fallback graph misses edge",
+    "action": "Correct graph membership"
+  },
+  {
+    "id": "UR-17",
+    "description": "Explain conflicting data/rules when no schedule possible",
+    "status": "Partially Implemented",
+    "location": "SRS Table23; see corresponding FR rows and their evidence",
+    "evidence": "FR-6.1/6.5/7.5; fixture diagnostics tested, incomplete/heuristic limits",
+    "action": "Expand diagnostic completeness and proof labels"
+  },
+  {
+    "id": "UR-18",
+    "description": "Regenerate and retain earlier versions",
+    "status": "Partially Implemented",
+    "location": "SRS Table23; see corresponding FR rows and their evidence",
+    "evidence": "FR-6.2/6.8/9.1/9.5; no draft duplication/full lifecycle",
+    "action": "Complete lifecycle and concurrency safety"
+  },
+  {
+    "id": "UR-19",
+    "description": "Manual moves with immediate rule warnings",
+    "status": "Partially Implemented",
+    "location": "SRS Table23; see corresponding FR rows and their evidence",
+    "evidence": "FR-8.x; ordinary API move tests pass, lab/room UI incomplete",
+    "action": "Support atomic block movement and revalidation"
+  },
+  {
+    "id": "UR-20",
+    "description": "Lock sessions across regeneration",
+    "status": "Partially Implemented",
+    "location": "SRS Table23; see corresponding FR rows and their evidence",
+    "evidence": "FR-6.10/8.6; engine/API work, UI controls absent",
+    "action": "Expose lock/unlock"
+  },
+  {
+    "id": "UR-21",
+    "description": "Approver review/approve/publish",
+    "status": "Incorrectly Implemented",
+    "location": "SRS Table23; see corresponding FR rows and their evidence",
+    "evidence": "FR-9.2; browser overlay only; publish404",
+    "action": "Implement real publication transaction"
+  },
+  {
+    "id": "UR-22",
+    "description": "Filter timetable by batch/instructor/room/course/day",
+    "status": "Partially Implemented",
+    "location": "SRS Table23; see corresponding FR rows and their evidence",
+    "evidence": "FR-10.1-10.3; rendered logic inspected, UI unexecuted",
+    "action": "Run browser filter matrix"
+  },
+  {
+    "id": "UR-23",
+    "description": "Filter exams by date/batch/course/room",
+    "status": "Partially Implemented",
+    "location": "SRS Table23; see corresponding FR rows and their evidence",
+    "evidence": "FR-10.4; rendering code and API inspected",
+    "action": "Run browser workflow verification"
+  },
+  {
+    "id": "UR-24",
+    "description": "Published-only and own default schedules",
+    "status": "Incorrectly Implemented",
+    "location": "SRS Table23; see corresponding FR rows and their evidence",
+    "evidence": "FR-9.4/10.5; Student read Generated26 entries",
+    "action": "Enforce identity and published scope"
+  },
+  {
+    "id": "UR-25",
+    "description": "Export current schedule as PDF/CSV",
+    "status": "Missing",
+    "location": "SRS Table23; see corresponding FR rows and their evidence",
+    "evidence": "FR-11.x; shared buttons emit only messages",
+    "action": "Implement exporters and audit"
+  },
+  {
+    "id": "UR-26",
+    "description": "Administrator sees trusted who/what/when log",
+    "status": "Partially Implemented",
+    "location": "SRS Table23; see corresponding FR rows and their evidence",
+    "evidence": "FR-12.x; mock-only query UI, limited DB events",
+    "action": "Implement protected persistent audit"
+  },
+  {
+    "id": "UR-27",
+    "description": "Archive older published schedules and view them",
+    "status": "Partially Implemented",
+    "location": "SRS Table23; see corresponding FR rows and their evidence",
+    "evidence": "FR-9.3/9.5; DB statuses/index exist, publication overlay only",
+    "action": "Implement archive lifecycle"
+  },
+  {
+    "id": "UC-01",
+    "description": "Log In with role-limited session",
+    "status": "Incorrectly Implemented",
+    "location": "SRS Table25; related FR implementation locations",
+    "evidence": "FR-1.1/1.5: mock login and bypass",
+    "action": "Implement authenticated session"
+  },
+  {
+    "id": "UC-02",
+    "description": "Manage User Accounts",
+    "status": "Partially Implemented",
+    "location": "SRS Table25; related FR implementation locations",
+    "evidence": "FR-1.6: in-memory UI only",
+    "action": "Implement users API"
+  },
+  {
+    "id": "UC-03",
+    "description": "View Audit Log",
+    "status": "Partially Implemented",
+    "location": "SRS Table25; related FR implementation locations",
+    "evidence": "FR-12.2: mock list; /audit404",
+    "action": "Implement audit API"
+  },
+  {
+    "id": "UC-04",
+    "description": "Manage Master Data",
+    "status": "Partially Implemented",
+    "location": "SRS Table25; related FR implementation locations",
+    "evidence": "FR-2.x tested subset; grid/inactive relationships gaps",
+    "action": "Finish validations and role-specific workflows"
+  },
+  {
+    "id": "UC-05",
+    "description": "Import CSV and confirm valid rows",
+    "status": "Incorrectly Implemented",
+    "location": "SRS Table25; related FR implementation locations",
+    "evidence": "FR-4.x: no server; false counts for offering/enrollment",
+    "action": "Build transactional imports"
+  },
+  {
+    "id": "UC-06",
+    "description": "Configure Constraints and save named configs",
+    "status": "Partially Implemented",
+    "location": "SRS Table25; related FR implementation locations",
+    "evidence": "FR-5.x: server rules and local deletion",
+    "action": "Finish lifecycle/parameter validation"
+  },
+  {
+    "id": "UC-07",
+    "description": "Define Exam Sessions",
+    "status": "Partially Implemented",
+    "location": "SRS Table25; related FR implementation locations",
+    "evidence": "FR-5.7 tested normal overlap rejection; full browser workflow unexecuted",
+    "action": "Exercise live UI and concurrent overlap validation"
+  },
+  {
+    "id": "UC-08",
+    "description": "Generate Timetable new version",
+    "status": "Partially Implemented",
+    "location": "SRS Table25; related FR implementation locations",
+    "evidence": "79-test suite confirms normal real generation; irregular grids unsafe",
+    "action": "Fix input/grid and deadline/cancel behavior"
+  },
+  {
+    "id": "UC-09",
+    "description": "Generate Exam Schedule",
+    "status": "Partially Implemented",
+    "location": "SRS Table25; related FR implementation locations",
+    "evidence": "DSATUR/fallback real tests pass; membership gap",
+    "action": "Fix student identity derivation"
+  },
+  {
+    "id": "UC-10",
+    "description": "Validate Input Data before generation",
+    "status": "Partially Implemented",
+    "location": "SRS Table25; related FR implementation locations",
+    "evidence": "Ordinary defects tested; malformed slots accepted",
+    "action": "Expand preflight"
+  },
+  {
+    "id": "UC-11",
+    "description": "View Conflict Report",
+    "status": "Partially Implemented",
+    "location": "SRS Table25; related FR implementation locations",
+    "evidence": "Live query/filter and local download; browser unexecuted",
+    "action": "Verify display/export with real failures"
+  },
+  {
+    "id": "UC-12",
+    "description": "Manual adjustment/locking with revalidation",
+    "status": "Partially Implemented",
+    "location": "SRS Table25; related FR implementation locations",
+    "evidence": "API move tests pass; no UI lock/block move",
+    "action": "Complete manual workflow"
+  },
+  {
+    "id": "UC-13",
+    "description": "Approve/Publish and archive previous",
+    "status": "Incorrectly Implemented",
+    "location": "SRS Table25; related FR implementation locations",
+    "evidence": "Server publish404; client overlay only",
+    "action": "Implement atomic guarded publish"
+  },
+  {
+    "id": "UC-14",
+    "description": "View weekly timetable with authorized filters",
+    "status": "Incorrectly Implemented",
+    "location": "SRS Table25; related FR implementation locations",
+    "evidence": "Student sees unpublished/all-batch data",
+    "action": "Enforce own published scope"
+  },
+  {
+    "id": "UC-15",
+    "description": "View exams with authorized filters",
+    "status": "Incorrectly Implemented",
+    "location": "SRS Table25; related FR implementation locations",
+    "evidence": "No publication/ownership checks; page all filters",
+    "action": "Enforce scope"
+  },
+  {
+    "id": "UC-16",
+    "description": "Download shown PDF/CSV",
+    "status": "Missing",
+    "location": "SRS Table25; related FR implementation locations",
+    "evidence": "Both export endpoints404; buttons status-only",
+    "action": "Implement exporters"
+  },
+  {
+    "id": "UC-17",
+    "description": "Set own/any instructor availability by role",
+    "status": "Incorrectly Implemented",
+    "location": "SRS Table25; related FR implementation locations",
+    "evidence": "Unlinked Faculty arbitrary write200",
+    "action": "Enforce ownership"
+  },
+  {
+    "id": "H01",
+    "description": "Instructor at most one session per slot (mandatory)",
+    "status": "Partially Implemented",
+    "location": "engine/constraints.py; engine/timetable_solver.py; engine/validator.py",
+    "evidence": "Existing H01 tests pass; API accepts overlapping clock slots and both model/validator key by slot_id",
+    "action": "Validate nonoverlapping grid and physical-time conflicts"
+  },
+  {
+    "id": "H02",
+    "description": "Room at most one session per slot (mandatory)",
+    "status": "Partially Implemented",
+    "location": "engine/constraints.py; engine/timetable_solver.py; engine/validator.py",
+    "evidence": "Existing H02 tests pass; distinct overlapping slots bypass slot_id exclusivity",
+    "action": "Reject overlapping grid or use interval overlap"
+  },
+  {
+    "id": "H03",
+    "description": "Batch at most one session per slot (mandatory)",
+    "status": "Partially Implemented",
+    "location": "engine/constraints.py; engine/timetable_solver.py; engine/validator.py",
+    "evidence": "Existing H03 tests pass; distinct overlapping slots bypass exclusivity",
+    "action": "Reject overlapping grid and validate actual intervals"
+  },
+  {
+    "id": "H04",
+    "description": "Room capacity at least offering enrolled count",
+    "status": "Fully Implemented",
+    "location": "engine/constraints.py; engine/timetable_solver.py; engine/validator.py",
+    "evidence": "Existing H04 solver toggle and validator tests pass; capacity constraints inspected",
+    "action": "Retain; guard post-publication metadata separately"
+  },
+  {
+    "id": "H05",
+    "description": "Labs in Lab rooms and lectures in Lecture rooms",
+    "status": "Fully Implemented",
+    "location": "engine/constraints.py; engine/timetable_solver.py; engine/validator.py",
+    "evidence": "Existing H05 toggle/validator tests pass and strict type model constraints inspected",
+    "action": "Retain type checks"
+  },
+  {
+    "id": "H06",
+    "description": "No teaching in instructor unavailable slot",
+    "status": "Fully Implemented",
+    "location": "engine/constraints.py; engine/timetable_solver.py; engine/validator.py",
+    "evidence": "Existing H06 toggle/validator tests pass; missing availability defaults available",
+    "action": "Retain availability checks"
+  },
+  {
+    "id": "H07",
+    "description": "No sessions in blocked slots",
+    "status": "Fully Implemented",
+    "location": "engine/constraints.py; engine/timetable_solver.py; engine/validator.py",
+    "evidence": "Existing H07 toggle/validator tests pass",
+    "action": "Retain blocked-slot checks"
+  },
+  {
+    "id": "H08",
+    "description": "Exact lecture and lab session counts per offering (mandatory)",
+    "status": "Partially Implemented",
+    "location": "engine/constraints.py; engine/timetable_solver.py; engine/validator.py",
+    "evidence": "Ordinary H08 tests pass; inactive courses skipped by validator and no immutable published snapshot",
+    "action": "Validate all required offerings against stable version inputs"
+  },
+  {
+    "id": "H09",
+    "description": "Lab consecutive clock slots on one day and one room",
+    "status": "Incorrectly Implemented",
+    "location": "engine/constraints.py; engine/timetable_solver.py; engine/validator.py",
+    "evidence": "Audit lab test changes last slot to18:00-19:00; validator returns[]",
+    "action": "Check temporal adjacency as well as slot_index"
+  },
+  {
+    "id": "H10",
+    "description": "Daily and weekly instructor teaching hours respected",
+    "status": "Fully Implemented",
+    "location": "engine/constraints.py; engine/timetable_solver.py; engine/validator.py",
+    "evidence": "Existing H10 toggle/validator tests pass; actual slot duration sums inspected",
+    "action": "Retain and validate uniform grid"
+  },
+  {
+    "id": "S01",
+    "description": "Minimize idle batch gaps",
+    "status": "Fully Implemented",
+    "location": "engine/constraints.py:1018-1806; engine/timetable_solver.py:844-881",
+    "evidence": "Executed test_s01_minimises_batch_idle_gaps_on_a_day and score tests",
+    "action": "Retain objective/metric tests"
+  },
+  {
+    "id": "S02",
+    "description": "Spread offering sessions over days",
+    "status": "Fully Implemented",
+    "location": "engine/constraints.py:1018-1806; engine/timetable_solver.py:844-881",
+    "evidence": "Executed test_s02_spreads_offering_sessions_across_different_days",
+    "action": "Retain tests"
+  },
+  {
+    "id": "S03",
+    "description": "Prefer at most configured batch sessions per day",
+    "status": "Fully Implemented",
+    "location": "engine/constraints.py:1018-1806; engine/timetable_solver.py:844-881",
+    "evidence": "Executed test_s03_keeps_batch_daily_sessions_at_or_below_parameter",
+    "action": "Retain tests"
+  },
+  {
+    "id": "S04",
+    "description": "Prefer at most configured consecutive instructor slots",
+    "status": "Fully Implemented",
+    "location": "engine/constraints.py:1018-1806; engine/timetable_solver.py:844-881",
+    "evidence": "Executed test_s04_keeps_instructor_consecutive_teaching_slots_within_limit",
+    "action": "Retain tests; enforce valid slot topology"
+  },
+  {
+    "id": "S05",
+    "description": "Prefer prior version slot and room",
+    "status": "Partially Implemented",
+    "location": "engine/constraints.py:1018-1806; engine/timetable_solver.py:844-881",
+    "evidence": "Direct-engine S05 tests pass; worker omits prior timetable argument",
+    "action": "Pass complete prior entries, not just locks"
+  },
+  {
+    "id": "S06",
+    "description": "Prefer smallest fitting room",
+    "status": "Fully Implemented",
+    "location": "engine/constraints.py:1018-1806; engine/timetable_solver.py:844-881",
+    "evidence": "Executed test_s06_prefers_smallest_fitting_room",
+    "action": "Retain tests"
+  },
+  {
+    "id": "E01",
+    "description": "Shared-student courses use different sessions (mandatory)",
+    "status": "Incorrectly Implemented",
+    "location": "engine/constraints.py:1824-2294; engine/exam_scheduler.py; engine/models.py:523-550",
+    "evidence": "Ordinary E01 tests pass; mixed enrollment/fallback graph has no expected edge",
+    "action": "Represent inferred cohort students consistently in solver and validator"
+  },
+  {
+    "id": "E02",
+    "description": "Daily student exam count <= configured maximum",
+    "status": "Partially Implemented",
+    "location": "engine/constraints.py:1824-2294; engine/exam_scheduler.py; engine/models.py:523-550",
+    "evidence": "Ordinary E02 tests pass; mixed explicit/cohort identities undercount",
+    "action": "Use consistent identity in every daily count"
+  },
+  {
+    "id": "E03",
+    "description": "Exact seats equal students and do not exceed capacity",
+    "status": "Fully Implemented",
+    "location": "engine/constraints.py:1824-2294; engine/exam_scheduler.py; engine/models.py:523-550",
+    "evidence": "Existing E03 validator, capacity-infeasibility and allocation tests pass",
+    "action": "Retain; validate inactive/type room eligibility too"
+  },
+  {
+    "id": "E04",
+    "description": "Room used by at most one exam per session (mandatory)",
+    "status": "Fully Implemented",
+    "location": "engine/constraints.py:1824-2294; engine/exam_scheduler.py; engine/models.py:523-550",
+    "evidence": "Existing E04 validator and fallback allocation tests pass",
+    "action": "Retain; reject overlapping exam sessions at input"
+  },
+  {
+    "id": "E05",
+    "description": "Each required course exactly one valid exam session (mandatory)",
+    "status": "Fully Implemented",
+    "location": "engine/constraints.py:1824-2294; engine/exam_scheduler.py; engine/models.py:523-550",
+    "evidence": "Existing E05 validator/mandatory tests pass; unique(schedule,course) exists",
+    "action": "Retain term-scoped validation"
+  },
+  {
+    "id": "ES01",
+    "description": "Spread one batch exams across days",
+    "status": "Fully Implemented",
+    "location": "engine/constraints.py:2297-2640; engine/exam_scheduler.py",
+    "evidence": "Executed ES01 preference test and score-breakdown test",
+    "action": "Retain"
+  },
+  {
+    "id": "ES02",
+    "description": "Minimize rooms per exam",
+    "status": "Fully Implemented",
+    "location": "engine/constraints.py:2297-2640; engine/exam_scheduler.py",
+    "evidence": "Executed ES02 preference test",
+    "action": "Retain; respect weight0 in all allocation paths"
+  },
+  {
+    "id": "ES03",
+    "description": "Keep rooms for one exam in same building",
+    "status": "Fully Implemented",
+    "location": "engine/constraints.py:2297-2640; engine/exam_scheduler.py",
+    "evidence": "Executed ES03 preference test",
+    "action": "Retain"
+  },
+  {
+    "id": "P-1",
+    "description": "95% ordinary requests <=2s with50 concurrent users",
+    "status": "Not Verified",
+    "location": "SRS Table27; no reference-size concurrent benchmark in supplied tests",
+    "evidence": "No executed concurrent benchmark; tiny SQLite tests do not measure target",
+    "action": "Benchmark150 offerings/60 rooms/3000 students with50 users"
+  },
+  {
+    "id": "P-2",
+    "description": "Reference timetable within configured limit; typical <=60s",
+    "status": "Not Verified",
+    "location": "SRS Table27; no reference-size concurrent benchmark in supplied tests",
+    "evidence": "Only tiny fixtures executed; model/diagnostics outside CP-SAT limit",
+    "action": "Benchmark reference size after global deadline fix"
+  },
+  {
+    "id": "P-3",
+    "description": "Reference exam generation <=30s",
+    "status": "Not Verified",
+    "location": "SRS Table27; no reference-size concurrent benchmark in supplied tests",
+    "evidence": "Small fixture success; no reference-size benchmark; backtracking lacks deadline",
+    "action": "Benchmark and bound every phase"
+  },
+  {
+    "id": "P-4",
+    "description": "Manual move validation <=1s",
+    "status": "Not Verified",
+    "location": "SRS Table27; no reference-size concurrent benchmark in supplied tests",
+    "evidence": "Functional move tests pass without reference-size timing assertions",
+    "action": "Measure representative worst-case moves"
+  },
+  {
+    "id": "P-5",
+    "description": "Validate/import5000 rows <=15s",
+    "status": "Missing",
+    "location": "SRS Table27; no reference-size concurrent benchmark in supplied tests",
+    "evidence": "Authoritative import service absent",
+    "action": "Implement service then benchmark"
+  },
+  {
+    "id": "P-6",
+    "description": "Single export<=5s; all-batch PDF<=30s",
+    "status": "Missing",
+    "location": "SRS Table27; no reference-size concurrent benchmark in supplied tests",
+    "evidence": "Real schedule exporters absent",
+    "action": "Implement and benchmark exporters"
+  },
+  {
+    "id": "P-7",
+    "description": "Schedule-view queries <=500ms reference size",
+    "status": "Not Verified",
+    "location": "SRS Table27; no reference-size concurrent benchmark in supplied tests",
+    "evidence": "No reference-size database benchmark; ORM per-entry lookups and missing leading indexes",
+    "action": "Measure query counts/plans/latency"
+  },
+  {
+    "id": "P-8",
+    "description": "Generation isolation worker process; other requests slowdown<=20%",
+    "status": "Incorrectly Implemented",
+    "location": "SRS Table27; no reference-size concurrent benchmark in supplied tests",
+    "evidence": "FastAPI BackgroundTasks runs synchronous callable in shared-process threadpool; no process queue",
+    "action": "Add separate worker process and paired load benchmark"
+  },
+  {
+    "id": "SAF-1",
+    "description": "Never publish a hard-invalid schedule; independent validator gate",
+    "status": "Incorrectly Implemented",
+    "location": "SRS Table28; backend/adapter.py; backend/routers/schedules.py; frontend/src/services/api.ts",
+    "evidence": "No real publish endpoint; local overlay trusts stored conflict count",
+    "action": "Implement server save-time validation and publication gate"
+  },
+  {
+    "id": "SAF-2",
+    "description": "Failed/cancelled/timed-out generation leaves prior schedules unchanged; atomic result save",
+    "status": "Partially Implemented",
+    "location": "SRS Table28; backend/adapter.py; backend/routers/schedules.py; frontend/src/services/api.ts",
+    "evidence": "Executed rollback/infeasible preservation tests pass; cancellation not implemented; data snapshot can change during solve",
+    "action": "Add real cancellation and stale-input rejection"
+  },
+  {
+    "id": "SAF-3",
+    "description": "Confirm destructive changes and explain consequence",
+    "status": "Partially Implemented",
+    "location": "SRS Table28; backend/adapter.py; backend/routers/schedules.py; frontend/src/services/api.ts",
+    "evidence": "Several ConfirmDialogs exist; direct APIs lack explicit acknowledgement and full UI unexecuted",
+    "action": "Verify complete confirmation matrix; enforce risky rule changes"
+  },
+  {
+    "id": "SAF-4",
+    "description": "Published schedule immutable; changes require new validated approved version",
+    "status": "Incorrectly Implemented",
+    "location": "SRS Table28; backend/adapter.py; backend/routers/schedules.py; frontend/src/services/api.ts",
+    "evidence": "Direct entries guarded; referenced room capacity can change without schedule revalidation/snapshot",
+    "action": "Snapshot version inputs or prevent invalidating edits"
+  },
+  {
+    "id": "SAF-5",
+    "description": "Daily automatic backups; retain7; prove restore of all data",
+    "status": "Not Verified",
+    "location": "SRS Table28; backend/adapter.py; backend/routers/schedules.py; frontend/src/services/api.ts",
+    "evidence": "No backup/restore job or restoration evidence in repo; managed external configuration unknown",
+    "action": "Provide backup policy/job and execute restore drill"
+  },
+  {
+    "id": "SAF-6",
+    "description": "Retain older versions for rollback",
+    "status": "Partially Implemented",
+    "location": "SRS Table28; backend/adapter.py; backend/routers/schedules.py; frontend/src/services/api.ts",
+    "evidence": "Version retention tests pass; duplicate/republish/archive lifecycle absent",
+    "action": "Implement tested restore-to-new-version workflow"
+  },
+  {
+    "id": "SEC-1",
+    "description": "Login before every application function; passwords>=8",
+    "status": "Incorrectly Implemented",
+    "location": "SRS Table29; backend/dependencies.py; backend/database.py; frontend/src/services/",
+    "evidence": "Unauthenticated reads200 and writes201; default UI Administrator",
+    "action": "Implement mandatory server login and route guard"
+  },
+  {
+    "id": "SEC-2",
+    "description": "Only salted slow bcrypt>=12 hashes; never log/return passwords",
+    "status": "Missing",
+    "location": "SRS Table29; backend/dependencies.py; backend/database.py; frontend/src/services/",
+    "evidence": "No hashing service; seed password hashes are placeholders; mock ignores password comparison",
+    "action": "Implement password hashing and redaction tests"
+  },
+  {
+    "id": "SEC-3",
+    "description": "Server RBAC every request",
+    "status": "Incorrectly Implemented",
+    "location": "SRS Table29; backend/dependencies.py; backend/database.py; frontend/src/services/",
+    "evidence": "Forged headers accepted; no authenticated identity",
+    "action": "Replace headers with verified claims/database roles"
+  },
+  {
+    "id": "SEC-4",
+    "description": "30-minute inactivity timeout;5-failure15-minute lock",
+    "status": "Missing",
+    "location": "SRS Table29; backend/dependencies.py; backend/database.py; frontend/src/services/",
+    "evidence": "No server sessions/login/lock service",
+    "action": "Implement and clock-test session/lock lifecycle"
+  },
+  {
+    "id": "SEC-5",
+    "description": "HTTPS TLS>=1.2; refuse/redirect HTTP",
+    "status": "Not Verified",
+    "location": "SRS Table29; backend/dependencies.py; backend/database.py; frontend/src/services/",
+    "evidence": "Frontend defaults HTTP localhost; no deployment/proxy TLS evidence examined",
+    "action": "Verify deployed proxy/app HTTPS policy; do not infer TLS from comments"
+  },
+  {
+    "id": "SEC-6",
+    "description": "Server validation; parameterized ORM; escape rendered text",
+    "status": "Partially Implemented",
+    "location": "SRS Table29; backend/dependencies.py; backend/database.py; frontend/src/services/",
+    "evidence": "ORM and React escaping exist; malformed times500, params unchecked, imports client-only",
+    "action": "Close validation gaps and exercise malicious-input tests"
+  },
+  {
+    "id": "SEC-7",
+    "description": "CSV-only<=10MB; parse as data; outside web root",
+    "status": "Missing",
+    "location": "SRS Table29; backend/dependencies.py; backend/database.py; frontend/src/services/",
+    "evidence": "Only browser checks; no upload endpoint/storage",
+    "action": "Implement server upload checks/storage isolation"
+  },
+  {
+    "id": "SEC-8",
+    "description": "Least-privilege DB account; env-supplied secrets",
+    "status": "Partially Implemented",
+    "location": "SRS Table29; backend/dependencies.py; backend/database.py; frontend/src/services/",
+    "evidence": "DATABASE_URL loading and gitignore tests pass; no forced TLS in engine; actual DB grants unknown; .env not read",
+    "action": "Verify grants/TLS without exposing secrets"
+  },
+  {
+    "id": "SEC-9",
+    "description": "Immutable trusted security audit",
+    "status": "Partially Implemented",
+    "location": "SRS Table29; backend/dependencies.py; backend/database.py; frontend/src/services/",
+    "evidence": "Some DB events; security services absent; SQL defines append-only triggers but ORM init does not install them and deployed state is unverified",
+    "action": "Complete event coverage and immutable log policy"
+  },
+  {
+    "id": "SEC-10",
+    "description": "Minimal personal data; Students own-batch Published; Faculty Published only",
+    "status": "Incorrectly Implemented",
+    "location": "SRS Table29; backend/dependencies.py; backend/database.py; frontend/src/services/",
+    "evidence": "Student reads Generated timetable across batches; enrollments list unrestricted by identity",
+    "action": "Enforce all row-level privacy scopes"
+  },
+  {
+    "id": "DB-1",
+    "description": "All business data relational with21 tables; none only in files",
+    "status": "Partially Implemented",
+    "location": "SRS5.1; backend/models.py; backend/database.py; db/schema.sql",
+    "evidence": "21 ORM tables tested; users/imports/publication/config deletion exist only in client memory",
+    "action": "Persist every workflow in authoritative database"
+  },
+  {
+    "id": "DB-2",
+    "description": "3NF except justified instructor/batch copies with clash enforcement",
+    "status": "Fully Implemented",
+    "location": "SRS5.1; backend/models.py; backend/database.py; db/schema.sql",
+    "evidence": "Executed composite-offering FK and three clash UNIQUE tests;21-table structure inspected",
+    "action": "Retain integrity constraints"
+  },
+  {
+    "id": "DB-3",
+    "description": "Integer surrogate PKs and enforced relationships",
+    "status": "Partially Implemented",
+    "location": "SRS5.1; backend/models.py; backend/database.py; db/schema.sql",
+    "evidence": "Existing FK/restrict/cascade tests pass on SQLite; term consistency and enrollment Student role not entirely DB-enforced",
+    "action": "Add cross-term and role integrity; verify PostgreSQL"
+  },
+  {
+    "id": "DB-4",
+    "description": "DB NOT NULL/UNIQUE/CHECK rules beyond app validation",
+    "status": "Partially Implemented",
+    "location": "SRS5.1; backend/models.py; backend/database.py; db/schema.sql",
+    "evidence": "Ordinary checks tested; schema.sql adds capacity/published/log triggers absent from ORM-created schema; full SQL/ORM behavior parity not tested",
+    "action": "Add explicit cross-table enforcement strategy and tests"
+  },
+  {
+    "id": "DB-5",
+    "description": "No deletion of referenced records; append-only logs",
+    "status": "Partially Implemented",
+    "location": "SRS5.1; backend/models.py; backend/database.py; db/schema.sql",
+    "evidence": "FK tests pass; schema.sql defines immutable-log triggers but ORM create_all omits them; offering lacks retirement",
+    "action": "Enforce log append-only and offering lifecycle"
+  },
+  {
+    "id": "DB-6",
+    "description": "Generation result saved atomically",
+    "status": "Fully Implemented",
+    "location": "SRS5.1; backend/models.py; backend/database.py; db/schema.sql",
+    "evidence": "Executed test_saf2_and_db6_atomic_rollback_on_save_failure and solve/save integration",
+    "action": "Retain transaction boundaries"
+  },
+  {
+    "id": "DB-7",
+    "description": "Index every FK and schedule/slot/room/instructor lookups",
+    "status": "Incorrectly Implemented",
+    "location": "SRS5.1; backend/models.py; backend/database.py; db/schema.sql",
+    "evidence": "Runtime ORM metadata lacks six leading FK indexes that already exist in schema.sql:444-457; database initialization paths diverge",
+    "action": "Reconcile ORM/migration/SQL indexes and verify installed query plans"
+  },
+  {
+    "id": "DB-8",
+    "description": "UTF8; event timestampsUTC displayed Asia/Karachi",
+    "status": "Partially Implemented",
+    "location": "SRS5.1; backend/models.py; backend/database.py; db/schema.sql",
+    "evidence": "ORM UTC helpers; UI toLocaleString uses client timezone without Asia/Karachi option; no Unicode roundtrip executed",
+    "action": "Specify timezone explicitly and verify Urdu/UTC roundtrip"
+  },
+  {
+    "id": "DB-9",
+    "description": "Schema only through versioned migrations; PG/SQLite equivalent",
+    "status": "Missing",
+    "location": "SRS5.1; backend/models.py; backend/database.py; db/schema.sql",
+    "evidence": "Only schema.sql and Base.metadata.create_all; no versioned migrations",
+    "action": "Create versioned migrations and dual-database CI"
+  },
+  {
+    "id": "C-1",
+    "description": "Python OR-Tools/NetworkX; React/Tailwind; open-source components",
+    "status": "Fully Implemented",
+    "location": "SRS2.5 (PDF pages15-16)",
+    "evidence": "Actual installed libraries match requirements pins; engine tests and TypeScript/Vite build executed",
+    "action": "Retain stack and dependency records"
+  },
+  {
+    "id": "C-2",
+    "description": "All functions REST/JSON overHTTPS; no frontend business rules",
+    "status": "Incorrectly Implemented",
+    "location": "SRS2.5 (PDF pages15-16)",
+    "evidence": "Login/import/publish/users/audit logic local mock; no HTTPS deployment evidence",
+    "action": "Move authoritative rules/workflows behind API"
+  },
+  {
+    "id": "C-3",
+    "description": "Relational storage via ORM; same code PostgreSQL/SQLite",
+    "status": "Partially Implemented",
+    "location": "SRS2.5 (PDF pages15-16)",
+    "evidence": "SQLAlchemy and SQLite tests pass; PostgreSQL integration not executed",
+    "action": "Run isolated PostgreSQL compatibility suite"
+  },
+  {
+    "id": "C-4",
+    "description": "Every generation run bounded by configured limit default120s",
+    "status": "Incorrectly Implemented",
+    "location": "SRS2.5 (PDF pages15-16)",
+    "evidence": "Timetable diagnosis has2s per rule; exam room solves5s each and unbounded backtracking; solve budget not total deadline",
+    "action": "Use one monotonic run deadline including all stages"
+  },
+  {
+    "id": "C-5",
+    "description": "Salted hashes/encrypted traffic/every API authorized",
+    "status": "Incorrectly Implemented",
+    "location": "SRS2.5 (PDF pages15-16)",
+    "evidence": "No auth/hash service; header bypass; TLS unknown",
+    "action": "Complete security implementation and deployment verification"
+  },
+  {
+    "id": "C-6",
+    "description": "Equal fixed weekly slots; whole sessions; consecutive labs",
+    "status": "Incorrectly Implemented",
+    "location": "SRS2.5 (PDF pages15-16)",
+    "evidence": "Overlapping and unequal lengths accepted; H09 clock-gap probe accepted",
+    "action": "Validate full grid invariants and physical lab adjacency"
+  },
+  {
+    "id": "C-7",
+    "description": "Four-student semester delivery using free tools",
+    "status": "Not Verified",
+    "location": "SRS2.5 (PDF pages15-16)",
+    "evidence": "Repository cannot establish actual staffing, schedule, or tools cost",
+    "action": "Confirm project-management constraint outside code audit"
+  },
+  {
+    "id": "C-8",
+    "description": "LaTeX SRS; UML2; specified requirement IDs",
+    "status": "Partially Implemented",
+    "location": "SRS2.5 (PDF pages15-16)",
+    "evidence": "62-page typeset SRS with UML-like diagrams and IDs; LaTeX source not present",
+    "action": "Retain editable SRS/model source and confirm notation"
+  },
+  {
+    "id": "C-9",
+    "description": "Current Chrome/Firefox/Edge/Safari without plugins",
+    "status": "Not Verified",
+    "location": "SRS2.5 (PDF pages15-16)",
+    "evidence": "No cross-browser execution performed; production build passes",
+    "action": "Run supported-browser matrix"
+  },
+  {
+    "id": "Q-01",
+    "description": "Correctness: independent validation; zero hard violations incl reference-size case; one negative test per H/E",
+    "status": "Partially Implemented",
+    "location": "Audit IDs for unnumbered SRS4.3.1-4.3.13; numeric suffix matches subsection",
+    "evidence": "All15 ordinary negative validator tests pass; no reference-size dataset; shared grid/enrollment blind spots",
+    "action": "Add adversarial and reference-size independent oracle"
+  },
+  {
+    "id": "Q-02",
+    "description": "Reliability:99% valid runs; failure explanations; restart interrupted recovery",
+    "status": "Partially Implemented",
+    "location": "Audit IDs for unnumbered SRS4.3.1-4.3.13; numeric suffix matches subsection",
+    "evidence": "Normal fixture tests pass; no99% run study; default lazy app does not initialize factory before lifespan recovery",
+    "action": "Initialize database/factory at startup and perform reliability campaign"
+  },
+  {
+    "id": "Q-03",
+    "description": "Availability99%08:00-18:00 working days per month",
+    "status": "Not Verified",
+    "location": "Audit IDs for unnumbered SRS4.3.1-4.3.13; numeric suffix matches subsection",
+    "evidence": "No monitoring, deployment or month of uptime evidence",
+    "action": "Instrument monthly availability and planned-maintenance policy"
+  },
+  {
+    "id": "Q-04",
+    "description": "Usability:<15min import-to-generation; own view<=2clicks; useful errors; AA contrast",
+    "status": "Partially Implemented",
+    "location": "Audit IDs for unnumbered SRS4.3.1-4.3.13; numeric suffix matches subsection",
+    "evidence": "Import absent; own defaults missing; notices exist; no usability/contrast study",
+    "action": "Fix workflows then execute timed usability/accessibility assessment"
+  },
+  {
+    "id": "Q-05",
+    "description": "Maintainability:constraint interfaces/layers/config/exporter;>=70% coverage; pinned dependencies",
+    "status": "Partially Implemented",
+    "location": "Audit IDs for unnumbered SRS4.3.1-4.3.13; numeric suffix matches subsection",
+    "evidence": "Reusable constraint interface/tests exist; exporter absent; frontend caret ranges; coverage tooling/result unavailable",
+    "action": "Add exporter boundary, pin reproducible deps, measure coverage"
+  },
+  {
+    "id": "Q-06",
+    "description": "Portability:Linux/Windows; PG/SQLite tests; four browsers; one-command packaging",
+    "status": "Partially Implemented",
+    "location": "Audit IDs for unnumbered SRS4.3.1-4.3.13; numeric suffix matches subsection",
+    "evidence": "Windows/SQLite and frontend build executed; PostgreSQL SQL-only triggers/indexes differ from create_all; no Linux/browser/packaging verification",
+    "action": "Provide container/start command and multi-platform CI"
+  },
+  {
+    "id": "Q-07",
+    "description": "Testability:repeatable seed/sample expected results/traceability",
+    "status": "Fully Implemented",
+    "location": "Audit IDs for unnumbered SRS4.3.1-4.3.13; numeric suffix matches subsection",
+    "evidence": "Seed and infeasible JSONs plus79 passing tests include reproducibility and expected26-entry results",
+    "action": "Keep audit matrix and expand missing workflow tests"
+  },
+  {
+    "id": "Q-08",
+    "description": "Interoperability:UTF8 CSV,JSON/OpenAPI,PDF",
+    "status": "Partially Implemented",
+    "location": "Audit IDs for unnumbered SRS4.3.1-4.3.13; numeric suffix matches subsection",
+    "evidence": "OpenAPI/JSON exist; real CSV/PDF schedule services absent",
+    "action": "Complete open-format import/export"
+  },
+  {
+    "id": "Q-09",
+    "description": "Adaptability:new term/data/rules without code; retain usable configs",
+    "status": "Partially Implemented",
+    "location": "Audit IDs for unnumbered SRS4.3.1-4.3.13; numeric suffix matches subsection",
+    "evidence": "Live master/config APIs exist; invalid grids and browser-local deletion/publication weaken lifecycle",
+    "action": "Validate evolution and previous-version behavior"
+  },
+  {
+    "id": "Q-10",
+    "description": "Flexibility:new rule/exporter/role with localized changes",
+    "status": "Partially Implemented",
+    "location": "Audit IDs for unnumbered SRS4.3.1-4.3.13; numeric suffix matches subsection",
+    "evidence": "Constraint extension tests pass; registries/role enum/checks and exporter absence require multiple changes",
+    "action": "Document extension points and add exporter/role architecture"
+  },
+  {
+    "id": "Q-11",
+    "description": "Robustness:bad rows isolated; invalid input explanatory; cancelled/timeouts safe",
+    "status": "Incorrectly Implemented",
+    "location": "Audit IDs for unnumbered SRS4.3.1-4.3.13; numeric suffix matches subsection",
+    "evidence": "Malformed time500; invalid-day409 mislabeled; CSV and real cancel absent",
+    "action": "Validate domain input and implement atomic cancel/import"
+  },
+  {
+    "id": "Q-12",
+    "description": "Reusability:engine/validator/CSV independent web layer; schema/templates documented",
+    "status": "Partially Implemented",
+    "location": "Audit IDs for unnumbered SRS4.3.1-4.3.13; numeric suffix matches subsection",
+    "evidence": "Engine dataclasses/tests independent FastAPI; CSV business logic in frontend mock; docs data-contract exists",
+    "action": "Extract server import/export reusable components"
+  },
+  {
+    "id": "Q-13",
+    "description": "Scalability:double reference offerings/rooms without redesign, within configurable limit",
+    "status": "Not Verified",
+    "location": "Audit IDs for unnumbered SRS4.3.1-4.3.13; numeric suffix matches subsection",
+    "evidence": "No doubled-size benchmark; end-to-end deadlines not enforced",
+    "action": "Benchmark300 offerings/120 rooms with bounded stages"
+  },
+  {
+    "id": "UI-01",
+    "description": "Shared layout; primary colored right action and adjacent Cancel",
+    "status": "Partially Implemented",
+    "location": "Audit IDs for SRS3.1.1 GUI standards1-8 (PDF18)",
+    "evidence": "AppShell/shared Button/forms exist; Availability/Constraints save headers do not provide adjacent Cancel",
+    "action": "Verify and standardize every form action layout"
+  },
+  {
+    "id": "UI-02",
+    "description": "Destructive/irreversible actions require confirmation",
+    "status": "Partially Implemented",
+    "location": "Audit IDs for SRS3.1.1 GUI standards1-8 (PDF18)",
+    "evidence": "ConfirmDialog used for several changes; confirmation completeness not browser-tested",
+    "action": "Execute destructive-action confirmation inventory"
+  },
+  {
+    "id": "UI-03",
+    "description": "Red field errors plus top-of-form summary",
+    "status": "Partially Implemented",
+    "location": "Audit IDs for SRS3.1.1 GUI standards1-8 (PDF18)",
+    "evidence": "ErrorSummary/field-error classes exist; several async errors only summary; bad API time produces500",
+    "action": "Unify field mapping and test invalid forms"
+  },
+  {
+    "id": "UI-04",
+    "description": "Fixed status area; icon plus color for success/warning/error",
+    "status": "Partially Implemented",
+    "location": "Audit IDs for SRS3.1.1 GUI standards1-8 (PDF18)",
+    "evidence": "AppShell status footer exists; fixed status-pulse rather than severity-specific icon",
+    "action": "Render severity/icon and screen-reader semantics consistently"
+  },
+  {
+    "id": "UI-05",
+    "description": "Default25-row table pagination",
+    "status": "Partially Implemented",
+    "location": "Audit IDs for SRS3.1.1 GUI standards1-8 (PDF18)",
+    "evidence": "Reusable DataTable defaults25 including Academic terms; full browser pagination behavior not executed",
+    "action": "Execute pagination on every tab with more than25 records"
+  },
+  {
+    "id": "UI-06",
+    "description": "Text/background WCAG2.1AA contrast",
+    "status": "Not Verified",
+    "location": "Audit IDs for SRS3.1.1 GUI standards1-8 (PDF18)",
+    "evidence": "Styles inspected but no measured contrast/accessibility execution",
+    "action": "Measure every token/state contrast"
+  },
+  {
+    "id": "UI-07",
+    "description": "Visible label and tooltip for every form field",
+    "status": "Partially Implemented",
+    "location": "Audit IDs for SRS3.1.1 GUI standards1-8 (PDF18)",
+    "evidence": "Field/InputField supports labels/hints; optional title means not every field has tooltip; aria-describedby refers to missing error IDs",
+    "action": "Audit labels/tooltips/error relationships"
+  },
+  {
+    "id": "UI-08",
+    "description": "Responsive from360px",
+    "status": "Not Verified",
+    "location": "Audit IDs for SRS3.1.1 GUI standards1-8 (PDF18)",
+    "evidence": "Responsive CSS present; no live viewport/touch verification",
+    "action": "Execute360/768/1280px layouts"
+  },
+  {
+    "id": "DOC-01",
+    "description": "Role-based user manual PDF with screenshots/tasks",
+    "status": "Missing",
+    "location": "Audit IDs for SRS2.6 documentation deliverables (PDF16)",
+    "evidence": "Only SRS PDF and planning/data-contract documents located",
+    "action": "Write user manual after workflows complete"
+  },
+  {
+    "id": "DOC-02",
+    "description": "Tooltips per form field and help page per screen",
+    "status": "Partially Implemented",
+    "location": "Audit IDs for SRS2.6 documentation deliverables (PDF16)",
+    "evidence": "Some hint/title tooltips; no per-screen help pages",
+    "action": "Complete contextual help"
+  },
+  {
+    "id": "DOC-03",
+    "description": "CSV templates with sample rows and field-by-field explanations",
+    "status": "Partially Implemented",
+    "location": "Audit IDs for SRS2.6 documentation deliverables (PDF16)",
+    "evidence": "Browser template generator includes example row; no full delivered authoritative schema guide",
+    "action": "Deliver documented templates backed by server import"
+  },
+  {
+    "id": "DOC-04",
+    "description": "Two-page quick-start guide data entry through publication",
+    "status": "Missing",
+    "location": "Audit IDs for SRS2.6 documentation deliverables (PDF16)",
+    "evidence": "No quick-start document found",
+    "action": "Deliver tested quick-start"
+  },
+  {
+    "id": "DOC-05",
+    "description": "Installation and administration guide",
+    "status": "Missing",
+    "location": "Audit IDs for SRS2.6 documentation deliverables (PDF16)",
+    "evidence": "docs/plan.md and frontend/plan.md are development plans, not deployment/admin guide",
+    "action": "Document safe setup, backup, migration and operations"
+  },
+  {
+    "id": "DOC-06",
+    "description": "Interactive OpenAPI documentation",
+    "status": "Fully Implemented",
+    "location": "Audit IDs for SRS2.6 documentation deliverables (PDF16)",
+    "evidence": "FastAPI app exposes /docs /redoc /openapi.json; runtime OpenAPI can be generated without database",
+    "action": "Keep API spec aligned with implemented resources"
+  },
+  {
+    "id": "IF-01",
+    "description": "Standard browser input and OS printing; no special hardware",
+    "status": "Partially Implemented",
+    "location": "Audit IDs for unnumbered SRS3.1.2-3.1.4 interfaces",
+    "evidence": "Standard React HTML controls; printable stylesheet, no functioning schedule PDF",
+    "action": "Verify keyboard/touch and exported printing"
+  },
+  {
+    "id": "IF-02",
+    "description": "Separate solver worker process; OS files/environment/log interfaces",
+    "status": "Incorrectly Implemented",
+    "location": "Audit IDs for unnumbered SRS3.1.2-3.1.4 interfaces",
+    "evidence": "BackgroundTasks synchronous callable shares API process; no upload/export filesystem services",
+    "action": "Add process worker lifecycle and file services"
+  },
+  {
+    "id": "IF-03",
+    "description": "TLS1.2 JSON/JWT; multipart CSV<=10MB; correct file content types",
+    "status": "Partially Implemented",
+    "location": "Audit IDs for unnumbered SRS3.1.2-3.1.4 interfaces",
+    "evidence": "JSON and restrictive configured-origin CORS tested; JWT/upload/download absent; TLS unverified",
+    "action": "Complete communications contract"
+  },
+  {
+    "id": "IF-04",
+    "description": "Browser polls generation status every2seconds",
+    "status": "Fully Implemented",
+    "location": "Audit IDs for unnumbered SRS3.1.2-3.1.4 interfaces",
+    "evidence": "GeneratePage POLL_MS=2000 and interval/poll code inspected; status endpoint exercised by existing integration tests",
+    "action": "Retain polling; prevent overlapping polling requests"
+  },
+  {
+    "id": "IF-05",
+    "description": "Table9 REST resource coverage",
+    "status": "Partially Implemented",
+    "location": "Audit IDs for unnumbered SRS3.1.2-3.1.4 interfaces",
+    "evidence": "Master/config/generation/status/entries/conflicts implemented; auth/import/publish/export/audit404",
+    "action": "Implement remaining required resources"
+  },
+  {
+    "id": "LEGAL-01",
+    "description": "SRS5.2:university privacy rules; only scheduling PII; licence notices delivered",
+    "status": "Partially Implemented",
+    "location": "SRS5.2; repository root; backend/models.py",
+    "evidence": "PII model scoped but unauthorized disclosure demonstrated; no delivered third-party licence notice bundle",
+    "action": "Enforce privacy and deliver licence inventory/notices"
+  },
+  {
+    "id": "I18N-01",
+    "description": "SRS5.3:English/UTF8 Urdu-ready strings separated;24h Asia/Karachi; configurable first weekday",
+    "status": "Partially Implemented",
+    "location": "frontend/src/pages/; frontend/src/data/reference.ts:4; backend/models.py:35-37",
+    "evidence": "English strings embedded in components; days fixed Monday-first; locale formatting uses client zone; no Urdu roundtrip",
+    "action": "Extract resources, explicit zone and per-term first-day setting"
+  },
+  {
+    "id": "REUSE-01",
+    "description": "SRS5.4:independent engine/constraints; adoptable schema and CSV template documentation",
+    "status": "Partially Implemented",
+    "location": "engine/; docs/data-contract.md; db/schema.sql; frontend/src/data/reference.ts",
+    "evidence": "Engine independent of FastAPI and tests run; templates/import implementation confined to client mock",
+    "action": "Document adoption and extract reusable authoritative import/export"
+  }
+]

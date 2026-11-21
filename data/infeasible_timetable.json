@@ -1,0 +1,279 @@
+{
+  "departments": [
+    {
+      "department_id": 1,
+      "code": "CISE",
+      "name": "Computer and Information Systems Engineering"
+    }
+  ],
+  "academic_terms": [
+    {
+      "term_id": 1,
+      "name": "Fall 2026",
+      "start_date": "2026-09-01",
+      "end_date": "2026-12-31",
+      "status": "Active"
+    }
+  ],
+  "time_slots": [
+    {"slot_id": 1, "term_id": 1, "day_of_week": 1, "slot_index": 1, "start_time": "08:00", "end_time": "09:00", "is_blocked": false, "block_reason": null},
+    {"slot_id": 2, "term_id": 1, "day_of_week": 1, "slot_index": 2, "start_time": "09:00", "end_time": "10:00", "is_blocked": false, "block_reason": null},
+    {"slot_id": 3, "term_id": 1, "day_of_week": 1, "slot_index": 3, "start_time": "10:00", "end_time": "11:00", "is_blocked": false, "block_reason": null},
+    {"slot_id": 4, "term_id": 1, "day_of_week": 1, "slot_index": 4, "start_time": "11:00", "end_time": "12:00", "is_blocked": false, "block_reason": null},
+    {"slot_id": 5, "term_id": 1, "day_of_week": 1, "slot_index": 5, "start_time": "12:00", "end_time": "13:00", "is_blocked": true, "block_reason": "Break / Prayer"},
+    {"slot_id": 6, "term_id": 1, "day_of_week": 1, "slot_index": 6, "start_time": "13:00", "end_time": "14:00", "is_blocked": false, "block_reason": null},
+
+    {"slot_id": 7, "term_id": 1, "day_of_week": 2, "slot_index": 1, "start_time": "08:00", "end_time": "09:00", "is_blocked": false, "block_reason": null},
+    {"slot_id": 8, "term_id": 1, "day_of_week": 2, "slot_index": 2, "start_time": "09:00", "end_time": "10:00", "is_blocked": false, "block_reason": null},
+    {"slot_id": 9, "term_id": 1, "day_of_week": 2, "slot_index": 3, "start_time": "10:00", "end_time": "11:00", "is_blocked": false, "block_reason": null},
+    {"slot_id": 10, "term_id": 1, "day_of_week": 2, "slot_index": 4, "start_time": "11:00", "end_time": "12:00", "is_blocked": false, "block_reason": null},
+    {"slot_id": 11, "term_id": 1, "day_of_week": 2, "slot_index": 5, "start_time": "12:00", "end_time": "13:00", "is_blocked": true, "block_reason": "Break / Prayer"},
+    {"slot_id": 12, "term_id": 1, "day_of_week": 2, "slot_index": 6, "start_time": "13:00", "end_time": "14:00", "is_blocked": false, "block_reason": null},
+
+    {"slot_id": 13, "term_id": 1, "day_of_week": 3, "slot_index": 1, "start_time": "08:00", "end_time": "09:00", "is_blocked": false, "block_reason": null},
+    {"slot_id": 14, "term_id": 1, "day_of_week": 3, "slot_index": 2, "start_time": "09:00", "end_time": "10:00", "is_blocked": false, "block_reason": null},
+    {"slot_id": 15, "term_id": 1, "day_of_week": 3, "slot_index": 3, "start_time": "10:00", "end_time": "11:00", "is_blocked": false, "block_reason": null},
+    {"slot_id": 16, "term_id": 1, "day_of_week": 3, "slot_index": 4, "start_time": "11:00", "end_time": "12:00", "is_blocked": false, "block_reason": null},
+    {"slot_id": 17, "term_id": 1, "day_of_week": 3, "slot_index": 5, "start_time": "12:00", "end_time": "13:00", "is_blocked": true, "block_reason": "Break / Prayer"},
+    {"slot_id": 18, "term_id": 1, "day_of_week": 3, "slot_index": 6, "start_time": "13:00", "end_time": "14:00", "is_blocked": false, "block_reason": null},
+
+    {"slot_id": 19, "term_id": 1, "day_of_week": 4, "slot_index": 1, "start_time": "08:00", "end_time": "09:00", "is_blocked": false, "block_reason": null},
+    {"slot_id": 20, "term_id": 1, "day_of_week": 4, "slot_index": 2, "start_time": "09:00", "end_time": "10:00", "is_blocked": false, "block_reason": null},
+    {"slot_id": 21, "term_id": 1, "day_of_week": 4, "slot_index": 3, "start_time": "10:00", "end_time": "11:00", "is_blocked": false, "block_reason": null},
+    {"slot_id": 22, "term_id": 1, "day_of_week": 4, "slot_index": 4, "start_time": "11:00", "end_time": "12:00", "is_blocked": false, "block_reason": null},
+    {"slot_id": 23, "term_id": 1, "day_of_week": 4, "slot_index": 5, "start_time": "12:00", "end_time": "13:00", "is_blocked": true, "block_reason": "Break / Prayer"},
+    {"slot_id": 24, "term_id": 1, "day_of_week": 4, "slot_index": 6, "start_time": "13:00", "end_time": "14:00", "is_blocked": false, "block_reason": null},
+
+    {"slot_id": 25, "term_id": 1, "day_of_week": 5, "slot_index": 1, "start_time": "08:00", "end_time": "09:00", "is_blocked": false, "block_reason": null},
+    {"slot_id": 26, "term_id": 1, "day_of_week": 5, "slot_index": 2, "start_time": "09:00", "end_time": "10:00", "is_blocked": false, "block_reason": null},
+    {"slot_id": 27, "term_id": 1, "day_of_week": 5, "slot_index": 3, "start_time": "10:00", "end_time": "11:00", "is_blocked": false, "block_reason": null},
+    {"slot_id": 28, "term_id": 1, "day_of_week": 5, "slot_index": 4, "start_time": "11:00", "end_time": "12:00", "is_blocked": false, "block_reason": null},
+    {"slot_id": 29, "term_id": 1, "day_of_week": 5, "slot_index": 5, "start_time": "12:00", "end_time": "13:00", "is_blocked": true, "block_reason": "Friday Prayer / Break"},
+    {"slot_id": 30, "term_id": 1, "day_of_week": 5, "slot_index": 6, "start_time": "13:00", "end_time": "14:00", "is_blocked": false, "block_reason": null}
+  ],
+  "batches": [
+    {
+      "batch_id": 1,
+      "department_id": 1,
+      "program_code": "BSCS",
+      "batch_year": 2024,
+      "section": "A",
+      "strength": 60,
+      "is_active": true
+    },
+    {
+      "batch_id": 2,
+      "department_id": 1,
+      "program_code": "BSCS",
+      "batch_year": 2024,
+      "section": "B",
+      "strength": 40,
+      "is_active": true
+    }
+  ],
+  "courses": [
+    {
+      "course_id": 1,
+      "course_code": "CS-326",
+      "title": "Software Engineering",
+      "department_id": 1,
+      "credit_hours": 4,
+      "lecture_hours": 3,
+      "lab_hours": 2,
+      "is_active": true
+    },
+    {
+      "course_id": 2,
+      "course_code": "CS-310",
+      "title": "Operating Systems",
+      "department_id": 1,
+      "credit_hours": 4,
+      "lecture_hours": 3,
+      "lab_hours": 2,
+      "is_active": true
+    },
+    {
+      "course_id": 3,
+      "course_code": "MT-212",
+      "title": "Linear Algebra",
+      "department_id": 1,
+      "credit_hours": 3,
+      "lecture_hours": 3,
+      "lab_hours": 0,
+      "is_active": true
+    }
+  ],
+  "instructors": [
+    {
+      "instructor_id": 1,
+      "department_id": 1,
+      "full_name": "Dr. Fakhra Aftab",
+      "email": "fakhra@neduet.edu.pk",
+      "max_daily_hours": 4,
+      "max_weekly_hours": 8,
+      "is_active": true
+    },
+    {
+      "instructor_id": 2,
+      "department_id": 1,
+      "full_name": "Dr. Ali Raza",
+      "email": "aliraza@neduet.edu.pk",
+      "max_daily_hours": 4,
+      "max_weekly_hours": 12,
+      "is_active": true
+    },
+    {
+      "instructor_id": 3,
+      "department_id": 1,
+      "full_name": "Prof. Sara Khan",
+      "email": "sarakhan@neduet.edu.pk",
+      "max_daily_hours": 4,
+      "max_weekly_hours": 12,
+      "is_active": true
+    }
+  ],
+  "instructor_availability": [
+    {"availability_id": 1, "instructor_id": 3, "slot_id": 1, "is_available": false},
+    {"availability_id": 2, "instructor_id": 3, "slot_id": 2, "is_available": false},
+    {"availability_id": 3, "instructor_id": 3, "slot_id": 3, "is_available": false},
+    {"availability_id": 4, "instructor_id": 3, "slot_id": 4, "is_available": false},
+    {"availability_id": 5, "instructor_id": 3, "slot_id": 6, "is_available": false},
+    {"availability_id": 6, "instructor_id": 3, "slot_id": 7, "is_available": false},
+    {"availability_id": 7, "instructor_id": 3, "slot_id": 8, "is_available": false},
+    {"availability_id": 8, "instructor_id": 3, "slot_id": 9, "is_available": false},
+    {"availability_id": 9, "instructor_id": 3, "slot_id": 10, "is_available": false},
+    {"availability_id": 10, "instructor_id": 3, "slot_id": 12, "is_available": false},
+    {"availability_id": 11, "instructor_id": 3, "slot_id": 13, "is_available": false},
+    {"availability_id": 12, "instructor_id": 3, "slot_id": 14, "is_available": false},
+    {"availability_id": 13, "instructor_id": 3, "slot_id": 15, "is_available": false},
+    {"availability_id": 14, "instructor_id": 3, "slot_id": 16, "is_available": false},
+    {"availability_id": 15, "instructor_id": 3, "slot_id": 18, "is_available": false},
+    {"availability_id": 16, "instructor_id": 3, "slot_id": 19, "is_available": false},
+    {"availability_id": 17, "instructor_id": 3, "slot_id": 20, "is_available": false},
+    {"availability_id": 18, "instructor_id": 3, "slot_id": 21, "is_available": false},
+    {"availability_id": 19, "instructor_id": 3, "slot_id": 22, "is_available": false},
+    {"availability_id": 20, "instructor_id": 3, "slot_id": 24, "is_available": false},
+    {"availability_id": 21, "instructor_id": 3, "slot_id": 25, "is_available": false},
+    {"availability_id": 22, "instructor_id": 3, "slot_id": 26, "is_available": false},
+    {"availability_id": 23, "instructor_id": 3, "slot_id": 27, "is_available": false},
+    {"availability_id": 24, "instructor_id": 3, "slot_id": 28, "is_available": false}
+  ],
+  "rooms": [
+    {
+      "room_id": 1,
+      "room_code": "Rm 301",
+      "building": "Main Block",
+      "capacity": 50,
+      "room_type": "Lecture",
+      "is_active": true
+    },
+    {
+      "room_id": 2,
+      "room_code": "Rm 204",
+      "building": "Main Block",
+      "capacity": 45,
+      "room_type": "Lecture",
+      "is_active": true
+    },
+    {
+      "room_id": 3,
+      "room_code": "Rm 105",
+      "building": "Annex Block",
+      "capacity": 30,
+      "room_type": "Lecture",
+      "is_active": true
+    },
+    {
+      "room_id": 4,
+      "room_code": "Lab 1",
+      "building": "Lab Block",
+      "capacity": 50,
+      "room_type": "Lab",
+      "is_active": true
+    },
+    {
+      "room_id": 5,
+      "room_code": "Lab 2",
+      "building": "Lab Block",
+      "capacity": 50,
+      "room_type": "Lab",
+      "is_active": true
+    }
+  ],
+  "course_offerings": [
+    {
+      "offering_id": 1,
+      "term_id": 1,
+      "course_id": 1,
+      "batch_id": 1,
+      "instructor_id": 1,
+      "enrolled_count": 45
+    },
+    {
+      "offering_id": 2,
+      "term_id": 1,
+      "course_id": 2,
+      "batch_id": 1,
+      "instructor_id": 2,
+      "enrolled_count": 60
+    },
+    {
+      "offering_id": 3,
+      "term_id": 1,
+      "course_id": 3,
+      "batch_id": 1,
+      "instructor_id": 3,
+      "enrolled_count": 45
+    },
+    {
+      "offering_id": 4,
+      "term_id": 1,
+      "course_id": 1,
+      "batch_id": 2,
+      "instructor_id": 1,
+      "enrolled_count": 40
+    }
+  ],
+  "scheduling_configs": [
+    {
+      "config_id": 1,
+      "term_id": 1,
+      "schedule_type": "Timetable",
+      "name": "Default timetable",
+      "solver_time_limit_s": 120,
+      "random_seed": 1,
+      "created_by": 1,
+      "created_at": "2026-10-20T09:00:00Z"
+    }
+  ],
+  "constraint_rules": [
+    {"rule_id": 1, "config_id": 1, "rule_code": "H01", "rule_type": "Hard", "is_enabled": true, "weight": 0, "param_value": null},
+    {"rule_id": 2, "config_id": 1, "rule_code": "H02", "rule_type": "Hard", "is_enabled": true, "weight": 0, "param_value": null},
+    {"rule_id": 3, "config_id": 1, "rule_code": "H03", "rule_type": "Hard", "is_enabled": true, "weight": 0, "param_value": null},
+    {"rule_id": 4, "config_id": 1, "rule_code": "H04", "rule_type": "Hard", "is_enabled": true, "weight": 0, "param_value": null},
+    {"rule_id": 5, "config_id": 1, "rule_code": "H05", "rule_type": "Hard", "is_enabled": true, "weight": 0, "param_value": null},
+    {"rule_id": 6, "config_id": 1, "rule_code": "H06", "rule_type": "Hard", "is_enabled": true, "weight": 0, "param_value": null},
+    {"rule_id": 7, "config_id": 1, "rule_code": "H07", "rule_type": "Hard", "is_enabled": true, "weight": 0, "param_value": null},
+    {"rule_id": 8, "config_id": 1, "rule_code": "H08", "rule_type": "Hard", "is_enabled": true, "weight": 0, "param_value": null},
+    {"rule_id": 9, "config_id": 1, "rule_code": "H09", "rule_type": "Hard", "is_enabled": true, "weight": 0, "param_value": null},
+    {"rule_id": 10, "config_id": 1, "rule_code": "H10", "rule_type": "Hard", "is_enabled": true, "weight": 0, "param_value": null}
+  ],
+  "schedules": [
+    {
+      "schedule_id": 2,
+      "term_id": 1,
+      "config_id": 1,
+      "schedule_type": "Timetable",
+      "version_no": 1,
+      "status": "Infeasible",
+      "solver_status": "infeasible",
+      "objective_score": null,
+      "run_seconds": null,
+      "generated_by": 1,
+      "generated_at": "2026-10-20T09:15:00Z",
+      "approved_by": null,
+      "published_at": null
+    }
+  ],
+  "timetable_entries": []
+}

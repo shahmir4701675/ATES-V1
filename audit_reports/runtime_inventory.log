@@ -1,0 +1,24 @@
+{
+  "python": "3.13.2",
+  "packages": {
+    "ortools": "9.15.6755",
+    "networkx": "3.7",
+    "sqlalchemy": "2.1.8",
+    "fastapi": "0.162.2",
+    "pytest": "9.2.0",
+    "uvicorn": "0.54.0",
+    "httpx": "0.28.1"
+  },
+  "unindexed_foreign_keys": [
+    "schedules.generated_by",
+    "schedules.approved_by",
+    "exam_entries.course_id",
+    "timetable_entries.instructor_id",
+    "timetable_entries.batch_id",
+    "timetable_entries.instructor_id",
+    "timetable_entries.batch_id",
+    "timetable_entries.room_id"
+  ],
+  "tables": 21,
+  "routes": 5
+}
