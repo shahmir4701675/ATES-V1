@@ -322,7 +322,11 @@ def test_e02_daily_exam_limit_exceeded(exam_dataset: TimetableDataset) -> None:
             slot.end_time = "21:00"
 
     violations = validate_exam_schedule(exam_dataset)
-    assert len(violations) == 1
+    assert len(violations) == 2
+    assert {v.rule_code for v in violations} == {"E02"}
+    assert {v.affected_entities["student_ref"] for v in violations} == {"batch:1", "student:9001"}
+    assert all(v.affected_entities["exam_count"] == 3 for v in violations)
+    violations = [v for v in violations if v.affected_entities["student_ref"] == "batch:1"]
     v = violations[0]
     assert v.rule_code == "E02"
     assert v.conflict_type == "DailyExamLimit"
@@ -357,10 +361,13 @@ def test_e04_exam_room_clash_in_session(exam_dataset: TimetableDataset) -> None:
     # Assign allocation_id=4 (exam_entry_id=5, also in exam_slot_id=3, 40 seats) to room_id=6 as well.
     alloc_4 = _get_exam_allocation(exam_dataset, 4)
     alloc_4.room_id = 6
+    _get_exam_entry(exam_dataset, 5).exam_slot_id = 3
 
     violations = validate_exam_schedule(exam_dataset)
-    assert len(violations) == 1
-    v = violations[0]
+    # B003 also detects their shared student and that student's third exam that day.
+    assert len(violations) == 3
+    assert {v.rule_code for v in violations} == {"E01", "E02", "E04"}
+    v = next(v for v in violations if v.rule_code == "E04")
     assert v.rule_code == "E04"
     assert v.conflict_type == "Room"
     assert v.severity == "Hard"
@@ -398,9 +405,10 @@ def test_mandatory_exam_constraints_cannot_be_disabled(exam_dataset: TimetableDa
 
     alloc_4 = _get_exam_allocation(exam_dataset, 4)
     alloc_4.room_id = 6
+    _get_exam_entry(exam_dataset, 5).exam_slot_id = 3
 
     validator = ExamValidator()
     violations = validator.validate(exam_dataset)
-    assert len(violations) == 1
-    assert violations[0].rule_code == "E04"
+    assert len(violations) == 3
+    assert {v.rule_code for v in violations} == {"E01", "E02", "E04"}
 

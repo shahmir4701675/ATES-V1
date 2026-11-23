@@ -47,8 +47,18 @@ from backend.models import (
     TimetableEntry,
     User,
 )
-from backend.main import app, create_app, get_cors_allowed_origins, recover_interrupted_generations
-from backend.seed import seed_database
+def __getattr__(name):
+    # Importing any backend submodule initializes this package in a spawned
+    # child. Do not build the web app/export routers inside its job deadline.
+    from importlib import import_module
+    if name in {"app", "create_app", "get_cors_allowed_origins", "recover_interrupted_generations"}:
+        value = getattr(import_module("backend.main"), name)
+    elif name == "seed_database":
+        value = getattr(import_module("backend.seed"), name)
+    else:
+        raise AttributeError(name)
+    globals()[name] = value
+    return value
 
 __all__ = [
     "ALL_MODELS",

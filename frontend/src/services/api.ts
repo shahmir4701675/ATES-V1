@@ -1,17 +1,18 @@
+import { formatTimestamp, utcTimestamp, t } from '../locales'
 /**
  * Public data service for the whole UI. Components import from here only and never call fetch.
  *
  * Real mode talks to the FastAPI server at VITE_API_URL. Set VITE_USE_MOCK=true to run on the
  * in-memory mock instead. Backend response shapes are adapted to the UI shapes in this file only.
- * Functions ending in `Mock` have no backend route yet and always use mock data (see the route list in the hand-over notes).
+ * Account, import, publication and export workflows use authoritative server endpoints.
  * Ids are numbers on the server and strings in the UI; conversion happens in `fromServer` / `toServer`.
  */
-import { DAY_NAMES, MAX_IMPORT_BYTES, importTemplateCsv } from '../data/reference'
-import { API_URL, ApiError, USE_MOCK, request, setAuthToken } from './http'
+import { DAY_NAMES, MAX_IMPORT_BYTES } from '../data/reference'
+import { API_URL, ApiError, USE_MOCK, request, requestPage, requestDownload, setAuthToken } from './http'
 import * as mock from './mockApi'
 import type {
   AppUser, AppUserInput, AuditEntry, AuditFilter, AvailabilityItem, Batch, ConfigInput, ConflictFilter, ConflictItem, ConstraintRule, Course, CourseOffering, DashboardSummary,
-  Department, Enrollment, ExamScheduleRow, ExamSlot, ExamSlotInput, GenerationConfig, GenerationStatus, ImportReport, ImportResult, ImportType, Instructor, LoginResult, MoveResult,
+  Department, Enrollment, ExamScheduleRow, ExamSlot, ExamSlotInput, GenerationConfig, GenerationStatus, ImportReport, ImportResult, ImportType, Instructor, MoveResult,
   Room, Schedule, ScheduleStatus, ScheduleType, SchedulingConfig, SlotGridInput, SolverStatus, Term, TimeSlot, TimetableEntry, TimetableRow, ActivityItem,
 } from '../types'
 
@@ -35,7 +36,9 @@ const uiSolver = (status: string | null, state: string): SolverStatus => {
   if (state === 'Generating') return 'Running'
   if (status === 'optimal') return 'Optimal'
   if (status === 'feasible') return 'Feasible'
-  return status ? 'Stopped' : 'Not started'
+  if (status === 'infeasible') return 'Infeasible'
+  if (status === 'unknown') return 'Unknown'
+  return status ? 'Failed' : 'Not started'
 }
 const toTerm = (row: Raw): Term => ({ term_id: String(row.term_id), label: row.name, start_date: row.start_date, end_date: row.end_date, status: row.status })
 const toSlot = (row: Raw): TimeSlot => ({ ...fromServer<TimeSlot>(row), day_of_week: DAY_NAMES[row.day_of_week - 1] ?? String(row.day_of_week), block_reason: row.block_reason ?? null })
@@ -80,9 +83,7 @@ export const getTimeSlots = (termId?: string): Promise<TimeSlot[]> => via(() => 
 })
 export const getExamSlots = (termId: string): Promise<ExamSlot[]> => via(() => mock.getExamSlots(termId), async () => (await request<Raw[]>(`/terms/${num(termId)}/exam-slots`)).map(toExamSlot))
 
-/** Publication state recorded by `publishScheduleMock` while the server has no publish route. */
-const publishOverlay = new Map<string, ScheduleStatus>()
-export const getSchedules = (): Promise<Schedule[]> => via(mock.getSchedules, async () => (await request<Raw[]>('/schedules')).map(toSchedule).map((item) => (publishOverlay.has(item.schedule_id) ? { ...item, status: publishOverlay.get(item.schedule_id)! } : item)))
+export const getSchedules = (): Promise<Schedule[]> => via(mock.getSchedules, async () => (await request<Raw[]>('/schedules')).map(toSchedule))
 
 const pickLatest = (list: Schedule[], type: ScheduleType, termId?: string): Schedule | null => {
   const items = list.filter((item) => item.schedule_type === type && (!termId || item.term_id === termId) && item.status !== 'Generating').sort((a, b) => b.version_no - a.version_no)
@@ -92,19 +93,22 @@ const pickLatest = (list: Schedule[], type: ScheduleType, termId?: string): Sche
 export const getConflicts = (scheduleId: string, filter: ConflictFilter = {}): Promise<ConflictItem[]> => via(() => mock.getConflicts(scheduleId, filter), async () => (await request<Raw[]>(`/schedules/${num(scheduleId)}/conflicts`, { query: { conflict_type: filter.conflict_type, severity: filter.severity } })).map((row) => fromServer<ConflictItem>(row)))
 
 export const getDashboardSummary = (): Promise<DashboardSummary> => via(mock.getDashboardSummary, async () => {
-  const [terms, schedules] = await Promise.all([getTerms(), getSchedules()])
+  const identity = await request<Raw>('/auth/me')
+  const canReview = ['Coordinator', 'Approver'].includes(identity.role)
+  const [terms, schedules] = await Promise.all([getTerms(), identity.role === 'Administrator' ? Promise.resolve([]) : getSchedules()])
   const activeTerm = terms.find((term) => term.status === 'Active') ?? null
   const [courses, instructors, rooms, batches, departments, offerings] = await Promise.all([
-    fetchAll('/courses', { is_active: true }), fetchAll('/instructors', { is_active: true }), fetchAll('/rooms', { is_active: true }), fetchAll('/batches', { is_active: true }),
-    request<Raw[]>('/departments'), activeTerm ? fetchAll('/offerings', { term_id: num(activeTerm.term_id) }) : Promise.resolve([]),
+    ...(['/courses', '/instructors', '/rooms', '/batches'] as const).map((path) => canReview ? fetchAll(path, { is_active: true }) : Promise.resolve([])),
+    canReview ? request<Raw[]>('/departments') : Promise.resolve([]), canReview && activeTerm ? fetchAll('/offerings', { term_id: num(activeTerm.term_id) }) : Promise.resolve([]),
   ])
   const timetable = pickLatest(schedules, 'Timetable', activeTerm?.term_id)
   const examSchedule = pickLatest(schedules, 'Exam schedule', activeTerm?.term_id)
-  const open = await Promise.all([timetable, examSchedule].map((item) => (item ? getConflicts(item.schedule_id).catch(() => []) : Promise.resolve([]))))
+
+  const open = await Promise.all([timetable, examSchedule].map((item) => (item && canReview ? getConflicts(item.schedule_id) : Promise.resolve([]))))
   const conflicts = open.flat()
   const activity: ActivityItem[] = [...schedules].sort((a, b) => (b.generated_at ?? '').localeCompare(a.generated_at ?? '')).slice(0, 3).map((item) => ({
     id: item.schedule_id, title: `${item.schedule_type} version ${item.version_no} ${item.status.toLowerCase()}`,
-    detail: item.generated_at ? new Date(item.published_at ?? item.generated_at).toLocaleString('en-GB') : '', tone: item.status === 'Published' ? 'success' : item.status === 'Infeasible' ? 'warning' : 'neutral',
+    detail: item.generated_at ? formatTimestamp(item.published_at ?? item.generated_at) : '', tone: item.status === 'Published' ? 'success' : item.status === 'Infeasible' ? 'warning' : 'neutral',
   }))
   return {
     activeTerm, timetable, examSchedule,
@@ -125,10 +129,14 @@ export const getTimetable = (scheduleId?: string, termId?: string): Promise<Time
   const id = await resolveSchedule(scheduleId, 'Timetable')
   if (!id) return []
   const view = await request<Raw>(`/schedules/${num(id)}/entries`)
-  const [courses, rooms, instructors, batches, slots] = await Promise.all([getCourses(), getRooms(), getInstructors(), getBatches(), getTimeSlots(String(view.term_id))])
+  const courses = (view.context.courses as Raw[]).map((row) => fromServer<Course>(row))
+  const rooms = (view.context.rooms as Raw[]).map((row) => fromServer<Room>(row))
+  const instructors = (view.context.instructors as Raw[]).map((row) => fromServer<Instructor>(row))
+  const batches = (view.context.batches as Raw[]).map((row) => fromServer<Batch>(row))
+  const slots = (view.context.time_slots as Raw[]).map(toSlot)
   const byId = <T,>(list: T[], key: keyof T) => new Map(list.map((item) => [String(item[key]), item]))
   const ctx = { courses: byId(courses, 'course_id'), rooms: byId(rooms, 'room_id'), instructors: byId(instructors, 'instructor_id'), batches: byId(batches, 'batch_id'), slots: byId(slots, 'slot_id') }
-  const entries: TimetableEntry[] = (view.timetable_entries as Raw[]).map((row) => fromServer<TimetableEntry>({ entry_id: row.entry_id, schedule_id: row.schedule_id, offering_id: row.offering_id, instructor_id: row.instructor_id, batch_id: row.batch_id, room_id: row.room_id, slot_id: row.slot_id, session_type: row.session_type, is_locked: row.is_locked, is_manual_override: row.is_manual_override }))
+  const entries: TimetableEntry[] = (view.timetable_entries as Raw[]).map((row) => fromServer<TimetableEntry>({ entry_id: row.entry_id, schedule_id: row.schedule_id, offering_id: row.offering_id, instructor_id: row.instructor_id, batch_id: row.batch_id, room_id: row.room_id, slot_id: row.slot_id, session_type: row.session_type, is_locked: row.is_locked, is_manual_override: row.is_manual_override, edit_revision: view.edit_revision }))
   const courseOf = new Map((view.timetable_entries as Raw[]).map((row) => [String(row.entry_id), String(row.course_id)]))
   const groups = new Map<string, TimetableEntry[]>()
   entries.forEach((entry) => {
@@ -143,7 +151,7 @@ export const getTimetable = (scheduleId?: string, termId?: string): Promise<Time
     const runs: TimetableEntry[][] = []
     sorted.forEach((entry, index) => {
       const previous = sorted[index - 1]
-      const contiguous = Boolean(previous && ctx.slots.get(entry.slot_id)!.slot_index === ctx.slots.get(previous.slot_id)!.slot_index + 1 && previous.session_type === entry.session_type)
+      const contiguous = Boolean(previous && ctx.slots.get(entry.slot_id)!.slot_index === ctx.slots.get(previous.slot_id)!.slot_index + 1 && ctx.slots.get(previous.slot_id)!.end_time === ctx.slots.get(entry.slot_id)!.start_time && previous.session_type === entry.session_type)
       if (!runs.length || !contiguous) runs.push([entry]); else runs[runs.length - 1].push(entry)
     })
     runs.forEach((run) => {
@@ -163,7 +171,10 @@ export const getExamSchedule = (scheduleId?: string): Promise<ExamScheduleRow[]>
   const id = await resolveSchedule(scheduleId, 'Exam schedule')
   if (!id) return []
   const view = await request<Raw>(`/schedules/${num(id)}/entries`)
-  const [courses, rooms, batches, offerings] = await Promise.all([getCourses(), getRooms(), getBatches(), getCourseOfferings(String(view.term_id))])
+  const courses = (view.context.courses as Raw[]).map((row) => fromServer<Course>(row))
+  const rooms = (view.context.rooms as Raw[]).map((row) => fromServer<Room>(row))
+  const batches = (view.context.batches as Raw[]).map((row) => fromServer<Batch>(row))
+  const offerings = (view.context.course_offerings as Raw[]).map((row) => fromServer<CourseOffering>(row))
   const courseMap = new Map(courses.map((item) => [item.course_id, item]))
   const roomMap = new Map(rooms.map((item) => [item.room_id, item]))
   const batchMap = new Map(batches.map((item) => [item.batch_id, item]))
@@ -173,7 +184,7 @@ export const getExamSchedule = (scheduleId?: string): Promise<ExamScheduleRow[]>
     if (!course) return []
     const linked = [...new Set(offerings.filter((item) => item.course_id === course.course_id).map((item) => item.batch_id))].map((batchId) => batchMap.get(batchId)).filter((item): item is Batch => Boolean(item))
     return [{
-      entry: { exam_entry_id: String(row.exam_entry_id), schedule_id: String(row.schedule_id), course_id: course.course_id, exam_slot_id: String(row.exam_slot_id), student_count: row.student_count, is_locked: row.is_locked },
+      entry: { exam_entry_id: String(row.exam_entry_id), schedule_id: String(row.schedule_id), course_id: course.course_id, exam_slot_id: String(row.exam_slot_id), student_count: row.student_count, is_locked: row.is_locked, is_manual_override: row.is_manual_override, edit_revision: view.edit_revision },
       course,
       examSlot: { exam_slot_id: String(row.exam_slot_id), term_id: String(view.term_id), exam_date: row.exam_date, start_time: row.start_time, end_time: row.end_time, label: row.label ?? '' },
       rooms: (row.room_allocations as Raw[]).map((alloc) => ({ room: roomMap.get(String(alloc.room_id)) ?? { room_id: String(alloc.room_id), room_code: alloc.room_code, building: alloc.building, capacity: 0, room_type: 'Exam Hall' as const, is_active: true }, seats: alloc.seats_allocated })),
@@ -188,25 +199,32 @@ async function putEntry(scheduleId: string, entryId: string, body: Raw): Promise
   if (res.__status === 409) return { ok: false, message: String(res.detail ?? 'The move violates a hard constraint.'), rule_code: res.rule_code ?? null, violated_constraints: res.violated_constraints ?? [] }
   return { ok: true }
 }
-export const moveTimetableEntry = (scheduleId: string, entryId: string, change: { slot_id?: string; room_id?: string }): Promise<MoveResult> => via(() => mock.moveTimetableEntry(scheduleId, entryId, change), () => putEntry(scheduleId, entryId, toServer(change)))
-export const moveExamEntry = (scheduleId: string, examEntryId: string, change: { exam_slot_id?: string }): Promise<MoveResult> => via(() => mock.moveExamEntry(scheduleId, examEntryId, change), () => putEntry(scheduleId, examEntryId, toServer(change)))
+export interface EntryChange { slot_id?: string; room_id?: string; exam_slot_id?: string; is_locked?: boolean; expected_revision?: number; room_allocations?: Array<{ room_id: string; seats_allocated: number }> }
+const editBody = (change: EntryChange) => toServer({ ...change, room_allocations: change.room_allocations?.map((r) => ({ room_id: num(r.room_id), seats_allocated: r.seats_allocated })) })
+export const moveTimetableEntry = (scheduleId: string, entryId: string, change: EntryChange): Promise<MoveResult> => putEntry(scheduleId, entryId, editBody(change))
+export const moveExamEntry = (scheduleId: string, entryId: string, change: EntryChange): Promise<MoveResult> => putEntry(scheduleId, entryId, editBody(change))
+export interface EditContext { revision: number; rooms: Room[]; slots: TimeSlot[]; examSlots: ExamSlot[] }
+export const getScheduleEditContext = async (id: string): Promise<EditContext> => {
+  const view = await request<Raw>(`/schedules/${num(id)}/entries`)
+  return { revision: view.edit_revision, rooms: view.context.rooms.map((r: Raw) => fromServer<Room>(r)), slots: view.context.time_slots.map(toSlot), examSlots: view.context.exam_slots.map(toExamSlot) }
+}
+export const undoSchedule = async (id: string, revision: number): Promise<void> => { await request(`/schedules/${num(id)}/undo`, { method: 'POST', body: { expected_revision: revision } }) }
 
 /* ---------------------------------------------------------------------- generation */
-interface RunMeta { startedAt: number; timeLimit: number; cancelled: boolean }
+interface RunMeta { startedAt: number; timeLimit: number }
 const runMeta = new Map<string, RunMeta>()
 
 export const generateSchedule = (config: GenerationConfig): Promise<{ run_id: string }> => via(() => mock.generateSchedule(config), async () => {
   const res = await request<Raw>('/schedules/generate', { method: 'POST', body: toServer({ term_id: config.term_id, schedule_type: serverType(config.schedule_type), solver_time_limit_s: config.time_limit, config_id: config.config_id, random_seed: config.random_seed }) })
   const run_id = String(res.schedule_id)
-  runMeta.set(run_id, { startedAt: Date.now(), timeLimit: config.time_limit, cancelled: false })
+  runMeta.set(run_id, { startedAt: Date.now(), timeLimit: config.time_limit })
   return { run_id }
 })
 
-/** The server has no cancel route yet: this stops following the run in the UI; the solver still finishes on the server. */
-export const cancelGeneration = (run_id: string): void => {
-  if (USE_MOCK) { mock.cancelGeneration(run_id); return }
-  const meta = runMeta.get(run_id)
-  if (meta) meta.cancelled = true
+/** Cancellation is acknowledged by the server, never inferred from stopped polling. */
+export const cancelGeneration = async (run_id: string): Promise<void> => {
+  if (USE_MOCK) throw new Error('Server cancellation requires real API mode.')
+  await request<Raw>(`/schedules/${num(run_id)}/cancel`, { method: 'POST' })
 }
 
 export const getScheduleStatus = (run_id: string): Promise<GenerationStatus> => via(() => mock.getScheduleStatus(run_id), async () => {
@@ -214,16 +232,22 @@ export const getScheduleStatus = (run_id: string): Promise<GenerationStatus> => 
   const schedule = toSchedule(row)
   const meta = runMeta.get(run_id)
   const running = schedule.status === 'Generating'
-  const startedAt = meta?.startedAt ?? Date.parse(row.generated_at)
+  const startedAt = meta?.startedAt ?? utcTimestamp(row.generated_at).getTime()
   const elapsed_seconds = running || schedule.run_seconds === null ? Math.max(0, Math.round((Date.now() - startedAt) / 1000)) : Math.round(schedule.run_seconds)
   const unit = schedule.schedule_type === 'Timetable' ? 'sessions' : 'exams'
   const solver = row.solver_status ? ` Solver result: ${row.solver_status}.` : ''
-  if (running && meta?.cancelled) {
-    return { run_id, status: 'Draft', solver_status: 'Stopped', progress: Math.min(100, Math.round((elapsed_seconds / meta.timeLimit) * 100)), elapsed_seconds, message: 'Stopped following this run. The server has no cancel route, so the solver will finish in the background as a new version.', result: null }
+  if (row.generation_state === 'Cancelled') {
+    return { run_id, status: row.worker_stopped ? 'Infeasible' : 'Generating', solver_status: row.worker_stopped ? 'Cancelled' : 'Running', progress: row.worker_stopped ? 100 : 95, elapsed_seconds, message: row.worker_stopped ? 'Generation cancelled on the server. No result was saved.' : 'Cancellation requested; waiting for the server worker to stop.', result: null }
+  }
+  if (row.generation_state === 'TimedOut' || row.generation_state === 'Interrupted') {
+    return { run_id, status: 'Infeasible', solver_status: row.generation_state === 'TimedOut' ? 'TimedOut' : 'Failed', progress: 100, elapsed_seconds, message: t(row.generation_state === 'TimedOut' ? 'status.timeout' : 'status.failure'), result: null }
   }
   if (running) {
     const limit = meta?.timeLimit ?? 120
     return { run_id, status: 'Generating', solver_status: 'Running', progress: Math.min(95, Math.round((elapsed_seconds / limit) * 100)), elapsed_seconds, message: 'The solver is running on the server.', result: null }
+  }
+  if (schedule.status === 'Infeasible' && row.solver_status === 'unknown') {
+    return { run_id, status: 'Infeasible', solver_status: 'Unknown', progress: 100, elapsed_seconds, message: t('status.unknown'), result: null }
   }
   const message = schedule.status === 'Generated'
     ? `${schedule.schedule_type} version ${schedule.version_no} generated with ${schedule.entry_count ?? 0} ${unit} and ${schedule.conflict_count ?? 0} conflict record(s).${solver}`
@@ -287,6 +311,8 @@ export const activateTerm = (id: string): Promise<void> => via<void>(() => { moc
 })
 export const closeTerm = (id: string) => remove('terms', id)
 export const generateSlotGrid = (termId: string, input: SlotGridInput): Promise<TimeSlot[]> => via(() => mock.generateSlotGrid(termId, input), async () => (await request<Raw[]>(`/terms/${num(termId)}/slots/generate`, { method: 'POST', body: input })).map(toSlot))
+/** Save the complete grid atomically; existing weekday/index pairs keep their IDs. */
+export const saveSlotGrid = (termId: string, input: SlotGridInput): Promise<TimeSlot[]> => via(() => mock.saveSlotGrid(termId, input), async () => (await request<Raw[]>(`/terms/${num(termId)}/slots/generate`, { method: 'PUT', body: input })).map(toSlot))
 export const updateSlot = (termId: string, slotId: string, change: { is_blocked: boolean; block_reason: string | null }): Promise<TimeSlot> => via(() => mock.updateSlot(termId, slotId, change), async () => toSlot(await request<Raw>(`/terms/${num(termId)}/slots/${num(slotId)}`, { method: 'PUT', body: change })))
 export const createExamSlot = (termId: string, input: ExamSlotInput): Promise<ExamSlot> => via(() => mock.createExamSlot(termId, input), async () => toExamSlot(await request<Raw>(`/terms/${num(termId)}/exam-slots`, { method: 'POST', body: input })))
 
@@ -295,44 +321,59 @@ export const getAvailability = (instructorId: string): Promise<AvailabilityItem[
 export const saveAvailability = (instructorId: string, items: AvailabilityItem[]): Promise<AvailabilityItem[]> => via(() => mock.saveAvailability(instructorId, items), async () => (await request<Raw[]>(`/instructors/${num(instructorId)}/availability`, { method: 'PUT', body: { slots: items.map((item) => ({ slot_id: num(item.slot_id), is_available: item.is_available })) } })).map((row) => ({ slot_id: String(row.slot_id), is_available: Boolean(row.is_available) })))
 
 /* ------------------------------------------------------------ configurations and rules */
-const hiddenConfigs = new Set<string>()
-export const getConfigs = (termId?: string, scheduleType?: ScheduleType): Promise<SchedulingConfig[]> => via(() => mock.getConfigs(termId, scheduleType), async () => (await request<Raw[]>('/configs', { query: { term_id: termId ? num(termId) : undefined, schedule_type: scheduleType ? serverType(scheduleType) : undefined } })).map(toConfig).filter((item) => !hiddenConfigs.has(item.config_id)))
+export const getConfigs = (termId?: string, scheduleType?: ScheduleType): Promise<SchedulingConfig[]> => via(() => mock.getConfigs(termId, scheduleType), async () => (await request<Raw[]>('/configs', { query: { term_id: termId ? num(termId) : undefined, schedule_type: scheduleType ? serverType(scheduleType) : undefined } })).map(toConfig))
 export const createConfig = (input: ConfigInput): Promise<SchedulingConfig> => via(() => mock.createConfig(input), async () => toConfig(await request<Raw>('/configs', { method: 'POST', body: { term_id: num(input.term_id), schedule_type: serverType(input.schedule_type), name: input.name, solver_time_limit_s: input.solver_time_limit_s, random_seed: input.random_seed, rules: input.rules } })))
 /** Clone = create a configuration with the source rules (uses the existing POST /configs). */
 export const cloneConfig = (source: SchedulingConfig, name: string): Promise<SchedulingConfig> => createConfig({ term_id: source.term_id, schedule_type: source.schedule_type, name, solver_time_limit_s: source.solver_time_limit_s, random_seed: source.random_seed, rules: source.rules })
 export const updateConfig = (configId: string, change: Partial<Pick<SchedulingConfig, 'name' | 'solver_time_limit_s' | 'random_seed'>>): Promise<SchedulingConfig> => via(() => mock.updateConfig(configId, change), async () => toConfig(await request<Raw>(`/configs/${num(configId)}`, { method: 'PUT', body: change })))
 export const saveConfigRules = (configId: string, rules: ConstraintRule[]): Promise<ConstraintRule[]> => via(() => mock.saveConfigRules(configId, rules), async () => (await request<Raw[]>(`/configs/${num(configId)}/rules`, { method: 'PUT', body: { rules } })).map(toRule))
 
-/* ------------------------------------------------------- functions without a backend route */
-/** No DELETE /configs/{id} on the server. The configuration is only hidden in this browser session. */
-export const deleteConfigMock = (configId: string): Promise<void> => via<void>(() => mock.deleteConfig(configId), async () => {
-  if ((await getSchedules()).some((item) => item.config_id === configId)) throw new Error('This configuration was used to generate a schedule and cannot be deleted.')
-  hiddenConfigs.add(configId)
-})
+export const deleteConfig = (id: string): Promise<void> => request(`/configs/${num(id)}`, { method: 'DELETE' })
+export const saveConfiguration = (id: string, solver_time_limit_s: number, random_seed: number, rules: ConstraintRule[]): Promise<SchedulingConfig> => request<Raw>(`/configs/${num(id)}`, { method: 'PUT', body: { solver_time_limit_s, random_seed, rules } }).then(toConfig)
 
-/** No POST /schedules/{id}/publish on the server. Publication is recorded in this browser session only. */
-export const publishScheduleMock = (scheduleId: string): Promise<Schedule> => via(() => mock.publishSchedule(scheduleId), async () => {
-  const list = await getSchedules()
-  const target = list.find((item) => item.schedule_id === scheduleId)
-  if (!target) throw new Error('Schedule not found.')
-  if (target.status !== 'Generated') throw new Error('Only a Generated version can be published.')
-  if ((target.hard_violation_count ?? 0) > 0) throw new Error('A version with hard violations cannot be published.')
-  list.filter((item) => item.schedule_type === target.schedule_type && item.term_id === target.term_id && item.status === 'Published').forEach((item) => publishOverlay.set(item.schedule_id, 'Archived'))
-  publishOverlay.set(scheduleId, 'Published')
-  return { ...target, status: 'Published', published_at: new Date().toISOString() }
-})
+export const publishSchedule = async (scheduleId: string): Promise<Schedule> => toSchedule(await request<Raw>(`/schedules/${num(scheduleId)}/publish`, { method: 'POST' }))
+export const archiveSchedule = async (scheduleId: string): Promise<Schedule> => toSchedule(await request<Raw>(`/schedules/${num(scheduleId)}/archive`, { method: 'POST' }))
 
-/** Template download is generated in the browser (no GET /import/{type}/template route). */
-export const getImportTemplate = (type: ImportType): Promise<string> => Promise.resolve(importTemplateCsv(type))
-/** No POST /import/{type} on the server. The file is validated locally against the schema rules. */
-export const validateImportMock = async (type: ImportType, file: File): Promise<ImportReport> => {
+export const getImportTemplate = (type: ImportType): Promise<string> => request<string>(`/import/${type}/template`)
+export const previewImport = async (type: ImportType, file: File): Promise<ImportReport> => {
   if (file.size > MAX_IMPORT_BYTES) throw new Error('The file is larger than the 10 MB limit.')
-  if (!/\.csv$/i.test(file.name)) throw new Error('Only .csv files can be imported.')
-  return mock.validateImport(type, file.name, await file.text())
+  const form = new FormData(); form.append('file', file)
+  return request<ImportReport>(`/import/${type}`, { method: 'POST', body: form })
 }
-export const confirmImportMock = (importId: string, mode: 'valid_only' | 'cancel'): Promise<ImportResult> => Promise.resolve().then(() => mock.confirmImport(importId, mode))
+export const confirmImport = (importId: string, mode: 'valid_only' | 'cancel'): Promise<ImportResult> => request(`/import/preview/${encodeURIComponent(importId)}/confirm`, { method: 'POST', body: { mode } })
+export interface ImportHistoryRow { import_id: number; entity_type: string; file_name: string; rows_total: number; rows_imported: number; rows_rejected: number; imported_at: string }
+export const getImportHistory = (): Promise<ImportHistoryRow[]> => fetchAll('/import/history') as Promise<ImportHistoryRow[]>
 
-export const loginMock = (username: string, password: string): Promise<LoginResult> => Promise.resolve(mock.login(username, password))
-export const getUsersMock = (): Promise<AppUser[]> => Promise.resolve(mock.getUsers())
-export const saveUserMock = (id: string | null, input: AppUserInput): Promise<AppUser> => Promise.resolve().then(() => mock.saveUser(id, input))
-export const getAuditLogMock = (filter: AuditFilter = {}): Promise<AuditEntry[]> => Promise.resolve(mock.getAuditLog(filter))
+/** Authentication always uses the server, including when demo data mode is enabled. */
+export const login = async (username: string, password: string): Promise<AppUser> => {
+  const response = await request<{ access_token: string; user: Raw }>('/auth/login', { method: 'POST', body: { username, password } })
+  setAuthToken(response.access_token)
+  return fromServer<AppUser>(response.user)
+}
+export const logout = async (): Promise<void> => {
+  try { await request('/auth/logout', { method: 'POST' }) } finally { setAuthToken(null) }
+}
+export const getUsers = async (): Promise<AppUser[]> => (await fetchAll('/users')).map((row) => fromServer<AppUser>(row))
+export const getAuditActions = (): Promise<string[]> => request('/audit/actions')
+export interface ListPageQuery { page: number; q: string; sort: string; direction: 'asc' | 'desc' }
+export const getUsersPage = async (query: ListPageQuery) => {
+  const page = await requestPage<Raw>('/users', { query: { ...query, page_size: 25 } })
+  return { ...page, items: page.items.map((row) => fromServer<AppUser>(row)) }
+}
+export const getAuditPage = async (query: ListPageQuery, filter: AuditFilter) => {
+  const page = await requestPage<Raw>('/audit', { query: { ...query, ...filter, user_id: filter.user_id ? num(filter.user_id) : undefined, page_size: 25 } })
+  return { ...page, items: page.items.map((row) => fromServer<AuditEntry>(row)) }
+}
+export const saveUser = async (id: string | null, input: AppUserInput): Promise<AppUser> => fromServer<AppUser>(await request<Raw>(id === null ? '/users' : `/users/${num(id)}`, { method: id === null ? 'POST' : 'PUT', body: toServer({ ...input, password: input.password || undefined }) }))
+export const getAuditLog = async (filter: AuditFilter = {}): Promise<AuditEntry[]> => (await fetchAll('/audit', { ...filter, user_id: filter.user_id ? num(filter.user_id) : undefined })).map((row) => fromServer<AuditEntry>(row))
+export const changePassword = async (current_password: string, new_password: string): Promise<void> => { await request('/auth/password', { method: 'POST', body: { current_password, new_password } }); setAuthToken(null); window.dispatchEvent(new Event('ates:auth-required')) }
+
+/** Download only after the server has authorized, generated and audited the file. */
+export const exportSchedule = async (scheduleId: string, format: 'csv' | 'pdf', filters: Record<string, string | number | undefined> = {}, groupBy?: 'batch' | 'instructor'): Promise<void> => {
+  const { blob, filename } = await requestDownload(`/schedules/${num(scheduleId)}/export`, { ...filters, format, group_by: groupBy })
+  const url = URL.createObjectURL(blob)
+  const link = Object.assign(document.createElement('a'), { href: url, download: filename })
+  document.body.appendChild(link); link.click(); link.remove()
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
+export const getScheduleTimeSlots = (scheduleId: string, termId: string): Promise<TimeSlot[]> => via(() => mock.getTimeSlots(termId), async () => ((await request<Raw>(`/schedules/${num(scheduleId)}/entries`)).context.time_slots as Raw[]).map(toSlot))

@@ -41,7 +41,7 @@ from backend.seed import seed_database
 
 
 @pytest.fixture()
-def sqlite_app_env(tmp_path: Path) -> Tuple[TestClient, Engine, sessionmaker[Session]]:
+def sqlite_app_env(tmp_path: Path, test_auth_settings, login_as) -> Tuple[TestClient, Engine, sessionmaker[Session]]:
     """Create a fresh SQLite-backed FastAPI `TestClient` seeded with the ATES dataset."""
     db_file = tmp_path / "test_ates_api.sqlite"
     db_url = f"sqlite:///{db_file.as_posix()}"
@@ -50,8 +50,9 @@ def sqlite_app_env(tmp_path: Path) -> Tuple[TestClient, Engine, sessionmaker[Ses
     session_factory = create_session_factory(engine)
     seed_database(session_factory)
 
-    app = create_app(engine=engine, session_factory=session_factory)
+    app = create_app(engine=engine, session_factory=session_factory, auth_settings=test_auth_settings)
     client = TestClient(app)
+    client.headers.update(login_as(client, session_factory))
     return client, engine, session_factory
 
 
@@ -101,18 +102,20 @@ def test_cors_allows_react_dev_server_only(
 
 def test_role_check_readiness_enforces_roles_when_header_present(
     sqlite_app_env: Tuple[TestClient, Engine, sessionmaker[Session]],
+    login_as,
 ) -> None:
-    """Verify routes work without auth in Milestone 5b, but reject unauthorized roles when supplied."""
-    client, _, _ = sqlite_app_env
+    """Real credentials grant access; anonymous/forged headers never grant a role."""
+    client, _, factory = sqlite_app_env
 
-    # Unauthenticated GET works in Milestone 5b
+    assert client.get("/departments", headers={"Authorization": ""}).status_code == 401
+    # The default fixture is authenticated by the real login endpoint.
     get_res = client.get("/departments")
     assert get_res.status_code == 200
 
     # Student role is forbidden from creating courses or generating schedules
     forbidden_course = client.post(
         "/courses",
-        headers={"X-User-Role": "Student"},
+        headers={**login_as(client, factory, "cs24a_9002"), "X-User-Role": "Coordinator"},
         json={
             "department_id": 1,
             "course_code": "CS999",
@@ -126,7 +129,7 @@ def test_role_check_readiness_enforces_roles_when_header_present(
 
     forbidden_gen = client.post(
         "/schedules/generate",
-        headers={"X-User-Role": "Faculty"},
+        headers={**login_as(client, factory, "fakhra"), "X-User-Role": "Coordinator"},
         json={"term_id": 1, "schedule_type": "Timetable"},
     )
     assert forbidden_gen.status_code == 403
@@ -555,6 +558,20 @@ def test_put_schedule_entry_valid_move_and_409_on_violated_timetable_constraints
     """Verify `PUT /schedules/{id}/entries/{entry_id}` updates valid moves and returns 409 naming violated H-codes."""
     client, _, session_factory = sqlite_app_env
 
+    # Include the capacity-test room in the immutable generation context (B004).
+    tiny_room_res = client.post(
+        "/rooms",
+        json={"room_code": "TINY-10", "building": "Block A", "capacity": 10, "room_type": "Lecture"},
+    )
+    assert tiny_room_res.status_code == 201
+    tiny_room_id = tiny_room_res.json()["room_id"]
+    spacious_room_res = client.post(
+        "/rooms",
+        json={"room_code": "R-SPACIOUS-100", "building": "Block A", "capacity": 100, "room_type": "Lecture"},
+    )
+    assert spacious_room_res.status_code == 201
+    spacious_room_id = spacious_room_res.json()["room_id"]
+
     # Generate a valid timetable first
     gen_res = client.post(
         "/schedules/generate",
@@ -658,18 +675,7 @@ def test_put_schedule_entry_valid_move_and_409_on_violated_timetable_constraints
     assert "H06" in h06_body["violated_constraints"]
     assert "H06" in h06_body["detail"]
 
-    # --- Case 5: H04 Room Capacity (create a tiny room of capacity 10 and move target_entry into it) ---
-    tiny_room_res = client.post(
-        "/rooms",
-        json={
-            "room_code": "TINY-10",
-            "building": "Block A",
-            "capacity": 10,
-            "room_type": "Lecture",
-        },
-    )
-    assert tiny_room_res.status_code == 201
-    tiny_room_id = tiny_room_res.json()["room_id"]
+    # --- Case 5: H04 Room Capacity (move target_entry into the captured capacity-10 room) ---
 
     h04_res = client.put(
         f"/schedules/{schedule_id}/entries/{target_entry_id}",
@@ -693,18 +699,7 @@ def test_put_schedule_entry_valid_move_and_409_on_violated_timetable_constraints
     assert unchanged_target["is_manual_override"] is False
 
     # --- Case 6: Valid Move & Lock (`200 OK`, marks `is_manual_override = True` and `is_locked = True`) ---
-    # Add a spacious new Lecture room so moving `target_entry` to that room at its current slot is guaranteed clash-free
-    spacious_room_res = client.post(
-        "/rooms",
-        json={
-            "room_code": "R-SPACIOUS-100",
-            "building": "Block A",
-            "capacity": 100,
-            "room_type": "Lecture",
-        },
-    )
-    assert spacious_room_res.status_code == 201
-    spacious_room_id = spacious_room_res.json()["room_id"]
+    # The spacious room was captured before generation, so the version can use it.
 
     valid_move_res = client.put(
         f"/schedules/{schedule_id}/entries/{target_entry_id}",

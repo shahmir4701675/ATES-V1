@@ -1,0 +1,44 @@
+{
+  "project": {
+    "passed": 362,
+    "failed": 0
+  },
+  "B001": {
+    "passed": 37,
+    "failed": 0
+  },
+  "B002": {
+    "passed": 87,
+    "failed": 0
+  },
+  "B003": {
+    "passed": 60,
+    "failed": 0
+  },
+  "B004": {
+    "passed": 99,
+    "failed": 0
+  },
+  "original_B004_audit": {
+    "passed": 1,
+    "failed": 0
+  },
+  "full_audit": {
+    "passed": 16,
+    "failed": 12
+  },
+  "sqlite_migration": {
+    "subset_of_B004": true,
+    "failed": 0,
+    "passed": 2
+  },
+  "frontend": {
+    "tooling_typescript": "PASS",
+    "production_build": "PASS",
+    "application_typescript": "PASS"
+  },
+  "postgresql": "Not Verified",
+  "production_data_modified": false,
+  "status": "Partially resolved",
+  "legacy_official_context_recovery": "Pending trustworthy original inputs and reviewed recovery"
+}

@@ -1,0 +1,42 @@
+.......................F.F..                                             [100%]
+================================== FAILURES ===================================
+_____________________ test_exam_manual_override_persisted _____________________
+
+authorized_env = (<starlette.testclient.TestClient object at 0x0000027E3B089550>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_exam_manual_override_persisted(authorized_env):
+        c,f=authorized_env
+        r=c.put('/schedules/2/entries/1',json={'is_locked':True})
+        assert r.status_code==200, str(r.text)
+>       assert 'is_manual_override' in r.json(), 'Exam response/model cannot preserve manual override flag'
+E       AssertionError: Exam response/model cannot preserve manual override flag
+E       assert 'is_manual_override' in {'exam_entry_id': 1, 'schedule_id': 2, 'course_id': 1, 'course_code': 'CS-326', ...}
+E        +  where {'exam_entry_id': 1, 'schedule_id': 2, 'course_id': 1, 'course_code': 'CS-326', ...} = json()
+E        +    where json = <Response [200 OK]>.json
+
+audit_reports\test_audit_probes.py:144: AssertionError
+_________________________ test_mutation_audit_written _________________________
+
+authorized_env = (<starlette.testclient.TestClient object at 0x0000027E39B35630>, sessionmaker(class_='Session', bind=Engine(sqlite:///%3Amemory%3A), autoflush=False, expire_on_commit=False))
+
+    def test_mutation_audit_written(authorized_env):
+        c,f=authorized_env
+        r=c.post('/rooms',json=dict(room_code='LOGTEST',building='X',capacity=30,room_type='Lecture'))
+        assert r.status_code==201
+        with f() as s:
+            logs=s.scalars(select(AuditLog).where(AuditLog.entity_type=='rooms')).all()
+>       assert logs, 'Room creation has no persistent audit event'
+E       AssertionError: Room creation has no persistent audit event
+E       assert []
+
+audit_reports\test_audit_probes.py:159: AssertionError
+============================== warnings summary ===============================
+.venv\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\DELL\OneDrive\Desktop\ATES-V1\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED audit_reports/test_audit_probes.py::test_exam_manual_override_persisted
+FAILED audit_reports/test_audit_probes.py::test_mutation_audit_written - Asse...
+2 failed, 26 passed, 1 warning in 11.90s

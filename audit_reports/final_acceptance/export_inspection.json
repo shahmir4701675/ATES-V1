@@ -1,0 +1,84 @@
+{
+  "journey_exam.pdf": {
+    "pages": 1,
+    "landscape": true,
+    "first_page_text": "NED University of Engineering & Technology\nJourney term | Exam | Version 1 | Generated\nFilter: All authorized entries\nGenerated: 2026-11-21T16:23:44Z UTC\nPage 1\nDay / date\nStart\nEnd\nCourse\nType\nInstructor\nRoom / exam seat allocation\nBatch\n2030-12-01\n09:00\n10:00\nC1\nExam\nInstructor 1\nR4 [QA]: 1 seats\nQA1 2030 A\n2030-12-01\n09:00\n10:00\nC2\nExam\nInstructor 2\nR3 [QA]: 1 seats\nQA1 2030 A\n"
+  },
+  "journey_timetable.pdf": {
+    "pages": 1,
+    "landscape": true,
+    "first_page_text": "NED University of Engineering & Technology\nJourney term | Timetable | Version 2 | Published\nFilter: batch_id=1\nGenerated: 2026-11-21T16:23:39Z UTC\nPage 1\nDay / date\nStart\nEnd\nCourse\nType\nInstructor\nRoom / exam seat allocation\nBatch\nMonday\n09:00\n10:00\nC2\nLecture\nInstructor 2\nR2\nQA1-30 A\nMonday\n10:00\n11:00\nC1\nLecture\nInstructor 1\nR2\nQA1-30 A\n"
+  },
+  "reference_1.pdf": {
+    "pages": 9,
+    "landscape": true,
+    "first_page_text": "NED University of Engineering & Technology\nAcceptance reference 2030 | Timetable | Version 1 | Generated\nFilter: All authorized entries\nGenerated: 2026-11-21T16:07:42Z UTC\nPage 1\nDay / date\nStart\nEnd\nCourse\nType\nInstructor\nRoom / exam seat allocation\nBatch\nMonday\n08:00\n09:00\nC003\nLecture\nInstructor 3\nR07\nQA17-30 A\nMonday\n08:00\n09:00\nC005\nLab\nInstructor 5\nR40\nQA01-30 A\nMonday\n08:00\n09:00\nC009\nLecture\nInstructor 9\nR06\nQA18-30 A\nMonday\n08:00\n09:00\nC014\nLecture\nInstructor 14\nR05\nQA19-30 A\nMonday\n08:00\n09:00\nC017\nLecture\nInstructor 17\nR20\nQA04-30 A\nMonday\n08:00\n09:00\nC019\nLecture\nInstructor 19\nR04\nQA20-30 A\nMonday\n08:00\n09:00\nC022\nLecture\nInstructor 22\nR19\nQA05-30 A\nMonday\n08:00\n09:00\nC024\nLecture\nInstructor 24\nR03\nQA21-30 A\nMonday\n08:00\n09:00\nC027\nLecture\nInstructor 27\nR18\nQA06-30 A\nMonday\n08:00\n09:00\nC029\nLecture\nInstructor 29\nR02\nQA22-30 A\nMonday\n08:00\n09:00\nC033\nLecture\nInstructor 33\nR17\n"
+  },
+  "reference_1_grouped.pdf": {
+    "pages": 30,
+    "landscape": true,
+    "first_page_text": "NED University of Engineering & Technology\nAcceptance reference 2030 | Timetable | Version 1 | Generated\nFilter: All authorized entries\nGenerated: 2026-11-21T16:07:42Z UTC\nPage 1\nBatch 1\nDay / date\nStart\nEnd\nCourse\nType\nInstructor\nRoom / exam seat allocation\nBatch\nMonday\n08:00\n09:00\nC005\nLab\nInstructor 5\nR40\nQA01-30 A\nMonday\n09:00\n10:00\nC005\nLab\nInstructor 5\nR40\nQA01-30 A\nMonday\n13:00\n14:00\nC004\nLecture\nInstructor 4\nR16\nQA01-30 A\nMonday\n14:00\n15:00\nC003\nLecture\nInstructor 3\nR16\nQA01-30 A\nMonday\n15:00\n16:00\nC002\nLecture\nInstructor 2\nR04\nQA01-30 A\nTuesday\n08:00\n09:00\nC001\nLecture\nInstructor 1\nR08\nQA01-30 A\nThursday\n08:00\n09:00\nC005\nLecture\nInstructor 5\nR02\nQA01-30 A\n"
+  },
+  "journey_exam.csv": {
+    "rows_including_header": 3,
+    "columns": [
+      "day",
+      "start_time",
+      "end_time",
+      "course_code",
+      "session_type",
+      "instructor",
+      "room",
+      "batch",
+      "exam_date",
+      "student_count",
+      "term",
+      "version",
+      "generated_at",
+      "status",
+      "course_title"
+    ]
+  },
+  "journey_timetable.csv": {
+    "rows_including_header": 3,
+    "columns": [
+      "day",
+      "start_time",
+      "end_time",
+      "course_code",
+      "session_type",
+      "instructor",
+      "room",
+      "batch",
+      "exam_date",
+      "student_count",
+      "term",
+      "version",
+      "generated_at",
+      "status",
+      "course_title"
+    ]
+  },
+  "reference_1.csv": {
+    "rows_including_header": 211,
+    "columns": [
+      "day",
+      "start_time",
+      "end_time",
+      "course_code",
+      "session_type",
+      "instructor",
+      "room",
+      "batch",
+      "exam_date",
+      "student_count",
+      "term",
+      "version",
+      "generated_at",
+      "status",
+      "course_title"
+    ]
+  },
+  "persisted_import_rows": 5000,
+  "cancelled_result_entries": 0
+}

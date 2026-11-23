@@ -22,13 +22,14 @@ def test_solver_rejects_overlapping_clock_slots():
  result=solve_timetable(ds,time_limit_s=10,config_id=1)
  assert not result.is_feasible, f'Solver returned {result.solver_status}: {[(e.slot_id,e.instructor_id,e.batch_id,e.room_id) for e in result.schedule]} in identical clock windows; validator={result.violations}'
 
-def test_default_app_recovers_orphan_on_startup():
+def test_default_app_recovers_orphan_on_startup(test_auth_settings, login_as):
  e=create_db_engine('sqlite:///:memory:'); init_db(e); f=create_session_factory(e); seed_database(f)
  with f() as s:
   s.get(Schedule,1).status='Generating'; s.commit()
- app=create_app()
+ app=create_app(auth_settings=test_auth_settings)
  with patch('backend.dependencies.create_db_engine',return_value=e):
   with TestClient(app) as c:
+   c.headers.update(login_as(c,f))
    r=c.get('/schedules/1/status')
  assert r.json()['status']=='Infeasible', f'Default lazy app left status={r.json()["status"]}'
  e.dispose()

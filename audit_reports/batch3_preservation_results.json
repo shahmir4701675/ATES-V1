@@ -1,0 +1,38 @@
+{
+  "changed_existing_files": [
+    "backend/adapter.py",
+    "backend/database.py",
+    "backend/dependencies.py",
+    "backend/generation.py",
+    "backend/main.py",
+    "backend/models.py",
+    "backend/routers/master_data.py",
+    "backend/routers/schedules.py",
+    "backend/schedule_access.py",
+    "backend/schemas.py",
+    "frontend/src/pages/ExamSchedulePage.tsx",
+    "frontend/src/pages/TimetablePage.tsx",
+    "frontend/src/services/api.ts",
+    "frontend/src/types/index.ts",
+    "tests/test_auth.py",
+    "tests/test_backend_db.py",
+    "tests/test_schedule_integrity.py"
+  ],
+  "new_files": [
+    "backend/batch3_schema.py",
+    "backend/generation_execution.py",
+    "backend/input_validation.py",
+    "backend/manual_edits.py",
+    "backend/mutation_audit.py",
+    "db/migrations/005_adjustment_integrity.postgresql.sql",
+    "db/migrations/005_adjustment_integrity.sqlite.sql",
+    "tests/test_batch3_adjustments.py",
+    "tests/test_batch3_integrity.py",
+    "tests/test_batch3_validation_concurrency.py"
+  ],
+  "engine_unchanged": true,
+  "original_migrations_unchanged": true,
+  "auth_core_unchanged": true,
+  "snapshot_core_unchanged": true,
+  "worker_supervisor_only_execution_import_changed": true
+}

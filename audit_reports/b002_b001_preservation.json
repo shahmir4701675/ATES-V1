@@ -1,0 +1,70 @@
+[
+  {
+    "path": "backend/auth.py",
+    "unchanged": true
+  },
+  {
+    "path": "backend/auth_password.py",
+    "unchanged": true
+  },
+  {
+    "path": "backend/dependencies.py",
+    "unchanged": true
+  },
+  {
+    "path": "backend/main.py",
+    "unchanged": true
+  },
+  {
+    "path": "backend/routers/auth.py",
+    "unchanged": true
+  },
+  {
+    "path": "conftest.py",
+    "unchanged": true
+  },
+  {
+    "path": "tests/test_auth.py",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src/App.tsx",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src/components/AppShell.tsx",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src/pages/LoginPage.tsx",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src/services/api.ts",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src/services/http.ts",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src/services/mockApi.ts",
+    "unchanged": true
+  },
+  {
+    "path": ".env.example",
+    "unchanged": true
+  },
+  {
+    "path": "requirements.txt",
+    "unchanged": true
+  },
+  {
+    "path": "db/migrations/001_auth_sessions.postgresql.sql",
+    "unchanged": true
+  },
+  {
+    "path": "db/migrations/001_auth_sessions.sqlite.sql",
+    "unchanged": true
+  }
+]

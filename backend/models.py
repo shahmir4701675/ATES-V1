@@ -1,6 +1,7 @@
 """SQLAlchemy 2.x ORM models matching `db/schema.sql` and `docs/SRS.pdf` Section 5.1.
 
-Defines all 21 relational tables in 3NF with exact column names, data types, defaults,
+Defines the 21 SRS business tables plus supplemental authentication and version-integrity tables,
+with column names, data types, defaults,
 primary keys, foreign keys (`ON DELETE RESTRICT` / `ON DELETE CASCADE` per `DB-3`),
 unique constraints (`DB-4`), composite foreign keys (`DB-2`), check constraints, and
 partial unique indexes (`uq_academic_terms_single_active`, `uq_schedules_one_published_per_term_type`).
@@ -19,6 +20,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     ForeignKeyConstraint,
+    Float,
     Index,
     Integer,
     Numeric,
@@ -950,6 +952,7 @@ class ExamEntry(Base):
         nullable=False,
     )
     student_count: Mapped[int] = mapped_column(SmallInteger, nullable=False)
+    is_manual_override: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=text('FALSE'))
     is_locked: Mapped[bool] = mapped_column(
         Boolean,
         nullable=False,
@@ -1097,6 +1100,8 @@ class AuditLog(Base):
     __table_args__ = (
         Index("idx_audit_logs_user_id", "user_id"),
         Index("idx_audit_logs_created_at", "created_at"),
+        Index("idx_audit_logs_user_time_id", "user_id", "created_at", "log_id"),
+        Index("idx_audit_logs_action_time_id", "action", "created_at", "log_id"),
     )
 
     log_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -1140,6 +1145,124 @@ ConflictLogORM = ConflictLog
 ImportLogORM = ImportLog
 AuditLogORM = AuditLog
 
+class AuthSession(Base):
+    """Revocable JWT session, supplemental to the 21 SRS business tables."""
+
+    __tablename__ = "auth_sessions"
+    __table_args__ = (
+        UniqueConstraint("token_id", name="uq_auth_sessions_token_id"),
+        Index("idx_auth_sessions_user_id", "user_id"),
+        Index("idx_auth_sessions_expires_at", "expires_at"),
+    )
+    auth_session_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    token_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False)
+    credential_fingerprint: Mapped[str] = mapped_column(String(64), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=_utc_now_naive)
+    last_seen_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+
+class ScheduleInputState(Base):
+    """Database-wide serialization point for snapshot capture and source writes."""
+    __tablename__ = "schedule_input_state"
+    state_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    revision: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("0"))
+    __table_args__ = (CheckConstraint("state_id = 1", name="ck_input_state_singleton"),)
+
+
+class ScheduleSnapshot(Base):
+    """Immutable authoritative inputs for a single term/type/version."""
+    __tablename__ = "schedule_snapshots"
+    schedule_id: Mapped[int] = mapped_column(Integer, ForeignKey("schedules.schedule_id", ondelete="RESTRICT"), primary_key=True)
+    term_id: Mapped[int] = mapped_column(Integer, ForeignKey("academic_terms.term_id", ondelete="RESTRICT"), nullable=False)
+    schedule_type: Mapped[str] = mapped_column(String(10), nullable=False)
+    format_version: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("1"))
+    input_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    inputs_json: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
+    __table_args__ = (
+        CheckConstraint("schedule_type IN ('Timetable','Exam')", name="ck_snapshot_type"),
+        CheckConstraint("format_version = 1", name="ck_snapshot_version"),
+        CheckConstraint("length(input_hash) = 64", name="ck_snapshot_hash"),
+        Index("idx_snapshot_term_type", "term_id", "schedule_type"),
+    )
+
+
+class ScheduleValidationReceipt(Base):
+    """Publication review invalidated by every entry/allocation mutation."""
+    __tablename__ = "schedule_validation_receipts"
+    schedule_id: Mapped[int] = mapped_column(Integer, ForeignKey("schedule_snapshots.schedule_id", ondelete="RESTRICT"), primary_key=True)
+    input_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    reviewed_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
+
+
+class GenerationRun(Base):
+    """Persistent cancellation/deadline fence, separate from SRS schedule states."""
+    __tablename__ = "generation_runs"
+    schedule_id: Mapped[int] = mapped_column(Integer, ForeignKey("schedules.schedule_id", ondelete="RESTRICT"), primary_key=True)
+    owner_token: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
+    state: Mapped[str] = mapped_column(String(16), nullable=False)
+    phase: Mapped[str] = mapped_column(String(16), nullable=False, default="Queued")
+    started_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    deadline_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    lease_until: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    ended_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    worker_stopped_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    process_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    time_limit_s: Mapped[float] = mapped_column(Float, nullable=False)
+    random_seed: Mapped[int] = mapped_column(Integer, nullable=False)
+    __table_args__ = (
+        CheckConstraint("state IN ('Queued','Running','Completed','Cancelled','TimedOut','Interrupted')", name="ck_generation_run_state"),
+        CheckConstraint("time_limit_s > 0", name="ck_generation_run_budget"),
+        Index("idx_generation_run_state_lease", "state", "lease_until"),
+    )
+
+
+class ImportStage(Base):
+    """Owner-scoped, persisted preview; confirmation is one atomic transaction."""
+    __tablename__='import_stages'
+    stage_id: Mapped[str]=mapped_column(String(64),primary_key=True)
+    user_id: Mapped[int]=mapped_column(Integer,ForeignKey('users.user_id',ondelete='RESTRICT'),nullable=False)
+    entity_type: Mapped[str]=mapped_column(String(20),nullable=False)
+    file_name: Mapped[str]=mapped_column(String(120),nullable=False)
+    state: Mapped[str]=mapped_column(String(12),nullable=False,default='Preview')
+    rows_json: Mapped[str]=mapped_column(Text,nullable=False)
+    report_json: Mapped[str]=mapped_column(Text,nullable=False)
+    created_at: Mapped[datetime]=mapped_column(DateTime,nullable=False,default=_utc_now_naive)
+    expires_at: Mapped[datetime]=mapped_column(DateTime,nullable=False)
+    import_id: Mapped[Optional[int]]=mapped_column(Integer,ForeignKey('import_logs.import_id',ondelete='RESTRICT'),nullable=True)
+    __table_args__=(CheckConstraint("state IN ('Preview','Confirmed','Cancelled')",name='ck_import_stage_state'),
+                   Index('idx_import_stages_owner_expiry','user_id','expires_at'))
+
+
+class ScheduleEditRevision(Base):
+    """Append-only, checksummed output states bound to a schedule's input context."""
+    __tablename__='schedule_edit_revisions'
+    revision_id: Mapped[int]=mapped_column(Integer,primary_key=True,autoincrement=True)
+    schedule_id: Mapped[int]=mapped_column(Integer,ForeignKey('schedules.schedule_id',ondelete='RESTRICT'),nullable=False)
+    revision_no: Mapped[int]=mapped_column(Integer,nullable=False)
+    actor_id: Mapped[int]=mapped_column(Integer,ForeignKey('users.user_id',ondelete='RESTRICT'),nullable=False)
+    action: Mapped[str]=mapped_column(String(24),nullable=False)
+    inputs_json: Mapped[str]=mapped_column(Text,nullable=False)
+    input_hash: Mapped[str]=mapped_column(String(64),nullable=False)
+    before_json: Mapped[str]=mapped_column(Text,nullable=False)
+    after_json: Mapped[str]=mapped_column(Text,nullable=False)
+    before_hash: Mapped[str]=mapped_column(String(64),nullable=False)
+    after_hash: Mapped[str]=mapped_column(String(64),nullable=False)
+    created_at: Mapped[datetime]=mapped_column(DateTime,nullable=False,default=_utc_now_naive,server_default=text('CURRENT_TIMESTAMP'))
+    __table_args__=(UniqueConstraint('schedule_id','revision_no',name='uq_edit_revision_schedule_number'),
+                   CheckConstraint('revision_no>=0',name='ck_edit_revision_number'),Index('idx_edit_revision_actor','actor_id'))
+
+
+for _table,_column,_name in [
+    (Schedule,'generated_by','idx_schedules_generated_by'),(Schedule,'approved_by','idx_schedules_approved_by'),
+    (TimetableEntry,'instructor_id','idx_timetable_entries_instructor_id'),(TimetableEntry,'batch_id','idx_timetable_entries_batch_id'),
+    (TimetableEntry,'room_id','idx_timetable_entries_room_id'),(ExamEntry,'course_id','idx_exam_entries_course_id'),
+    (AuditLog,'action','idx_audit_logs_action'),(ImportStage,'import_id','idx_import_stages_import_id')]:
+    Index(_name,_table.__table__.c[_column])
+
+
 ALL_MODELS: tuple[type[Base], ...] = (
     Department,
     AcademicTerm,
@@ -1162,4 +1285,11 @@ ALL_MODELS: tuple[type[Base], ...] = (
     ConflictLog,
     ImportLog,
     AuditLog,
+    AuthSession,
+    ScheduleInputState,
+    ScheduleSnapshot,
+    ScheduleValidationReceipt,
+    GenerationRun,
+    ImportStage,
+    ScheduleEditRevision,
 )

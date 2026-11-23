@@ -1,0 +1,85 @@
+{
+  "project": {
+    "tests": 604,
+    "passed": 604,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "failures": []
+  },
+  "original_audit": {
+    "tests": 28,
+    "passed": 28,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "failures": []
+  },
+  "batch4_python_tests": {
+    "passed": 27,
+    "failed": 0,
+    "configuration_generation": 25,
+    "documentation": 2
+  },
+  "frontend_runtime_tests": {
+    "passed": 5,
+    "failed": 0,
+    "kind": "Node/React server rendering and client-adapter fixtures; not browser compliance"
+  },
+  "frontend": {
+    "application_typescript": "Passed",
+    "tooling_typescript": "Passed",
+    "production_build": "Passed"
+  },
+  "deadline_cases": [
+    {
+      "name": "test_new_generation_uses_current_inputs_and_preserves_versions[1-1-Timetable]",
+      "seconds": "10.622",
+      "passed": true
+    },
+    {
+      "name": "test_new_generation_uses_current_inputs_and_preserves_versions[2-2-Exam]",
+      "seconds": "6.341",
+      "passed": true
+    }
+  ],
+  "targeted": {
+    "tests": 29,
+    "passed": 29,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "failures": []
+  },
+  "worker_targeted": {
+    "tests": 25,
+    "passed": 25,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "failures": []
+  },
+  "sqlite_migrations": {
+    "passed": 7,
+    "failed": 0,
+    "cases": [
+      "test_sqlite_auth_migration_matches_orm_without_changing_business_tables",
+      "test_run_control_migration_is_additive_and_repeatable",
+      "test_sqlite_stage_migration_is_additive_and_repeatable",
+      "test_005_upgrade_preserves_existing_rows_on_disposable_database",
+      "test_migration_005_failure_rolls_back_additive_schema",
+      "test_sqlite_additive_migration_and_legacy_fail_closed",
+      "test_failed_migration_is_atomic_in_disposable_sqlite"
+    ]
+  },
+  "postgresql": "Not Verified",
+  "browser_mobile_accessibility": "Not Verified",
+  "distributed_load": "Not Verified",
+  "status": {
+    "generation_reliability": "Resolved for required deadline/regression tests; reference-load behavior unverified",
+    "B019": "Implemented and verified in isolated SQLite/API tests",
+    "B020": "Functional improvements delivered; SRS completion/acceptance remains partial",
+    "B004": "Partial: legacy recovery and PostgreSQL execution remain outstanding"
+  },
+  "counting": "One full project run and one original audit run. Targeted repeats are not counted as additional distinct tests."
+}

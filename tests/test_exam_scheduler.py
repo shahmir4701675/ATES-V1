@@ -56,10 +56,10 @@ def test_step1_build_conflict_graph(feasible_exam_dataset: TimetableDataset) -> 
     assert graph.nodes[2]["student_count"] == 45
     assert graph.nodes[4]["student_count"] == 40
 
-    # Batch 1 triangle: (1, 2), (1, 3), (2, 3)
-    # Batch 2 triangle: (1, 4), (1, 5), (4, 5)
-    # Repeater student 9001 edge: (2, 4)
-    expected_edges = {(1, 2), (1, 3), (2, 3), (1, 4), (1, 5), (4, 5), (2, 4)}
+    # Enrollment information is partial for every offering. A-4 conservatively
+    # includes known student 9001 throughout both linked batches: all five exams
+    # conflict, rather than only the two courses with explicit repeater links.
+    expected_edges = {(u, v) for u in range(1, 6) for v in range(u + 1, 6)}
     actual_edges = {(min(u, v), max(u, v)) for u, v in graph.edges()}
     assert actual_edges == expected_edges
     assert "student:9001" in graph.edges[2, 4]["shared_students"]
@@ -74,8 +74,8 @@ def test_step2_dsatur_colouring_produces_valid_proper_colouring(
     assert set(colouring.keys()) == {1, 2, 3, 4, 5}
     for u, v in graph.edges():
         assert colouring[u] != colouring[v]
-    # Chromatic number of this graph is 3
-    assert len(set(colouring.values())) == 3
+    # The corrected partial-enrollment graph is K5.
+    assert len(set(colouring.values())) == 5
 
 
 def test_feasible_seed_exam_dataset_scheduled_and_validated(

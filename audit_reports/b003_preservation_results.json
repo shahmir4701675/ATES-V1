@@ -1,0 +1,66 @@
+[
+  {
+    "path": "backend/routers/schedules.py",
+    "unchanged": true
+  },
+  {
+    "path": "engine/timetable_solver.py",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src/App.tsx",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src/services/http.ts",
+    "unchanged": true
+  },
+  {
+    "path": "backend/dependencies.py",
+    "unchanged": true
+  },
+  {
+    "path": "backend/schemas.py",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src/services/api.ts",
+    "unchanged": true
+  },
+  {
+    "path": "backend/main.py",
+    "unchanged": true
+  },
+  {
+    "path": "engine/weekly_grid.py",
+    "unchanged": true
+  },
+  {
+    "path": "backend/routers/auth.py",
+    "unchanged": true
+  },
+  {
+    "path": "conftest.py",
+    "unchanged": true
+  },
+  {
+    "path": "backend/auth_password.py",
+    "unchanged": true
+  },
+  {
+    "path": "backend/routers/master_data.py",
+    "unchanged": true
+  },
+  {
+    "path": "tests/test_auth.py",
+    "unchanged": true
+  },
+  {
+    "path": "backend/auth.py",
+    "unchanged": true
+  },
+  {
+    "path": "tests/test_weekly_grid.py",
+    "unchanged": true
+  }
+]

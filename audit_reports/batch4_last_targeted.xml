@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="3" time="3.851" timestamp="2026-11-21T20:26:42.686638+05:00" hostname="shahmir"><testcase classname="tests.test_batch4_config_generation" name="test_config_deletion_and_generation_are_serialized" time="1.919" /><testcase classname="tests.test_batch4_documentation" name="test_user_manual_and_two_page_quick_start_are_real_readable_pdfs" time="0.099" /><testcase classname="tests.test_batch4_documentation" name="test_help_roles_and_csv_examples_match_real_server_templates" time="0.003"><failure message="AssertionError: assert (['course_code..., 'lab_hours'] == ['course_code..., 'lab_hours']&#10;  &#10;  Use -v to get more diff and 0 == 6)&#10; +  where 0 = len([])&#10; +  and   6 = len(['course_code', 'title', 'department_code', 'credit_hours', 'lecture_hours', 'lab_hours'])">def test_help_roles_and_csv_examples_match_real_server_templates():
+        helpdata=json.loads((ROOT/'src/locales/help.en.json').read_text(encoding='utf-8'))
+        assert set(helpdata['roles'])=={'Coordinator','Approver','Faculty','Student','Administrator'}
+        assert len(helpdata['screens'])&gt;=10
+        reference=(ROOT/'public/help/csv-fields.md').read_text(encoding='utf-8')
+        for kind,header in HEADERS.items():
+            rows=list(csv.reader((ROOT/f'public/help/{kind}-example.csv').read_text(encoding='utf-8').splitlines()))
+&gt;           assert rows[0]==header.split(',') and len(rows[1])==len(rows[0])
+E           AssertionError: assert (['course_code..., 'lab_hours'] == ['course_code..., 'lab_hours']
+E             
+E             Use -v to get more diff and 0 == 6)
+E            +  where 0 = len([])
+E            +  and   6 = len(['course_code', 'title', 'department_code', 'credit_hours', 'lecture_hours', 'lab_hours'])
+
+tests\test_batch4_documentation.py:28: AssertionError</failure></testcase></testsuite></testsuites>

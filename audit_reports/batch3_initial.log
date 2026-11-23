@@ -1,0 +1,102 @@
+FFFFF                                                                    [100%]
+================================== FAILURES ===================================
+_____________ test_adjustments_and_undo_are_generated_only[Draft] _____________
+
+env = (<starlette.testclient.TestClient object at 0x000001FDC510D940>, sessionmaker(class_='Session', bind=Engine(sqlite:///...ne(sqlite:///C%3A/Users/DELL/AppData/Local/Temp/pytest-of-DELL/pytest-44/test_adjustments_and_undo_are_0/batch.sqlite))
+state = 'Draft'
+
+    @pytest.mark.parametrize('state',['Draft','Generating','Infeasible','Published','Archived'])
+    def test_adjustments_and_undo_are_generated_only(env,state):
+        client,factory,_=env
+        if state in {'Published','Archived'}:freeze(factory,1,True)
+        with factory.begin() as s:s.get(m.Schedule,1).status=state
+>       assert client.put('/schedules/1/entries/1',json={'is_locked':True}).status_code==409
+E       AssertionError: assert 200 == 409
+E        +  where 200 = <Response [200 OK]>.status_code
+E        +    where <Response [200 OK]> = put('/schedules/1/entries/1', json={'is_locked': True})
+E        +      where put = <starlette.testclient.TestClient object at 0x000001FDC510D940>.put
+
+tests\test_batch3_adjustments.py:16: AssertionError
+__________ test_adjustments_and_undo_are_generated_only[Generating] ___________
+
+env = (<starlette.testclient.TestClient object at 0x000001FDC5557D90>, sessionmaker(class_='Session', bind=Engine(sqlite:///...ne(sqlite:///C%3A/Users/DELL/AppData/Local/Temp/pytest-of-DELL/pytest-44/test_adjustments_and_undo_are_1/batch.sqlite))
+state = 'Generating'
+
+    @pytest.mark.parametrize('state',['Draft','Generating','Infeasible','Published','Archived'])
+    def test_adjustments_and_undo_are_generated_only(env,state):
+        client,factory,_=env
+        if state in {'Published','Archived'}:freeze(factory,1,True)
+        with factory.begin() as s:s.get(m.Schedule,1).status=state
+>       assert client.put('/schedules/1/entries/1',json={'is_locked':True}).status_code==409
+E       AssertionError: assert 200 == 409
+E        +  where 200 = <Response [200 OK]>.status_code
+E        +    where <Response [200 OK]> = put('/schedules/1/entries/1', json={'is_locked': True})
+E        +      where put = <starlette.testclient.TestClient object at 0x000001FDC5557D90>.put
+
+tests\test_batch3_adjustments.py:16: AssertionError
+__________ test_adjustments_and_undo_are_generated_only[Infeasible] ___________
+
+env = (<starlette.testclient.TestClient object at 0x000001FDC6727390>, sessionmaker(class_='Session', bind=Engine(sqlite:///...ne(sqlite:///C%3A/Users/DELL/AppData/Local/Temp/pytest-of-DELL/pytest-44/test_adjustments_and_undo_are_2/batch.sqlite))
+state = 'Infeasible'
+
+    @pytest.mark.parametrize('state',['Draft','Generating','Infeasible','Published','Archived'])
+    def test_adjustments_and_undo_are_generated_only(env,state):
+        client,factory,_=env
+        if state in {'Published','Archived'}:freeze(factory,1,True)
+        with factory.begin() as s:s.get(m.Schedule,1).status=state
+>       assert client.put('/schedules/1/entries/1',json={'is_locked':True}).status_code==409
+E       AssertionError: assert 200 == 409
+E        +  where 200 = <Response [200 OK]>.status_code
+E        +    where <Response [200 OK]> = put('/schedules/1/entries/1', json={'is_locked': True})
+E        +      where put = <starlette.testclient.TestClient object at 0x000001FDC6727390>.put
+
+tests\test_batch3_adjustments.py:16: AssertionError
+___________ test_adjustments_and_undo_are_generated_only[Published] ___________
+
+env = (<starlette.testclient.TestClient object at 0x000001FDC55DE3F0>, sessionmaker(class_='Session', bind=Engine(sqlite:///...ne(sqlite:///C%3A/Users/DELL/AppData/Local/Temp/pytest-of-DELL/pytest-44/test_adjustments_and_undo_are_3/batch.sqlite))
+state = 'Published'
+
+    @pytest.mark.parametrize('state',['Draft','Generating','Infeasible','Published','Archived'])
+    def test_adjustments_and_undo_are_generated_only(env,state):
+        client,factory,_=env
+        if state in {'Published','Archived'}:freeze(factory,1,True)
+        with factory.begin() as s:s.get(m.Schedule,1).status=state
+        assert client.put('/schedules/1/entries/1',json={'is_locked':True}).status_code==409
+>       assert client.post('/schedules/1/undo',json={}).status_code==409
+E       AssertionError: assert 404 == 409
+E        +  where 404 = <Response [404 Not Found]>.status_code
+E        +    where <Response [404 Not Found]> = post('/schedules/1/undo', json={})
+E        +      where post = <starlette.testclient.TestClient object at 0x000001FDC55DE3F0>.post
+
+tests\test_batch3_adjustments.py:17: AssertionError
+___________ test_adjustments_and_undo_are_generated_only[Archived] ____________
+
+env = (<starlette.testclient.TestClient object at 0x000001FDC55DE780>, sessionmaker(class_='Session', bind=Engine(sqlite:///...ne(sqlite:///C%3A/Users/DELL/AppData/Local/Temp/pytest-of-DELL/pytest-44/test_adjustments_and_undo_are_4/batch.sqlite))
+state = 'Archived'
+
+    @pytest.mark.parametrize('state',['Draft','Generating','Infeasible','Published','Archived'])
+    def test_adjustments_and_undo_are_generated_only(env,state):
+        client,factory,_=env
+        if state in {'Published','Archived'}:freeze(factory,1,True)
+        with factory.begin() as s:s.get(m.Schedule,1).status=state
+        assert client.put('/schedules/1/entries/1',json={'is_locked':True}).status_code==409
+>       assert client.post('/schedules/1/undo',json={}).status_code==409
+E       AssertionError: assert 404 == 409
+E        +  where 404 = <Response [404 Not Found]>.status_code
+E        +    where <Response [404 Not Found]> = post('/schedules/1/undo', json={})
+E        +      where post = <starlette.testclient.TestClient object at 0x000001FDC55DE780>.post
+
+tests\test_batch3_adjustments.py:17: AssertionError
+============================== warnings summary ===============================
+.venv\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\DELL\OneDrive\Desktop\ATES-V1\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_batch3_adjustments.py::test_adjustments_and_undo_are_generated_only[Draft]
+FAILED tests/test_batch3_adjustments.py::test_adjustments_and_undo_are_generated_only[Generating]
+FAILED tests/test_batch3_adjustments.py::test_adjustments_and_undo_are_generated_only[Infeasible]
+FAILED tests/test_batch3_adjustments.py::test_adjustments_and_undo_are_generated_only[Published]
+FAILED tests/test_batch3_adjustments.py::test_adjustments_and_undo_are_generated_only[Archived]
+5 failed, 13 deselected, 1 warning in 6.97s

@@ -11,7 +11,7 @@ import {
 import { DAY_NAMES, IMPORT_SPECS, defaultRules, parseCsv } from '../data/reference'
 import type {
   ActivityItem, AppUser, AppUserInput, AuditEntry, AuditFilter, AvailabilityItem, Batch, ConfigInput, ConflictFilter, ConflictItem, Course, CourseOffering, DashboardSummary,
-  Department, Enrollment, ExamScheduleRow, ExamSlot, ExamSlotInput, GenerationConfig, GenerationStatus, ImportReport, ImportResult, ImportType, Instructor, LoginResult, MoveResult,
+  Department, Enrollment, ExamScheduleRow, ExamSlot, ExamSlotInput, GenerationConfig, GenerationStatus, ImportReport, ImportResult, ImportType, Instructor, MoveResult,
   Room, Schedule, SchedulingConfig, SlotGridInput, Student, Term, TimeSlot, TimetableEntry, TimetableRow,
 } from '../types'
 import type { ConstraintRule } from '../types'
@@ -243,6 +243,26 @@ export const generateSlotGrid = (termId: string, input: SlotGridInput): TimeSlot
   return clone(created)
 }
 
+export const saveSlotGrid = (termId: string, input: SlotGridInput): TimeSlot[] => {
+  const existing = db.slots.filter((slot) => slot.term_id === termId)
+  const keys = new Set(input.working_days.flatMap((day) => Array.from({ length: input.slots_per_day }, (_, index) => `${DAY_NAMES[day - 1]}:${index + 1}`)))
+  if (existing.some((slot) => !keys.has(`${slot.day_of_week}:${slot.slot_index}`))) throw new MockError('Saving this grid would remove existing slots. No slots were changed.')
+  const minutes = (value: string) => { const [h, m] = value.split(':').map(Number); return h * 60 + m }
+  if (existing.length && minutes(existing[0].end_time) - minutes(existing[0].start_time) !== input.slot_length_min) throw new MockError('Keep the existing fixed slot length.')
+  if (!input.working_days.length || new Set(input.working_days).size !== input.working_days.length || input.working_days.some((d) => !Number.isInteger(d) || d < 1 || d > 7) || !Number.isInteger(input.slots_per_day) || input.slots_per_day < 1 || !Number.isInteger(input.slot_length_min) || input.slot_length_min < 1 || !/^([01]\d|2[0-3]):[0-5]\d$/.test(input.first_start_time) || minutes(input.first_start_time) + input.slots_per_day * input.slot_length_min >= 1440) throw new MockError('Invalid weekly grid.')
+  const fmt = (n: number) => `${String(Math.floor(n / 60)).padStart(2, '0')}:${String(n % 60).padStart(2, '0')}`
+  const saved = [...input.working_days].sort().flatMap((day) => Array.from({ length: input.slots_per_day }, (_, i) => {
+    const old = existing.find((slot) => slot.day_of_week === DAY_NAMES[day - 1] && slot.slot_index === i + 1)
+    const start = minutes(input.first_start_time) + i * input.slot_length_min
+    return { slot_id: old?.slot_id ?? nextId('slot'), term_id: termId, day_of_week: DAY_NAMES[day - 1], slot_index: i + 1, start_time: fmt(start), end_time: fmt(start + input.slot_length_min), is_blocked: old?.is_blocked ?? false, block_reason: old?.block_reason ?? null }
+  }))
+  for (const slot of saved) {
+    const old = existing.find((item) => item.slot_id === slot.slot_id)
+    if (old) Object.assign(old, slot); else db.slots.push(slot)
+  }
+  return clone(saved)
+}
+
 export const updateSlot = (termId: string, slotId: string, change: { is_blocked: boolean; block_reason: string | null }): TimeSlot => {
   const slot = db.slots.find((item) => item.slot_id === slotId && item.term_id === termId)
   if (!slot) throw new MockError('Slot not found.')
@@ -383,10 +403,3 @@ export const saveUser = (id: string | null, input: AppUserInput): AppUser => {
 export const getAuditLog = (filter: AuditFilter = {}): AuditEntry[] => clone(db.audit
   .filter((item) => (!filter.user_id || item.user_id === filter.user_id) && (!filter.action || item.action === filter.action) && (!filter.from || item.created_at.slice(0, 10) >= filter.from) && (!filter.to || item.created_at.slice(0, 10) <= filter.to))
   .sort((a, b) => b.created_at.localeCompare(a.created_at)))
-export const login = (username: string, password: string): LoginResult => {
-  const user = db.users.find((item) => norm(item.username) === norm(username))
-  if (!user || !password) return { ok: false, message: 'User name or password is incorrect.' }
-  if (user.account_status === 'Locked') return { ok: false, message: 'This account is locked after repeated failed sign-in attempts.', locked_minutes: 12 }
-  if (user.account_status === 'Deactivated') return { ok: false, message: 'This account has been deactivated. Contact the Administrator.' }
-  return { ok: true, user: clone(user) }
-}

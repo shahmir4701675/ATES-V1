@@ -1,0 +1,18 @@
+........................................................................ [ 27%]
+........................................................................ [ 54%]
+........................................................................ [ 82%]
+...............................................                          [100%]
+============================== warnings summary ===============================
+.venv\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\DELL\OneDrive\Desktop\ATES-V1\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+tests/test_backend_api.py::test_master_data_terms_slots_exam_slots_offerings_and_configs
+tests/test_weekly_grid.py::test_create_rejects_invalid_grid_atomically[patch3]
+tests/test_weekly_grid.py::test_create_rejects_invalid_grid_atomically[patch4]
+tests/test_weekly_grid.py::test_create_rejects_invalid_grid_atomically[patch5]
+  C:\Users\DELL\OneDrive\Desktop\ATES-V1\.venv\Lib\site-packages\fastapi\telemetry\_api.py:244: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+    return function(**arguments)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+263 passed, 5 warnings in 295.98s (0:04:55)

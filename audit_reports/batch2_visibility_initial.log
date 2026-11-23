@@ -1,0 +1,115 @@
+FFFFF                                                                    [100%]
+================================== FAILURES ===================================
+_ test_published_entries_and_counts_use_trusted_scope[cs24a_9002-batch_id-1-1] _
+
+env = (<starlette.testclient.TestClient object at 0x000002EBFCB374D0>, sessionmaker(class_='Session', bind=Engine(sqlite:///...ne(sqlite:///C%3A/Users/DELL/AppData/Local/Temp/pytest-of-DELL/pytest-30/test_published_entries_and_cou0/batch.sqlite))
+login_as = <function login_as.<locals>.authenticate at 0x000002EBFCEE1BC0>
+sid = 1, username = 'cs24a_9002', scope = 'batch_id', expected = 1
+
+    @pytest.mark.parametrize('sid',[1,2])
+    @pytest.mark.parametrize('username,scope,expected',[('cs24a_9002','batch_id',1),('fakhra','instructor_id',1)])
+    def test_published_entries_and_counts_use_trusted_scope(env,login_as,sid,username,scope,expected):
+        client,factory,_=env;freeze(factory,sid,True)
+        headers=login_as(client,factory,username)
+        response=client.get(f'/schedules/{sid}/entries',headers={**headers,'X-Batch-Id':'2','X-Instructor-Id':'2'})
+        assert response.status_code==200,response.text
+        view=response.json()
+        if sid==1:
+>           assert view['entries'] and all(row[scope]==expected for row in view['entries'])
+E           AssertionError: assert ([{'entry_id': 1, 'schedule_id': 1, 'offering_id': 1, 'course_id': 1, ...}, {'entry_id': 2, 'schedule_id': 1, 'offering... 'offering_id': 1, 'course_id': 1, ...}, {'entry_id': 6, 'schedule_id': 1, 'offering_id': 2, 'course_id': 2, ...}, ...] and False)
+E            +  where False = all(<generator object test_published_entries_and_counts_use_trusted_scope.<locals>.<genexpr> at 0x000002EBFD0B4900>)
+
+tests\test_batch2_schedule_access.py:31: AssertionError
+_ test_published_entries_and_counts_use_trusted_scope[cs24a_9002-batch_id-1-2] _
+
+env = (<starlette.testclient.TestClient object at 0x000002EBFD130E10>, sessionmaker(class_='Session', bind=Engine(sqlite:///...ne(sqlite:///C%3A/Users/DELL/AppData/Local/Temp/pytest-of-DELL/pytest-30/test_published_entries_and_cou1/batch.sqlite))
+login_as = <function login_as.<locals>.authenticate at 0x000002EBFCD9C360>
+sid = 2, username = 'cs24a_9002', scope = 'batch_id', expected = 1
+
+    @pytest.mark.parametrize('sid',[1,2])
+    @pytest.mark.parametrize('username,scope,expected',[('cs24a_9002','batch_id',1),('fakhra','instructor_id',1)])
+    def test_published_entries_and_counts_use_trusted_scope(env,login_as,sid,username,scope,expected):
+        client,factory,_=env;freeze(factory,sid,True)
+        headers=login_as(client,factory,username)
+        response=client.get(f'/schedules/{sid}/entries',headers={**headers,'X-Batch-Id':'2','X-Instructor-Id':'2'})
+        assert response.status_code==200,response.text
+        view=response.json()
+        if sid==1:
+            assert view['entries'] and all(row[scope]==expected for row in view['entries'])
+        else:
+>           offers=view['context']['course_offerings']
+                   ^^^^^^^^^^^^^^^
+E           KeyError: 'context'
+
+tests\test_batch2_schedule_access.py:33: KeyError
+_ test_published_entries_and_counts_use_trusted_scope[fakhra-instructor_id-1-1] _
+
+env = (<starlette.testclient.TestClient object at 0x000002EBFD2A2990>, sessionmaker(class_='Session', bind=Engine(sqlite:///...ne(sqlite:///C%3A/Users/DELL/AppData/Local/Temp/pytest-of-DELL/pytest-30/test_published_entries_and_cou2/batch.sqlite))
+login_as = <function login_as.<locals>.authenticate at 0x000002EBFD202B60>
+sid = 1, username = 'fakhra', scope = 'instructor_id', expected = 1
+
+    @pytest.mark.parametrize('sid',[1,2])
+    @pytest.mark.parametrize('username,scope,expected',[('cs24a_9002','batch_id',1),('fakhra','instructor_id',1)])
+    def test_published_entries_and_counts_use_trusted_scope(env,login_as,sid,username,scope,expected):
+        client,factory,_=env;freeze(factory,sid,True)
+        headers=login_as(client,factory,username)
+        response=client.get(f'/schedules/{sid}/entries',headers={**headers,'X-Batch-Id':'2','X-Instructor-Id':'2'})
+        assert response.status_code==200,response.text
+        view=response.json()
+        if sid==1:
+>           assert view['entries'] and all(row[scope]==expected for row in view['entries'])
+E           AssertionError: assert ([{'entry_id': 1, 'schedule_id': 1, 'offering_id': 1, 'course_id': 1, ...}, {'entry_id': 2, 'schedule_id': 1, 'offering... 'offering_id': 1, 'course_id': 1, ...}, {'entry_id': 6, 'schedule_id': 1, 'offering_id': 2, 'course_id': 2, ...}, ...] and False)
+E            +  where False = all(<generator object test_published_entries_and_counts_use_trusted_scope.<locals>.<genexpr> at 0x000002EBFD3B52A0>)
+
+tests\test_batch2_schedule_access.py:31: AssertionError
+_ test_published_entries_and_counts_use_trusted_scope[fakhra-instructor_id-1-2] _
+
+env = (<starlette.testclient.TestClient object at 0x000002EBFCDDFCE0>, sessionmaker(class_='Session', bind=Engine(sqlite:///...ne(sqlite:///C%3A/Users/DELL/AppData/Local/Temp/pytest-of-DELL/pytest-30/test_published_entries_and_cou3/batch.sqlite))
+login_as = <function login_as.<locals>.authenticate at 0x000002EBFD457D80>
+sid = 2, username = 'fakhra', scope = 'instructor_id', expected = 1
+
+    @pytest.mark.parametrize('sid',[1,2])
+    @pytest.mark.parametrize('username,scope,expected',[('cs24a_9002','batch_id',1),('fakhra','instructor_id',1)])
+    def test_published_entries_and_counts_use_trusted_scope(env,login_as,sid,username,scope,expected):
+        client,factory,_=env;freeze(factory,sid,True)
+        headers=login_as(client,factory,username)
+        response=client.get(f'/schedules/{sid}/entries',headers={**headers,'X-Batch-Id':'2','X-Instructor-Id':'2'})
+        assert response.status_code==200,response.text
+        view=response.json()
+        if sid==1:
+            assert view['entries'] and all(row[scope]==expected for row in view['entries'])
+        else:
+>           offers=view['context']['course_offerings']
+                   ^^^^^^^^^^^^^^^
+E           KeyError: 'context'
+
+tests\test_batch2_schedule_access.py:33: KeyError
+_________ test_faculty_availability_ownership_applies_to_get_and_put __________
+
+env = (<starlette.testclient.TestClient object at 0x000002EBFCDDFA80>, sessionmaker(class_='Session', bind=Engine(sqlite:///...ne(sqlite:///C%3A/Users/DELL/AppData/Local/Temp/pytest-of-DELL/pytest-30/test_faculty_availability_owne0/batch.sqlite))
+login_as = <function login_as.<locals>.authenticate at 0x000002EBFD5E6980>
+
+    def test_faculty_availability_ownership_applies_to_get_and_put(env,login_as):
+        client,factory,_=env;headers=login_as(client,factory,'fakhra')
+        for method,body in [('GET',None),('PUT',{'slots':[]})]:
+            assert client.request(method,'/instructors/1/availability',headers=headers,json=body).status_code==200
+>           assert client.request(method,'/instructors/2/availability',headers={**headers,'X-Instructor-Id':'2'},json=body).status_code==403
+E           AssertionError: assert 200 == 403
+E            +  where 200 = <Response [200 OK]>.status_code
+E            +    where <Response [200 OK]> = request('GET', '/instructors/2/availability', headers={'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMDEiLCJqdGkiOiI3NDJmYzg5MTA1MzVjYTAxZTM2ZDR...yOTQ1MjMsImlzcyI6ImF0ZXMiLCJhdWQiOiJhdGVzLXdlYiJ9.FMlSUKgYN8TqiTIZtClQZq4tEH7gWLNaz4D3NHV1NZw', 'X-Instructor-Id': '2'}, json=None)
+E            +      where request = <starlette.testclient.TestClient object at 0x000002EBFCDDFA80>.request
+
+tests\test_batch2_schedule_access.py:52: AssertionError
+============================== warnings summary ===============================
+.venv\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\DELL\OneDrive\Desktop\ATES-V1\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_batch2_schedule_access.py::test_published_entries_and_counts_use_trusted_scope[cs24a_9002-batch_id-1-1]
+FAILED tests/test_batch2_schedule_access.py::test_published_entries_and_counts_use_trusted_scope[cs24a_9002-batch_id-1-2]
+FAILED tests/test_batch2_schedule_access.py::test_published_entries_and_counts_use_trusted_scope[fakhra-instructor_id-1-1]
+FAILED tests/test_batch2_schedule_access.py::test_published_entries_and_counts_use_trusted_scope[fakhra-instructor_id-1-2]
+FAILED tests/test_batch2_schedule_access.py::test_faculty_availability_ownership_applies_to_get_and_put
+5 failed, 16 deselected, 1 warning in 8.09s

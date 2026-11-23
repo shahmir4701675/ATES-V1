@@ -1,0 +1,12 @@
+✔ parallel classes share a normal-flow stack; complete lab continuation remains visible (12.1359ms)
+✔ field error description references a real element and visible label (3.9115ms)
+✔ Karachi display is independent of host timezone and handles UTC or explicit offsets (47.6499ms)
+✔ every role has real help/document links without inventing permission (11.7369ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 834.5468

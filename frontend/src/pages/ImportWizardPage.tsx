@@ -1,14 +1,16 @@
+import { useAsync } from '../hooks/useAsync'
 import { useState } from 'react'
 import { ArrowLeft, CheckCircle2, Download, FileSpreadsheet, Upload } from 'lucide-react'
 import { Button, Card, Notice, PageHeader, SelectField } from '../components/ui'
 import { DataTable } from '../components/Modal'
 import { IMPORT_SPECS, MAX_IMPORT_BYTES } from '../data/reference'
-import { confirmImportMock, errorMessage, getImportTemplate, validateImportMock } from '../services/api'
+import { confirmImport, errorMessage, getImportTemplate, getImportHistory, previewImport } from '../services/api'
 import type { ImportReport, ImportResult, ImportType } from '../types'
 
 const TYPES = (Object.keys(IMPORT_SPECS) as ImportType[]).map((value) => ({ value, label: IMPORT_SPECS[value].label }))
 
 export function ImportWizardPage({ onNavigate, onStatus }: { onNavigate: (path: string) => void; onStatus: (message: string) => void }) {
+  const history = useAsync(getImportHistory, [])
   const [type, setType] = useState<ImportType>('courses')
   const [report, setReport] = useState<ImportReport | null>(null)
   const [choice, setChoice] = useState<'valid_only' | 'cancel'>('valid_only')
@@ -38,7 +40,7 @@ export function ImportWizardPage({ onNavigate, onStatus }: { onNavigate: (path: 
     }
     setBusy(true)
     try {
-      const next = await validateImportMock(type, file)
+      const next = await previewImport(type, file)
       setReport(next)
       setChoice(next.rows_valid > 0 ? 'valid_only' : 'cancel')
       onStatus(`Validated ${file.name}: ${next.rows_valid} valid, ${next.rejected.length} rejected issue(s).`)
@@ -54,7 +56,8 @@ export function ImportWizardPage({ onNavigate, onStatus }: { onNavigate: (path: 
     setBusy(true)
     setError('')
     try {
-      const result = await confirmImportMock(report.import_id, choice)
+      const result = await confirmImport(report.import_id, choice)
+      history.reload()
       if (choice === 'cancel') {
         setReport(null)
         onStatus('Import cancelled. No records were written.')
@@ -70,6 +73,15 @@ export function ImportWizardPage({ onNavigate, onStatus }: { onNavigate: (path: 
   }
 
   const reset = () => { setReport(null); setDone(null); setError('') }
+  const cancelPreview = async () => {
+    if (!report) return
+    setBusy(true); setError('')
+    try {
+      await confirmImport(report.import_id, 'cancel')
+      history.reload(); reset(); onStatus('The server cancelled this import preview. No master records were written.')
+    } catch (reason) { setError(errorMessage(reason)) }
+    finally { setBusy(false) }
+  }
 
   return <div className="page-stack">
     <PageHeader
@@ -91,7 +103,7 @@ export function ImportWizardPage({ onNavigate, onStatus }: { onNavigate: (path: 
       <section className="section-grid two-columns">
         <Card title="1. Choose data type and template">
           <div className="stack-gap">
-            <SelectField label="Data type" id="import-type" value={type} onChange={(value) => { setType(value as ImportType); reset() }} options={TYPES} hint="Each CSV import applies to one master data table." />
+            <SelectField label="Data type" id="import-type" value={type} onChange={(value) => { if (busy) return; setType(value as ImportType); reset() }} options={TYPES} hint="Each CSV import applies to one master data table." />
             <div className="subtle-note">
               <FileSpreadsheet size={16} aria-hidden="true" />
               <span>Required columns: <code>{spec.columns.map((column) => column.name).join(', ')}</code></span>
@@ -116,6 +128,7 @@ export function ImportWizardPage({ onNavigate, onStatus }: { onNavigate: (path: 
           <div className="report-counts">
             <div><span>Total data rows</span><strong className="tabular">{report.rows_total}</strong></div>
             <div><span>Valid rows ready to import</span><strong className="tabular success-text">{report.rows_valid}</strong></div>
+            <div><span>Rejected rows</span><strong className="tabular">{report.rows_rejected ?? report.rows_total - report.rows_valid}</strong></div>
             <div><span>Validation issues</span><strong className={`tabular ${report.rejected.length ? 'text-danger' : ''}`}>{report.rejected.length}</strong></div>
           </div>
           {report.rejected.length > 0 ? (
@@ -145,7 +158,7 @@ export function ImportWizardPage({ onNavigate, onStatus }: { onNavigate: (path: 
             </label>
           </fieldset>
           <div className="form-actions">
-            <Button variant="secondary" onClick={reset}>Cancel</Button>
+            <Button variant="secondary" onClick={() => void cancelPreview()} disabled={busy}>Cancel</Button>
             <Button onClick={() => void confirm()} disabled={busy || (choice === 'valid_only' && report.rows_valid === 0)}>{busy ? 'Confirming…' : 'Confirm'}</Button>
           </div>
         </div>
@@ -165,5 +178,16 @@ export function ImportWizardPage({ onNavigate, onStatus }: { onNavigate: (path: 
         </div>
       </Card>
     )}
+    <Card title="Import history">
+      {history.error && <Notice tone="error" title="History could not be loaded">{history.error}</Notice>}
+      <DataTable rows={history.data ?? []} rowKey={(row) => String(row.import_id)} searchText={(row) => `${row.file_name} ${row.entity_type}`} caption="Authoritative import history" columns={[
+        { key: 'file', label: 'File', value: (row) => row.file_name },
+        { key: 'type', label: 'Type', value: (row) => row.entity_type },
+        { key: 'total', label: 'Read', value: (row) => row.rows_total },
+        { key: 'imported', label: 'Imported', value: (row) => row.rows_imported },
+        { key: 'rejected', label: 'Rejected / skipped', value: (row) => row.rows_rejected },
+        { key: 'time', label: 'Time', value: (row) => row.imported_at },
+      ]} />
+    </Card>
   </div>
 }

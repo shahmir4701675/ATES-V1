@@ -1,0 +1,131 @@
+{
+  "full_project_once": {
+    "total": 528,
+    "passed": 527,
+    "failed": 1,
+    "skipped": 0,
+    "failures": [
+      "test_review_does_not_create_a_publish_endpoint"
+    ]
+  },
+  "intentional_contract_replacement": {
+    "old": "test_review_does_not_create_a_publish_endpoint",
+    "new": "test_review_does_not_publish_or_grant_publication_permission",
+    "reason": "B008 requires a real endpoint. Replaced obsolete 404 expectation with Coordinator 403 and independent-review/unchanged-snapshot/approval assertions.",
+    "focused_result": {
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "failures": []
+    },
+    "full_suite_repeated": false
+  },
+  "new_regressions_total": 98,
+  "new_regressions_passed_in_full_run": 98,
+  "genuine_project_regressions_detected": 0,
+  "cohorts": {
+    "tests.test_auth": {
+      "total": 37,
+      "passed": 37
+    },
+    "tests.test_backend_api": {
+      "total": 10,
+      "passed": 10
+    },
+    "tests.test_backend_db": {
+      "total": 12,
+      "passed": 12
+    },
+    "tests.test_batch1_generation": {
+      "total": 23,
+      "passed": 23
+    },
+    "tests.test_batch2_accounts": {
+      "total": 17,
+      "passed": 17
+    },
+    "tests.test_batch2_exports": {
+      "total": 18,
+      "passed": 18
+    },
+    "tests.test_batch2_imports": {
+      "total": 28,
+      "passed": 28
+    },
+    "tests.test_batch2_publication": {
+      "total": 12,
+      "passed": 12
+    },
+    "tests.test_batch2_schedule_access": {
+      "total": 23,
+      "passed": 23
+    },
+    "tests.test_exam_membership": {
+      "total": 60,
+      "passed": 60
+    },
+    "tests.test_exam_scheduler": {
+      "total": 13,
+      "passed": 13
+    },
+    "tests.test_lab_contiguity": {
+      "total": 45,
+      "passed": 45
+    },
+    "tests.test_schedule_integrity": {
+      "total": 99,
+      "passed": 98
+    },
+    "tests.test_timetable_solver": {
+      "total": 25,
+      "passed": 25
+    },
+    "tests.test_validator": {
+      "total": 19,
+      "passed": 19
+    },
+    "tests.test_weekly_grid": {
+      "total": 87,
+      "passed": 87
+    }
+  },
+  "original_audit": {
+    "total": 28,
+    "passed": 26,
+    "failed": 2,
+    "skipped": 0,
+    "failures": [
+      "test_exam_manual_override_persisted",
+      "test_mutation_audit_written"
+    ]
+  },
+  "audit_comparison": {
+    "old_failed": 10,
+    "current_failed": 2,
+    "newly_failing": [],
+    "fixed": [
+      "test_required_endpoint_exists[get-/audit-None]",
+      "test_required_endpoint_exists[get-/schedules/1/export?format=csv-None]",
+      "test_required_endpoint_exists[get-/schedules/1/export?format=pdf-None]",
+      "test_required_endpoint_exists[get-/users-None]",
+      "test_required_endpoint_exists[post-/import/courses-payload4]",
+      "test_required_endpoint_exists[post-/schedules/1/publish-payload5]",
+      "test_student_cannot_read_generated_schedule",
+      "test_student_list_contains_published_only"
+    ],
+    "remaining": [
+      "test_exam_manual_override_persisted",
+      "test_mutation_audit_written"
+    ]
+  },
+  "frontend": {
+    "application_typescript": "Passed, exit 0",
+    "tooling_typescript": "Passed, exit 0",
+    "production_build": "Passed, exit 0"
+  },
+  "sqlite_migration_004": "Passed: additive/repeatable upgrade preserves old rows; included in project tests",
+  "postgres": "Not Verified",
+  "browser_e2e": "Not Verified",
+  "pdf_qa": "Rendered timetable, exam and grouped long-Unicode-label representative pages with Poppler; inspected PNGs, independently parsed rows/pages with pypdf"
+}

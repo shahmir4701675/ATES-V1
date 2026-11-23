@@ -1,0 +1,77 @@
+{
+  "reported_solver_status": "optimal",
+  "entries": [
+    {
+      "is_manual_override": false,
+      "exam_entry_id": 1,
+      "schedule_id": 3,
+      "course_id": 1,
+      "course_code": "C1",
+      "course_title": "Course 1",
+      "exam_slot_id": 1,
+      "exam_date": "2030-12-01",
+      "start_time": "09:00",
+      "end_time": "10:00",
+      "label": "Day 1",
+      "student_count": 1,
+      "is_locked": false,
+      "room_allocations": [
+        {
+          "allocation_id": 1,
+          "room_id": 4,
+          "room_code": "R4",
+          "building": "QA",
+          "seats_allocated": 1
+        }
+      ]
+    },
+    {
+      "is_manual_override": false,
+      "exam_entry_id": 2,
+      "schedule_id": 3,
+      "course_id": 2,
+      "course_code": "C2",
+      "course_title": "Course 2",
+      "exam_slot_id": 1,
+      "exam_date": "2030-12-01",
+      "start_time": "09:00",
+      "end_time": "10:00",
+      "label": "Day 1",
+      "student_count": 1,
+      "is_locked": false,
+      "room_allocations": [
+        {
+          "allocation_id": 2,
+          "room_id": 3,
+          "room_code": "R3",
+          "building": "QA",
+          "seats_allocated": 1
+        }
+      ]
+    }
+  ],
+  "allocations": [
+    {
+      "allocation_id": 1,
+      "room_id": 4,
+      "room_code": "R4",
+      "building": "QA",
+      "seats_allocated": 1,
+      "exam_entry_id": 1
+    },
+    {
+      "allocation_id": 2,
+      "room_id": 3,
+      "room_code": "R3",
+      "building": "QA",
+      "seats_allocated": 1,
+      "exam_entry_id": 2
+    }
+  ],
+  "heuristic_same_batch_same_day": true,
+  "better_distinct_days": true,
+  "alternative_oracle": [],
+  "original_oracle": [],
+  "soft_ES01_weight": 8,
+  "other_soft_weights": 0
+}

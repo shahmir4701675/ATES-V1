@@ -1,0 +1,14 @@
+{
+  "status": "Not verified",
+  "attempted_tool": "mcp__cua_repl.js",
+  "operation": "await cua.getState();",
+  "actual_error": "failed to write kernel assets: The system cannot find the path specified. (os error 3)",
+  "browser_workflows_executed": false,
+  "notes": "No browser interaction, 360px viewport, cross-browser or keyboard/screen-reader compliance is claimed. Backend TestClient/HTTP and React server rendering are separate evidence.",
+  "second_attempt": {
+    "reset": "succeeded",
+    "operation": "await cua.createBrowserTab('iab','http://127.0.0.1:8769/docs',{visible:false});",
+    "error": "failed to write kernel assets: The system cannot find the path specified. (os error 3)"
+  },
+  "completion_summary_recorded": true
+}

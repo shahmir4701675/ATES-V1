@@ -1,6 +1,6 @@
 export type ScheduleType = 'Timetable' | 'Exam schedule'
 export type ScheduleStatus = 'Draft' | 'Generating' | 'Infeasible' | 'Generated' | 'Published' | 'Archived'
-export type SolverStatus = 'Not started' | 'Running' | 'Optimal' | 'Feasible' | 'Stopped'
+export type SolverStatus = 'Not started' | 'Running' | 'Optimal' | 'Feasible' | 'Stopped' | 'Infeasible' | 'Unknown' | 'Cancelled' | 'TimedOut' | 'Failed'
 export type SessionType = 'Lecture' | 'Lab'
 export type RoomType = 'Lecture' | 'Lab' | 'Exam Hall'
 export type TermStatus = 'Planned' | 'Active' | 'Closed'
@@ -86,6 +86,7 @@ export interface Enrollment {
 }
 
 export interface TimetableEntry {
+  edit_revision?: number
   entry_id: string
   schedule_id: string
   offering_id: string
@@ -108,6 +109,8 @@ export interface ExamSlot {
 }
 
 export interface ExamEntry {
+  edit_revision?: number
+  is_manual_override?: boolean
   exam_entry_id: string
   schedule_id: string
   course_id: string
@@ -294,6 +297,7 @@ export interface ImportReport {
   file_name: string
   rows_total: number
   rows_valid: number
+  rows_rejected?: number
   rejected: ImportRejectedRow[]
 }
 

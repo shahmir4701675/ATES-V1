@@ -1,20 +1,34 @@
-import { useEffect, useState } from 'react'
-import { AppShell, getAllowedPaths, type Role } from './components/AppShell'
-import { AvailabilityPage } from './pages/AvailabilityPage'
-import { ConflictReportPage } from './pages/ConflictReportPage'
-import { ConstraintsSettingsPage } from './pages/ConstraintsSettingsPage'
-import { DashboardPage } from './pages/DashboardPage'
-import { DataManagementPage } from './pages/DataManagementPage'
-import { ExamSchedulePage } from './pages/ExamSchedulePage'
-import { GeneratePage } from './pages/GeneratePage'
-import { ImportWizardPage } from './pages/ImportWizardPage'
+import { Component, lazy, Suspense, useCallback, useEffect, useState } from 'react'
+import type { ErrorInfo, ReactNode } from 'react'
+import { LoadingSkeleton, Notice } from './components/ui'
+import { AppShell, getAllowedPaths } from './components/AppShell'
 import { LoginPage } from './pages/LoginPage'
-import { PlaceholderPage } from './pages/PlaceholderPage'
-import { ReviewPublishPage } from './pages/ReviewPublishPage'
-import { TimetablePage } from './pages/TimetablePage'
-import { UsersAuditPage } from './pages/UsersAuditPage'
-import { API_URL, USE_MOCK } from './services/api'
+import { API_URL, USE_MOCK, logout } from './services/api'
 import type { AppUser } from './types'
+
+const HelpPage = lazy(() => import('./pages/HelpPage').then((page) => ({ default: page.HelpPage })))
+const AvailabilityPage = lazy(() => import('./pages/AvailabilityPage').then((page) => ({ default: page.AvailabilityPage })))
+const ConflictReportPage = lazy(() => import('./pages/ConflictReportPage').then((page) => ({ default: page.ConflictReportPage })))
+const ConstraintsSettingsPage = lazy(() => import('./pages/ConstraintsSettingsPage').then((page) => ({ default: page.ConstraintsSettingsPage })))
+const DashboardPage = lazy(() => import('./pages/DashboardPage').then((page) => ({ default: page.DashboardPage })))
+const DataManagementPage = lazy(() => import('./pages/DataManagementPage').then((page) => ({ default: page.DataManagementPage })))
+const ExamSchedulePage = lazy(() => import('./pages/ExamSchedulePage').then((page) => ({ default: page.ExamSchedulePage })))
+const GeneratePage = lazy(() => import('./pages/GeneratePage').then((page) => ({ default: page.GeneratePage })))
+const ImportWizardPage = lazy(() => import('./pages/ImportWizardPage').then((page) => ({ default: page.ImportWizardPage })))
+const PlaceholderPage = lazy(() => import('./pages/PlaceholderPage').then((page) => ({ default: page.PlaceholderPage })))
+const ReviewPublishPage = lazy(() => import('./pages/ReviewPublishPage').then((page) => ({ default: page.ReviewPublishPage })))
+const TimetablePage = lazy(() => import('./pages/TimetablePage').then((page) => ({ default: page.TimetablePage })))
+const PasswordPage = lazy(() => import('./pages/PasswordPage').then((page) => ({ default: page.PasswordPage })))
+const UsersAuditPage = lazy(() => import('./pages/UsersAuditPage').then((page) => ({ default: page.UsersAuditPage })))
+
+class PageLoadBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false }
+  static getDerivedStateFromError() { return { failed: true } }
+  componentDidCatch(_error: Error, _info: ErrorInfo) { /* Render a recoverable message without exposing server data. */ }
+  render() {
+    return this.state.failed ? <Notice tone="error" title="This page could not be loaded" action={<button type="button" onClick={() => window.location.reload()}>Reload application</button>}>Check your connection and reload to fetch the current application files.</Notice> : this.props.children
+  }
+}
 
 const validPaths = [
   '/',
@@ -31,6 +45,8 @@ const validPaths = [
   '/settings',
   '/users',
   '/login',
+  '/password',
+  '/help',
 ]
 
 function useRoute() {
@@ -40,26 +56,36 @@ function useRoute() {
     window.addEventListener('popstate', onPopState)
     return () => window.removeEventListener('popstate', onPopState)
   }, [])
-  const navigate = (nextPath: string) => {
+  const navigate = useCallback((nextPath: string) => {
     const safePath = validPaths.includes(nextPath) ? nextPath : '/'
     if (safePath !== window.location.pathname) window.history.pushState({}, '', safePath)
     setPath(safePath)
     window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
+  }, [])
   return { path, navigate }
 }
 
 export default function App() {
   const { path, navigate } = useRoute()
-  const [role, setRole] = useState<Role>('Administrator')
   const [currentUser, setCurrentUser] = useState<AppUser | null>(null)
   const [statusMessage, setStatusMessage] = useState(
     USE_MOCK ? 'System ready · Mock data mode enabled' : `System ready · Connected to ${API_URL}`,
   )
-  const notify = (message: string) => setStatusMessage(message)
+  const notify = useCallback((message: string) => setStatusMessage(message), [])
+  const role = currentUser?.role
+  const signOut = async () => {
+    try { await logout() } catch { notify('Signed out locally. The server session will expire if it could not be reached.') }
+    setCurrentUser(null)
+    navigate('/login')
+  }
+  useEffect(() => {
+    const expired = () => { setCurrentUser(null); navigate('/login') }
+    window.addEventListener('ates:auth-required', expired)
+    return () => window.removeEventListener('ates:auth-required', expired)
+  }, [])
 
   useEffect(() => {
-    if (!getAllowedPaths(role).includes(path)) {
+    if (role && !getAllowedPaths(role).includes(path)) {
       navigate('/')
       notify(`Route not available for ${role}. Returned to the dashboard.`)
     }
@@ -67,13 +93,15 @@ export default function App() {
 
   const onLoginSuccess = (user: AppUser) => {
     setCurrentUser(user)
-    setRole(user.role)
     notify(`Signed in as ${user.full_name} (${user.role}).`)
     navigate('/')
   }
 
+  if (!currentUser || !role) return <LoginPage onSuccess={onLoginSuccess} />
+
   const page =
-    path === '/' ? <DashboardPage onNavigate={navigate} onStatus={notify} />
+    path === '/help' ? <HelpPage role={role} />
+    : path === '/' ? <DashboardPage onNavigate={navigate} onStatus={notify} role={role} />
     : path === '/generate' ? <GeneratePage onNavigate={navigate} onStatus={notify} />
     : path === '/timetable' || path === '/my-schedule' ? <TimetablePage onStatus={notify} role={role} />
     : path === '/exams' ? <ExamSchedulePage onStatus={notify} role={role} />
@@ -84,6 +112,7 @@ export default function App() {
     : path === '/availability' || path === '/teaching' ? <AvailabilityPage role={role} facultyInstructorId={currentUser?.instructor_id} onStatus={notify} />
     : path === '/approvals' ? <ReviewPublishPage onNavigate={navigate} onStatus={notify} />
     : path === '/users' ? <UsersAuditPage onStatus={notify} />
+    : path === '/password' ? <PasswordPage onStatus={notify} />
     : path === '/login' ? <LoginPage onSuccess={onLoginSuccess} onCancel={() => navigate('/')} />
     : <PlaceholderPage path={path} onNavigate={navigate} />
 
@@ -91,15 +120,12 @@ export default function App() {
     <AppShell
       path={path}
       role={role}
-      userName={currentUser?.full_name ?? 'Alex Roy'}
-      onRoleChange={(nextRole) => {
-        setRole(nextRole)
-        notify(`Role switched to ${nextRole}. Navigation updated.`)
-      }}
+      userName={currentUser.full_name}
+      onLogout={() => void signOut()}
       onNavigate={navigate}
       statusMessage={statusMessage}
     >
-      {page}
+      <PageLoadBoundary key={path}><Suspense fallback={<LoadingSkeleton label="Loading page…" />}>{page}</Suspense></PageLoadBoundary>
     </AppShell>
   )
 }

@@ -6,9 +6,20 @@ Conforms strictly to `docs/SRS.pdf` (Table 9, Section 3.2, Section 5.1) and `doc
 from __future__ import annotations
 
 from datetime import date, time
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, model_validator
+from engine.weekly_grid import clock_minutes
+
+
+def _weekly_clock(value: str) -> str:
+    minutes = clock_minutes(value)
+    return f"{minutes // 60:02d}:{minutes % 60:02d}"
+
+
+WeeklyClock = Annotated[str, AfterValidator(_weekly_clock)]
+Weekday = Annotated[int, Field(strict=True, ge=1, le=7)]
+SlotIndex = Annotated[int, Field(strict=True, ge=1, le=32767)]
 
 
 # ============================================================================
@@ -237,29 +248,41 @@ class TermResponse(BaseModel):
 
 class TimeSlotCreate(BaseModel):
     term_id: int | None = None
-    day_of_week: int = Field(..., ge=1, le=7)
-    slot_index: int = Field(..., gt=0)
-    start_time: str
-    end_time: str
+    day_of_week: Weekday
+    slot_index: SlotIndex
+    start_time: WeeklyClock
+    end_time: WeeklyClock
     is_blocked: bool = False
-    block_reason: str | None = None
+    block_reason: str | None = Field(default=None, max_length=50)
 
 
 class TimeSlotUpdate(BaseModel):
     slot_id: int | None = None
-    start_time: str | None = None
-    end_time: str | None = None
+    day_of_week: Weekday | None = None
+    slot_index: SlotIndex | None = None
+    start_time: WeeklyClock | None = None
+    end_time: WeeklyClock | None = None
     is_blocked: bool | None = None
-    block_reason: str | None = None
+    block_reason: str | None = Field(default=None, max_length=50)
 
 
 class SlotGridGenerateRequest(BaseModel):
-    working_days: list[int] = Field(default_factory=lambda: [1, 2, 3, 4, 5])
-    first_start_time: str = "08:00"
-    slot_length_min: int = Field(default=60, gt=0)
-    slots_per_day: int = Field(default=6, gt=0)
-    blocked_slot_indices: list[int] = Field(default_factory=list)
-    block_reason: str | None = "Break / Prayer"
+    working_days: list[Weekday] = Field(default_factory=lambda: [1, 2, 3, 4, 5], min_length=1, max_length=7)
+    first_start_time: WeeklyClock = "08:00"
+    slot_length_min: int = Field(default=60, strict=True, gt=0, le=1439)
+    slots_per_day: int = Field(default=6, strict=True, gt=0, le=1440)
+    blocked_slot_indices: list[SlotIndex] = Field(default_factory=list)
+    block_reason: str | None = Field(default="Break / Prayer", max_length=50)
+
+    @model_validator(mode="after")
+    def validate_grid_options(self):
+        if len(set(self.working_days)) != len(self.working_days):
+            raise ValueError("working_days must be unique.")
+        if len(set(self.blocked_slot_indices)) != len(self.blocked_slot_indices) or any(i > self.slots_per_day for i in self.blocked_slot_indices):
+            raise ValueError("Blocked indexes must be unique and within slots_per_day.")
+        if self.blocked_slot_indices and not (self.block_reason and self.block_reason.strip()):
+            raise ValueError("Blocked slots require a block_reason.")
+        return self
 
 
 class TimeSlotResponse(BaseModel):
@@ -276,17 +299,22 @@ class TimeSlotResponse(BaseModel):
 class ExamSlotCreate(BaseModel):
     term_id: int | None = None
     exam_date: date
-    start_time: str
-    end_time: str
-    label: str | None = None
+    start_time: WeeklyClock
+    end_time: WeeklyClock
+    label: str | None = Field(None,max_length=30)
+
+    @model_validator(mode='after')
+    def chronological(self):
+        if clock_minutes(self.end_time)<=clock_minutes(self.start_time):raise ValueError('Exam slots must end after they start, without crossing midnight.')
+        return self
 
 
 class ExamSlotUpdate(BaseModel):
     exam_slot_id: int | None = None
     exam_date: date | None = None
-    start_time: str | None = None
-    end_time: str | None = None
-    label: str | None = None
+    start_time: WeeklyClock | None = None
+    end_time: WeeklyClock | None = None
+    label: str | None = Field(None,max_length=30)
 
 
 class ExamSlotResponse(BaseModel):
@@ -349,8 +377,8 @@ class ConstraintRuleInput(BaseModel):
     rule_code: str = Field(..., min_length=2, max_length=6)
     rule_type: Literal["Hard", "Soft"] | None = None
     is_enabled: bool = True
-    weight: int = Field(default=0, ge=0, le=10)
-    param_value: int | None = None
+    weight: int = Field(default=0, ge=0, le=10,strict=True)
+    param_value: int | None = Field(None,strict=True,ge=1,le=2147483647)
 
 
 class ConstraintRuleResponse(BaseModel):
@@ -370,8 +398,8 @@ class ConfigCreate(BaseModel):
     schedule_type: Literal["Timetable", "Exam"]
     name: str = Field(..., min_length=1, max_length=60)
     solver_time_limit_s: int = Field(default=120, ge=10, le=600)
-    random_seed: int = 1
-    created_by: int = 1
+    random_seed: int = Field(1,ge=0,le=2147483647,strict=True)
+    created_by: int | None = None  # Legacy input accepted but never used as authenticated identity.
     rules: list[ConstraintRuleInput] | None = None
 
 
@@ -379,7 +407,8 @@ class ConfigUpdate(BaseModel):
     config_id: int | None = None
     name: str | None = Field(default=None, min_length=1, max_length=60)
     solver_time_limit_s: int | None = Field(default=None, ge=10, le=600)
-    random_seed: int | None = None
+    random_seed: int | None = Field(None,ge=0,le=2147483647,strict=True)
+    rules: list[ConstraintRuleInput] | None = None
 
 
 class ConfigResponse(BaseModel):
@@ -406,8 +435,8 @@ class ScheduleGenerateRequest(BaseModel):
     config_id: int | None = None
     schedule_type: Literal["Timetable", "Exam"] = "Timetable"
     solver_time_limit_s: int | None = Field(default=None, ge=10, le=600)
-    random_seed: int | None = None
-    generated_by: int = 1
+    random_seed: int | None = Field(None,ge=0,le=2147483647,strict=True)
+    generated_by: int | None = None  # Legacy input accepted but never used as authenticated identity.
 
 
 class ScheduleGenerateResponse(BaseModel):
@@ -420,6 +449,9 @@ class ScheduleGenerateResponse(BaseModel):
 
 
 class ScheduleStatusResponse(BaseModel):
+    generation_state: str | None = None
+    generation_phase: str | None = None
+    worker_stopped: bool = False
     schedule_id: int
     term_id: int
     config_id: int
@@ -470,6 +502,7 @@ class EnrichedExamRoomAllocationResponse(BaseModel):
 
 
 class EnrichedExamEntryResponse(BaseModel):
+    is_manual_override: bool = False
     exam_entry_id: int
     schedule_id: int
     course_id: int
@@ -486,6 +519,8 @@ class EnrichedExamEntryResponse(BaseModel):
 
 
 class ScheduleEntriesResponse(BaseModel):
+    edit_revision: int = 0
+    context: dict[str, Any] = Field(default_factory=dict)
     schedule_id: int
     term_id: int
     term_name: str
@@ -518,16 +553,21 @@ class ConflictLogResponse(BaseModel):
 
 
 class ExamRoomAllocationInput(BaseModel):
-    room_id: int
-    seats_allocated: int = Field(..., gt=0)
+    room_id: int = Field(gt=0,strict=True)
+    seats_allocated: int = Field(..., gt=0,le=32767,strict=True)
 
 
 class ScheduleEntryUpdateRequest(BaseModel):
     """Payload for `PUT /schedules/{id}/entries/{entry_id}` (FR-8.3..FR-8.6)."""
 
-    entry_id: int | None = None
-    slot_id: int | None = None
-    room_id: int | None = None
-    exam_slot_id: int | None = None
+    entry_id: int | None = Field(None,gt=0,le=2147483647,strict=True)
+    slot_id: int | None = Field(None,gt=0,le=2147483647,strict=True)
+    room_id: int | None = Field(None,gt=0,le=2147483647,strict=True)
+    exam_slot_id: int | None = Field(None,gt=0,le=2147483647,strict=True)
     room_allocations: list[ExamRoomAllocationInput] | None = None
     is_locked: bool | None = None
+    expected_revision: int | None = Field(None,ge=0,strict=True)
+
+
+class UndoScheduleRequest(BaseModel):
+    expected_revision: int | None = Field(None,ge=0,strict=True)

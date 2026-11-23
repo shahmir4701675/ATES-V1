@@ -1,0 +1,274 @@
+[
+  {
+    "path": "backend\\dependencies.py",
+    "unchanged": true
+  },
+  {
+    "path": "backend\\routers\\auth.py",
+    "unchanged": true
+  },
+  {
+    "path": "tests\\test_auth.py",
+    "unchanged": true
+  },
+  {
+    "path": "engine\\validator.py",
+    "unchanged": true
+  },
+  {
+    "path": "backend\\adapter.py",
+    "unchanged": true
+  },
+  {
+    "path": "engine\\exam_scheduler.py",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src\\vite-env.d.ts",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src\\pages\\ReviewPublishPage.tsx",
+    "unchanged": true
+  },
+  {
+    "path": "tests\\test_timetable_solver.py",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src\\components\\ui.tsx",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src\\types\\index.ts",
+    "unchanged": true
+  },
+  {
+    "path": "tests\\test_validator.py",
+    "unchanged": true
+  },
+  {
+    "path": "backend\\auth.py",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src\\services\\api.ts",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src\\pages\\PlaceholderPage.tsx",
+    "unchanged": true
+  },
+  {
+    "path": "backend\\schedule_integrity.py",
+    "unchanged": false
+  },
+  {
+    "path": "backend\\routers\\__init__.py",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src\\pages\\ExamSchedulePage.tsx",
+    "unchanged": true
+  },
+  {
+    "path": "backend\\schemas.py",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src\\App.tsx",
+    "unchanged": true
+  },
+  {
+    "path": "tests\\test_exam_scheduler.py",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src\\pages\\ImportWizardPage.tsx",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src\\pages\\ConstraintsSettingsPage.tsx",
+    "unchanged": true
+  },
+  {
+    "path": "tests\\test_weekly_grid.py",
+    "unchanged": true
+  },
+  {
+    "path": "engine\\timetable_solver.py",
+    "unchanged": false
+  },
+  {
+    "path": "db/migrations\\002_schedule_snapshots.sqlite.sql",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src\\data\\mockData.ts",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src\\pages\\DashboardPage.tsx",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src\\main.tsx",
+    "unchanged": true
+  },
+  {
+    "path": "backend\\routers\\master_data.py",
+    "unchanged": true
+  },
+  {
+    "path": "backend\\app.py",
+    "unchanged": true
+  },
+  {
+    "path": "backend\\models.py",
+    "unchanged": true
+  },
+  {
+    "path": "engine\\constraints.py",
+    "unchanged": false
+  },
+  {
+    "path": "db/migrations\\002_schedule_snapshots.postgresql.sql",
+    "unchanged": true
+  },
+  {
+    "path": "engine\\models.py",
+    "unchanged": true
+  },
+  {
+    "path": "tests\\test_backend_db.py",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src\\services\\http.ts",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src\\pages\\ConflictReportPage.tsx",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src\\hooks\\useAsync.ts",
+    "unchanged": true
+  },
+  {
+    "path": "backend\\auth_password.py",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src\\pages\\data\\TermsSlotsTab.tsx",
+    "unchanged": true
+  },
+  {
+    "path": "tests\\test_backend_api.py",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src\\pages\\TimetablePage.tsx",
+    "unchanged": true
+  },
+  {
+    "path": "db/migrations\\001_auth_sessions.sqlite.sql",
+    "unchanged": true
+  },
+  {
+    "path": "engine\\exam_membership_validation.py",
+    "unchanged": true
+  },
+  {
+    "path": "backend\\snapshot_schema.py",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src\\pages\\GeneratePage.tsx",
+    "unchanged": true
+  },
+  {
+    "path": "backend\\main.py",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src\\styles.css",
+    "unchanged": true
+  },
+  {
+    "path": "tests\\test_schedule_integrity.py",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src\\pages\\DataManagementPage.tsx",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src\\components\\Modal.tsx",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src\\data\\reference.ts",
+    "unchanged": true
+  },
+  {
+    "path": "backend\\routers\\schedules.py",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src\\pages\\data\\MasterTabs.tsx",
+    "unchanged": true
+  },
+  {
+    "path": "db/migrations\\001_auth_sessions.postgresql.sql",
+    "unchanged": true
+  },
+  {
+    "path": "backend\\database.py",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src\\pages\\data\\MasterTab.tsx",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src\\components\\AppShell.tsx",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src\\pages\\AvailabilityPage.tsx",
+    "unchanged": true
+  },
+  {
+    "path": "backend\\__init__.py",
+    "unchanged": true
+  },
+  {
+    "path": "engine\\__init__.py",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src\\pages\\LoginPage.tsx",
+    "unchanged": true
+  },
+  {
+    "path": "tests\\test_exam_membership.py",
+    "unchanged": true
+  },
+  {
+    "path": "engine\\weekly_grid.py",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src\\services\\mockApi.ts",
+    "unchanged": true
+  },
+  {
+    "path": "frontend/src\\pages\\UsersAuditPage.tsx",
+    "unchanged": true
+  },
+  {
+    "path": "backend\\seed.py",
+    "unchanged": true
+  }
+]

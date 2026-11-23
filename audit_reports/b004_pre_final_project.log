@@ -1,0 +1,34 @@
+....................................F................................... [ 20%]
+........................................................................ [ 40%]
+........................................................................ [ 60%]
+........................................................................ [ 80%]
+........................................................................ [100%]
+================================== FAILURES ===================================
+___ test_sqlite_auth_migration_matches_orm_without_changing_business_tables ___
+
+    def test_sqlite_auth_migration_matches_orm_without_changing_business_tables():
+        engine = create_db_engine("sqlite:///:memory:")
+        init_db(engine)
+        AuthSession.__table__.drop(engine)  # Disposable in-memory database only.
+        before = set(inspect(engine).get_table_names())
+>       assert len(before) == 21
+E       AssertionError: assert 24 == 21
+E        +  where 24 = len({'academic_terms', 'audit_logs', 'batches', 'conflict_log', 'constraint_rules', 'course_offerings', ...})
+
+tests\test_auth.py:283: AssertionError
+============================== warnings summary ===============================
+.venv\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\DELL\OneDrive\Desktop\ATES-V1\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+tests/test_backend_api.py::test_master_data_terms_slots_exam_slots_offerings_and_configs
+tests/test_weekly_grid.py::test_create_rejects_invalid_grid_atomically[patch3]
+tests/test_weekly_grid.py::test_create_rejects_invalid_grid_atomically[patch4]
+tests/test_weekly_grid.py::test_create_rejects_invalid_grid_atomically[patch5]
+  C:\Users\DELL\OneDrive\Desktop\ATES-V1\.venv\Lib\site-packages\fastapi\telemetry\_api.py:244: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+    return function(**arguments)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_auth.py::test_sqlite_auth_migration_matches_orm_without_changing_business_tables
+1 failed, 359 passed, 5 warnings in 461.25s (0:07:41)

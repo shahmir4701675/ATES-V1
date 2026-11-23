@@ -1,0 +1,47 @@
+{
+  "static_unextracted_display_nodes": 447,
+  "files": 21,
+  "examples": [
+    {
+      "file": "frontend\\src\\components\\AppShell.tsx",
+      "line": 55,
+      "text": "ATES dashboard"
+    },
+    {
+      "file": "frontend\\src\\components\\AppShell.tsx",
+      "line": 56,
+      "text": "A"
+    },
+    {
+      "file": "frontend\\src\\components\\AppShell.tsx",
+      "line": 57,
+      "text": "ATES"
+    },
+    {
+      "file": "frontend\\src\\components\\AppShell.tsx",
+      "line": 57,
+      "text": "Auto Timetable / Exam Scheduler"
+    },
+    {
+      "file": "frontend\\src\\components\\AppShell.tsx",
+      "line": 59,
+      "text": "Primary navigation"
+    },
+    {
+      "file": "frontend\\src\\components\\AppShell.tsx",
+      "line": 63,
+      "text": "Help for this screen"
+    },
+    {
+      "file": "frontend\\src\\components\\AppShell.tsx",
+      "line": 65,
+      "text": "Users & audit log"
+    },
+    {
+      "file": "frontend\\src\\components\\AppShell.tsx",
+      "line": 66,
+      "text": "Constraints & settings"
+    }
+  ],
+  "note": "Static JSX text/attributes only; dynamic string coverage is not measured."
+}

@@ -1,0 +1,23 @@
+{
+  "missing_leading_fk_indexes": [
+    {
+      "table": "timetable_entries",
+      "columns": [
+        "offering_id",
+        "instructor_id",
+        "batch_id"
+      ],
+      "target": "course_offerings"
+    }
+  ],
+  "non_integer_primary_keys": [
+    {
+      "table": "import_stages",
+      "pk": [
+        "stage_id"
+      ],
+      "type": "VARCHAR(64)"
+    }
+  ],
+  "tables": 28
+}

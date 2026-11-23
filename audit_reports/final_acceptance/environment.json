@@ -1,0 +1,12 @@
+{
+  "os": "Microsoft Windows 11 Pro",
+  "os_version": "10.0.22621",
+  "physical_cpu_cores": 4.0,
+  "logical_cpu_cores": 8,
+  "memory_gib": 15.69,
+  "database": "Disposable file-backed SQLite",
+  "api": "Uvicorn, one API process; genuine spawned solver workers",
+  "transport": "127.0.0.1 HTTP; no production/TLS claims",
+  "postgresql": "No postgres/initdb/pg_ctl/psql/docker executable discovered; no isolated instance supplied",
+  "browser": "CUA initialization failed before a tab or app could be selected"
+}

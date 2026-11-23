@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1" time="1.574" timestamp="2026-11-21T18:06:50.798998+05:00" hostname="shahmir"><testcase classname="tests.test_auth" name="test_all_business_routes_and_api_aliases_reject_anonymous" time="1.366" /></testsuite></testsuites>

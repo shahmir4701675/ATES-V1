@@ -4,6 +4,8 @@
 
 ## B001 - Critical: Unauthenticated and spoofed-role access permits writes
 
+**B001 resolution update (21 November 2026): implemented and verified in isolated tests.** See [B001_FIX_REPORT.md](B001_FIX_REPORT.md) for the 37 passing new authentication tests, passing audit regressions, deployment prerequisites and remaining out-of-scope issues. The original audit evidence below and the other findings remain historical baseline records.
+
 - Location: backend/dependencies.py:69-133.
 - Requirements: FR-1.5; SEC-1/3.
 - Evidence: test_unauthenticated_write_requires_login; test_forged_role_is_not_authentication.
@@ -12,6 +14,8 @@
 - Required action (not implemented): Verify JWT/session; load active user and roles from trusted storage; reject missing identity.
 
 ## B002 - Critical: Generated timetable can contain simultaneous instructor, room and batch clashes
+
+**B002 resolution update (21 November 2026): implemented; all six targeted grid/clock-time audit regressions pass.** See [B002_FIX_REPORT.md](B002_FIX_REPORT.md) for source changes, full verification results and remaining out-of-scope audit failures. Original evidence below is retained as the historical baseline.
 
 - Location: backend/routers/master_data.py:1201-1243; engine/constraints.py:126-293.
 - Requirements: C-6; H01-H03; FR-6.3.
@@ -22,6 +26,8 @@
 
 ## B003 - Critical: Mixed explicit and inferred exam enrollments miss required conflict edges
 
+**B003 resolution update (21 November 2026): implemented; the original mixed-enrollment regression and the focused 92-case exam/validator suite pass.** See [B003_FIX_REPORT.md](B003_FIX_REPORT.md) for membership semantics, independent validation, sample-fixture corrections, full verification results and remaining limitations. Original evidence below is retained as the historical baseline.
+
 - Location: engine/models.py:523-550; engine/exam_scheduler.py:141-184; engine/constraints.py:1850-1866.
 - Requirements: A-4; E01/E02; FR-7.1/7.3.
 - Evidence: test_mixed_enrollment_fallback_has_cohort_conflict.
@@ -30,6 +36,8 @@
 - Required action (not implemented): Represent inferred membership using known batch students plus conservative cohort relations; test mixed, partial, repeater and elective data.
 
 ## B004 - Critical: Published timetable can be invalidated through master-data updates
+
+**B004 implementation update (21 November 2026): partially resolved overall.** Immutable input snapshots, independent review receipts, stale-generation rejection and database read-only guards are implemented; 99 B004 tests and the original audit regression pass. Already official legacy versions without trustworthy original inputs fail closed pending reviewed recovery; PostgreSQL execution is Not Verified. See [B004_FIX_REPORT.md](B004_FIX_REPORT.md) for architecture, migrations, verification and remaining limits. Original evidence below is retained as the historical baseline.
 
 - Location: backend/routers/master_data.py:801-839,1298-1329; backend/adapter.py:106-455.
 - Requirements: SAF-1/4; H04; FR-9.2.
@@ -40,6 +48,8 @@
 
 ## B005 - High: Lab validator accepts clock-time gaps as consecutive
 
+**B005 resolution update (21 November 2026): resolved and verified.** Corrected H09 validates physical end/start adjacency, term, slot references and required size; the solver and manual validation use consistent checks. All 45 B005 regressions and the original audit case pass, with all 407 project tests passing. Exact, reviewed snapshot-reader compatibility preserves valid original B004 contexts without rewriting them. See [B005_FIX_REPORT.md](B005_FIX_REPORT.md). Original evidence below is retained as the historical baseline.
+
 - Location: engine/constraints.py:723-768,796-813.
 - Requirements: H09; C-6.
 - Evidence: test_lab_contiguity_uses_clock_time.
@@ -48,6 +58,8 @@
 - Required action (not implemented): Require previous end_time==next start_time for every lab block; validate grid topology.
 
 ## B006 - High: Unpublished and other-batch schedules exposed; Administrator permitted scheduling
+
+**Batch 2 update:** shared server-side schedule visibility now restricts non-review roles to Published versions and applies trusted Faculty/Student scope to metadata, entries and exports. Coordinator/Approver separation is enforced; frontend role controls follow it. Targeted regressions pass; final evidence is tracked in [PROGRESS.md](PROGRESS.md). Original audit evidence below is retained.
 
 - Location: backend/routers/schedules.py:343-378,505-585,391; frontend/src/pages/TimetablePage.tsx:40-59.
 - Requirements: SEC-10; FR-9.4/10.5; SRS2.3.
@@ -58,6 +70,8 @@
 
 ## B007 - High: Unlinked Faculty can edit any instructor availability
 
+**Batch 2 update:** B001's trusted-link checks are preserved, and availability reads now enforce the same own-instructor restriction as writes. Targeted ownership/unlinked/forged-header tests pass; see [PROGRESS.md](PROGRESS.md).
+
 - Location: backend/routers/master_data.py:640-688.
 - Requirements: FR-3.1; SEC-3.
 - Evidence: test_faculty_without_identity_cannot_edit_any_instructor.
@@ -66,6 +80,8 @@
 - Required action (not implemented): Require trusted non-null Faculty link and scope read/write to it.
 
 ## B008 - High: Publication and archiving only exist in browser overlay
+
+**Batch 2 update:** real Approver-only publish/archive replaces browser overlays. Independent snapshot validation, input freshness, atomic prior-version archival, approval metadata, rollback and competing publications are tested. Historical inputs are never rewritten. Legacy or stale Generated versions require regeneration/reviewed recovery; see [PROGRESS.md](PROGRESS.md).
 
 - Location: frontend/src/services/api.ts:313-323; frontend/src/pages/ReviewPublishPage.tsx:34.
 - Requirements: FR-9.1-9.6; UC-13; SAF-1.
@@ -76,6 +92,8 @@
 
 ## B009 - High: CSV import validates mock records and can report inserts it never performs
 
+**Batch 2 update:** all six SRS CSV types now use bounded UTF-8 multipart upload, server templates, persisted owner-scoped previews, revalidation and atomic confirmation/history/audit. Targeted persistence/count/ownership/rollback tests pass. Migration 004 and deployment limits are documented in [PROGRESS.md](PROGRESS.md).
+
 - Location: frontend/src/services/api.ts:325-333; frontend/src/services/mockApi.ts:307-368.
 - Requirements: FR-4.1-4.5; UR-12.
 - Evidence: POST /import/courses404 executed; remaining behavior static inspection.
@@ -84,6 +102,8 @@
 - Required action (not implemented): Implement staged server validation/confirmation, complete FK checks and truthful counts.
 
 ## B010 - High: Schedule PDF/CSV export buttons have no download behavior
+
+**Batch 2 update:** real authenticated PDF/CSV downloads use frozen scoped views, server filters and metadata, full exam allocations and audit events. Frontend controls download actual bytes. File-content and rendered representative-layout evidence is in [PROGRESS.md](PROGRESS.md); production load and complex-script shaping remain unverified.
 
 - Location: frontend/src/components/ui.tsx:87-89; frontend/src/pages/TimetablePage.tsx:72; frontend/src/pages/ExamSchedulePage.tsx:54.
 - Requirements: FR-11.1-11.5; UC-16.
@@ -94,6 +114,8 @@
 
 ## B011 - High: Login/accounts/audit screens simulate security without server persistence
 
+**Batch 2 update:** B001 authentication remains intact; account CRUD-by-deactivation, role/identity links, own/admin password workflows, session revocation and Administrator-only audit retrieval are now real backend workflows. Account-management mocks are no longer used. Generic master-mutation auditing/database enforcement remain B016, outside this batch; see [PROGRESS.md](PROGRESS.md).
+
 - Location: frontend/src/services/mockApi.ts:373-391; frontend/src/App.tsx:59-79; frontend/src/services/api.ts:335-338.
 - Requirements: FR-1.x; FR-12.2; SEC-1/2/4.
 - Evidence: Auth/users/audit endpoint probes404; static mock login check.
@@ -102,6 +124,8 @@
 - Required action (not implemented): Replace security mocks with authenticated server workflows, bcrypt>=12, expiry and lockout.
 
 ## B012 - High: Cancellation, total deadlines and process isolation are incomplete
+
+**Batch 1 update (21 November 2026): implemented with real spawned workers, authenticated owner cancellation, a shared deadline and atomic persistence fencing.** Targeted worker/API tests pass; final evidence and deployment limitations are tracked in [PROGRESS.md](PROGRESS.md). The finding below is the original audit baseline.
 
 - Location: frontend/src/services/api.ts:205-226; backend/routers/schedules.py:473-480; engine/exam_scheduler.py:471,614-688,1150,1364; engine/timetable_solver.py:883-936.
 - Requirements: C-4; P-2/3/8; FR-6.5/6.6.
@@ -112,6 +136,8 @@
 
 ## B013 - High: Default production app skips startup recovery of orphaned runs
 
+**Batch 1 update (21 November 2026): default lifespan now initializes its factory before recovery; durable leases distinguish live work from interrupted runs.** Real lifespan and idempotency tests pass; see [PROGRESS.md](PROGRESS.md). Original evidence is retained below.
+
 - Location: backend/main.py:96-109; backend/dependencies.py:38-55.
 - Requirements: SRS4.3.2; Q-02.
 - Evidence: test_default_app_recovers_orphan_on_startup.
@@ -120,6 +146,8 @@
 - Required action (not implemented): Initialize configured engine/session factory before startup recovery and test default entrypoint.
 
 ## B014 - High: Backend regeneration never supplies previous timetable to S05
+
+**Batch 1 update (21 November 2026): API regeneration supplies the complete previous timetable separately from mandatory locks and captures those preferences in immutable version inputs.** Real API tests cover enabled/zero/disabled S05, hard constraints, locks and no prior schedule; see [PROGRESS.md](PROGRESS.md). Original evidence is retained below.
 
 - Location: backend/routers/schedules.py:261-296; engine/timetable_solver.py:1002-1004.
 - Requirements: S05; FR-6.4.

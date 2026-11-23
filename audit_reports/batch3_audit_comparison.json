@@ -1,0 +1,12 @@
+{
+  "prior_failures": [
+    "audit_reports.test_audit_probes::test_exam_manual_override_persisted",
+    "audit_reports.test_audit_probes::test_mutation_audit_written"
+  ],
+  "current_failures": [],
+  "newly_failing": [],
+  "now_passing": [
+    "audit_reports.test_audit_probes::test_exam_manual_override_persisted",
+    "audit_reports.test_audit_probes::test_mutation_audit_written"
+  ]
+}

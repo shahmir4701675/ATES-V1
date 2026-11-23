@@ -33,6 +33,8 @@ from backend.adapter import (
     save_timetable_result,
 )
 from backend.database import session_scope
+from backend.manual_edits import revision_no
+from backend.schedule_access import check_schedule_access, check_scope_filters, scoped_entries, scoped_offerings, view_context
 from backend.dependencies import (
     CurrentUser,
     get_db,
@@ -56,6 +58,8 @@ from backend.models import (
     SchedulingConfig,
     TimeSlot,
     TimetableEntry,
+    GenerationRun,
+    ScheduleSnapshot,
 )
 from backend.routers.master_data import (
     DEFAULT_EXAM_CATALOGUE,
@@ -69,6 +73,7 @@ from backend.schemas import (
     EnrichedExamRoomAllocationResponse,
     EnrichedTimetableEntryResponse,
     ScheduleEntriesResponse,
+    UndoScheduleRequest,
     ScheduleEntryUpdateRequest,
     ScheduleGenerateRequest,
     ScheduleGenerateResponse,
@@ -77,9 +82,11 @@ from backend.schemas import (
 from engine.exam_scheduler import schedule_exams
 from engine.models import (
     ExamRoomAllocation as EngineExamRoomAllocation,
+    TimetableEntry as EngineTimetableEntry,
 )
 from engine.timetable_solver import solve_timetable
 from engine.validator import ExamValidator, TimetableValidator
+from backend.schedule_integrity import capture_inputs, validate_version, lock_inputs
 
 router = APIRouter(tags=["Schedules & Generation"])
 
@@ -92,13 +99,14 @@ def _batch_label(batch: Batch) -> str:
 def _build_enriched_timetable_entry(
     db: Session,
     entry: TimetableEntry,
+    context=None,
 ) -> EnrichedTimetableEntryResponse:
-    offering = db.get(CourseOffering, entry.offering_id)
-    course = db.get(Course, offering.course_id) if offering is not None else None
-    instructor = db.get(Instructor, entry.instructor_id)
-    batch = db.get(Batch, entry.batch_id)
-    room = db.get(Room, entry.room_id)
-    slot = db.get(TimeSlot, entry.slot_id)
+    offering = context.offerings_by_id.get(entry.offering_id) if context else db.get(CourseOffering, entry.offering_id)
+    course = (context.courses_by_id.get(offering.course_id) if context else db.get(Course, offering.course_id)) if offering else None
+    instructor = context.instructors_by_id.get(entry.instructor_id) if context else db.get(Instructor, entry.instructor_id)
+    batch = context.batches_by_id.get(entry.batch_id) if context else db.get(Batch, entry.batch_id)
+    room = context.rooms_by_id.get(entry.room_id) if context else db.get(Room, entry.room_id)
+    slot = context.slots_by_id.get(entry.slot_id) if context else db.get(TimeSlot, entry.slot_id)
 
     return EnrichedTimetableEntryResponse(
         entry_id=entry.entry_id,
@@ -116,8 +124,8 @@ def _build_enriched_timetable_entry(
         slot_id=entry.slot_id,
         day_of_week=slot.day_of_week if slot else 1,
         slot_index=slot.slot_index if slot else 1,
-        start_time=_fmt_time(slot.start_time) if slot else "08:00",
-        end_time=_fmt_time(slot.end_time) if slot else "09:00",
+        start_time=str(slot.start_time)[:5] if slot else "08:00",
+        end_time=str(slot.end_time)[:5] if slot else "09:00",
         session_type=entry.session_type,
         is_locked=bool(entry.is_locked),
         is_manual_override=bool(entry.is_manual_override),
@@ -127,9 +135,10 @@ def _build_enriched_timetable_entry(
 def _build_enriched_exam_entry(
     db: Session,
     entry: ExamEntry,
+    context=None,
 ) -> EnrichedExamEntryResponse:
-    course = db.get(Course, entry.course_id)
-    exam_slot = db.get(ExamSlot, entry.exam_slot_id)
+    course = context.courses_by_id.get(entry.course_id) if context else db.get(Course, entry.course_id)
+    exam_slot = context.exam_slots_by_id.get(entry.exam_slot_id) if context else db.get(ExamSlot, entry.exam_slot_id)
     allocs = db.scalars(
         select(ExamRoomAllocation)
         .where(ExamRoomAllocation.exam_entry_id == entry.exam_entry_id)
@@ -138,7 +147,7 @@ def _build_enriched_exam_entry(
 
     enriched_allocs: list[EnrichedExamRoomAllocationResponse] = []
     for a in allocs:
-        room = db.get(Room, a.room_id)
+        room = context.rooms_by_id.get(a.room_id) if context else db.get(Room, a.room_id)
         enriched_allocs.append(
             EnrichedExamRoomAllocationResponse(
                 allocation_id=a.allocation_id,
@@ -156,17 +165,20 @@ def _build_enriched_exam_entry(
         course_code=course.course_code if course else "",
         course_title=course.title if course else "",
         exam_slot_id=entry.exam_slot_id,
-        exam_date=exam_slot.exam_date.isoformat() if exam_slot else "",
-        start_time=_fmt_time(exam_slot.start_time) if exam_slot else "09:00",
-        end_time=_fmt_time(exam_slot.end_time) if exam_slot else "12:00",
+        exam_date=str(exam_slot.exam_date) if exam_slot else "",
+        start_time=str(exam_slot.start_time)[:5] if exam_slot else "09:00",
+        end_time=str(exam_slot.end_time)[:5] if exam_slot else "12:00",
         label=exam_slot.label if exam_slot else None,
         student_count=entry.student_count,
         is_locked=bool(entry.is_locked),
+        is_manual_override=bool(entry.is_manual_override),
         room_allocations=enriched_allocs,
     )
 
 
-def _build_schedule_status_response(db: Session, sch: Schedule) -> ScheduleStatusResponse:
+def _build_schedule_status_response(db: Session, sch: Schedule, user=None) -> ScheduleStatusResponse:
+    if sch.status in {"Published", "Archived"}:
+        load_term_dataset(db, sch.term_id, config_id=sch.config_id, schedule_id=sch.schedule_id)
     if sch.schedule_type == "Timetable":
         entry_count = int(
             db.scalar(
@@ -204,7 +216,15 @@ def _build_schedule_status_response(db: Session, sch: Schedule) -> ScheduleStatu
         or 0
     )
 
+    if user is not None and user.role in {'Faculty','Student'}:
+        context=load_term_dataset(db,sch.term_id,config_id=sch.config_id,schedule_id=sch.schedule_id)
+        entry_count=len(scoped_entries(context,sch.schedule_type,user))
+        conflict_count=hard_violation_count=0
+    run = db.get(GenerationRun, sch.schedule_id)
     return ScheduleStatusResponse(
+        generation_state=run.state if run else None,
+        generation_phase=run.phase if run else None,
+        worker_stopped=bool(run and run.worker_stopped_at),
         schedule_id=sch.schedule_id,
         term_id=sch.term_id,
         config_id=sch.config_id,
@@ -234,107 +254,42 @@ def run_schedule_generation_worker(
     *,
     time_limit_override: int | None = None,
     random_seed_override: int | None = None,
+    deadline: float | None = None,
 ) -> None:
-    """Background worker that solves a timetable or exam schedule and saves in one transaction (`DB-6`, `SAF-2`)."""
-    try:
-        with session_scope(session_factory) as session:
-            sch = session.get(Schedule, schedule_id)
-            if sch is None:
-                return
-            term_id = sch.term_id
-            config_id = sch.config_id
-            schedule_type = sch.schedule_type
-            generated_by = sch.generated_by
+    from backend.generation import supervise
+    supervise(session_factory,schedule_id,deadline)
 
-            cfg = session.get(SchedulingConfig, config_id)
-            time_limit_s = float(
-                time_limit_override
-                if time_limit_override is not None
-                else (cfg.solver_time_limit_s if cfg is not None else 120)
-            )
-            random_seed = int(
-                random_seed_override
-                if random_seed_override is not None
-                else (cfg.random_seed if cfg is not None else 1)
-            )
 
-            # Find latest previous Generated or Published schedule to preserve locked entries (FR-6.10)
-            prev_schedule = session.scalar(
-                select(Schedule)
-                .where(
-                    Schedule.term_id == term_id,
-                    Schedule.schedule_type == schedule_type,
-                    Schedule.schedule_id != schedule_id,
-                    Schedule.status.in_(("Generated", "Published")),
-                )
-                .order_by(Schedule.version_no.desc())
-            )
-            prev_schedule_id = prev_schedule.schedule_id if prev_schedule is not None else None
+from backend.generation_execution import execute_generation
 
-            dataset = load_term_dataset(
-                session,
-                term_id=term_id,
-                config_id=config_id,
-                schedule_id=prev_schedule_id,
-                include_existing_schedules=prev_schedule_id is not None,
-            )
-            if prev_schedule_id is not None:
-                dataset.timetable_entries = [
-                    e for e in dataset.timetable_entries if e.is_locked
-                ]
-                dataset.exam_entries = [
-                    e for e in dataset.exam_entries if e.is_locked
-                ]
 
-        if schedule_type == "Timetable":
-            tt_result = solve_timetable(
-                dataset,
-                term_id=term_id,
-                config_id=config_id,
-                time_limit_s=time_limit_s,
-                random_seed=random_seed,
-            )
-            save_timetable_result(
-                session_factory,
-                tt_result,
-                term_id=term_id,
-                config_id=config_id,
-                generated_by=generated_by,
-                schedule_id=schedule_id,
-            )
-        else:
-            exam_result = schedule_exams(
-                dataset,
-                term_id=term_id,
-                config_id=config_id,
-                time_limit_s=time_limit_s,
-                random_seed=random_seed,
-            )
-            save_exam_result(
-                session_factory,
-                exam_result,
-                term_id=term_id,
-                config_id=config_id,
-                generated_by=generated_by,
-                schedule_id=schedule_id,
-            )
-    except Exception as exc:
-        # Ensure a failed/interrupted run never leaves the schedule stuck in 'Generating' (SRS 4.3.2, SAF-2)
-        with session_scope(session_factory) as session:
-            sch = session.get(Schedule, schedule_id)
-            if sch is not None and sch.status == "Generating":
-                sch.status = "Infeasible"
-                sch.solver_status = "interrupted"
-                session.add(
-                    ConflictLog(
-                        schedule_id=schedule_id,
-                        conflict_type="WorkerInterrupted",
-                        severity="Hard",
-                        description=f"Solver worker interrupted: {exc}",
-                        entity_ref=f"schedule_id={schedule_id}",
-                        is_resolved=False,
-                    )
-                )
+@router.post("/schedules/{schedule_id}/cancel", response_model=ScheduleStatusResponse)
+def cancel_schedule(schedule_id: int, request: Request, db: Session = Depends(get_db), user: CurrentUser = Depends(require_roles("Coordinator"))):
+    from backend.generation import terminal,stop_local,acknowledge_stop
+    import time
+    lock_inputs(db)
+    sch=db.get(Schedule,schedule_id)
+    if sch is None: raise HTTPException(404,"Schedule not found.")
+    if sch.generated_by != user.user_id: raise HTTPException(403,"Only the Coordinator who started this run may cancel it.")
+    run=db.get(GenerationRun,schedule_id)
+    if run is None: raise HTTPException(409,"This version has no active generation run.")
+    if run.state not in {"Queued","Running","Cancelled"}: raise HTTPException(409,"The generation run has already finished.")
+    token=run.owner_token
+    no_process=run.process_id is None
+    terminal(db,sch,"Cancelled","Generation cancelled by its authenticated Coordinator.")
+    db.add(AuditLog(user_id=user.user_id,action="CANCEL_GENERATION",entity_type="schedules",entity_id=schedule_id,details="Cancellation requested; result persistence is fenced."))
+    db.commit()
+    factory=get_session_factory_from_request(request)
+    if no_process or stop_local(token): acknowledge_stop(factory,schedule_id,token)
+    # A different API process may own the worker; durable state is its stop signal.
+    for _ in range(20):
+        db.expire_all(); run=db.get(GenerationRun,schedule_id)
+        if run.worker_stopped_at: break
+        time.sleep(.05)
+    result=_build_schedule_status_response(db,db.get(Schedule,schedule_id))
+    if not result.worker_stopped:
+        return JSONResponse(status_code=202,content=result.model_dump(mode="json"))
+    return result
 
 
 # ============================================================================
@@ -358,7 +313,14 @@ def list_schedules(
     if status_filter is not None:
         stmt = stmt.where(Schedule.status == status_filter)
     schedules = db.scalars(stmt.order_by(Schedule.schedule_id)).all()
-    return [_build_schedule_status_response(db, s) for s in schedules]
+    visible=[]
+    for schedule in schedules:
+        try:check_schedule_access(db,schedule,_user)
+        except HTTPException as exc:
+            if exc.status_code==403:continue
+            raise
+        visible.append(_build_schedule_status_response(db,schedule,_user))
+    return visible
 
 
 @router.get("/schedules/{schedule_id}", response_model=ScheduleStatusResponse)
@@ -375,7 +337,8 @@ def get_schedule(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Schedule {schedule_id} not found.",
         )
-    return _build_schedule_status_response(db, sch)
+    check_schedule_access(db,sch,_user)
+    return _build_schedule_status_response(db, sch, _user)
 
 
 @router.post(
@@ -388,15 +351,23 @@ def generate_schedule(
     background_tasks: BackgroundTasks,
     request: Request,
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> ScheduleGenerateResponse:
     """Create a new schedule with `status='Generating'` and run the solver in a background worker."""
+    from backend.auth import utc_now
+    from backend.generation import new_run
+    submitted_at=utc_now()
+    import time
+    submitted_monotonic=time.monotonic()
+    lock_inputs(db)  # Serialize config selection/creation and version allocation together.
     term = db.get(AcademicTerm, payload.term_id)
     if term is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"AcademicTerm {payload.term_id} not found.",
         )
+
+    if term.status=='Closed':raise HTTPException(422,'Cannot generate schedules for a Closed term.')
 
     if payload.config_id is not None:
         cfg = db.get(SchedulingConfig, payload.config_id)
@@ -407,6 +378,7 @@ def generate_schedule(
                     f"SchedulingConfig {payload.config_id} for term {payload.term_id} not found."
                 ),
             )
+        if 'schedule_type' in payload.model_fields_set and payload.schedule_type!=cfg.schedule_type:raise HTTPException(422,'Configuration schedule type does not match the request.')
         schedule_type = cfg.schedule_type
     else:
         schedule_type = payload.schedule_type
@@ -425,7 +397,7 @@ def generate_schedule(
                 name=f"Default {schedule_type.lower()}",
                 solver_time_limit_s=payload.solver_time_limit_s or 120,
                 random_seed=payload.random_seed or 1,
-                created_by=payload.generated_by or user.user_id,
+                created_by=user.user_id,
             )
             db.add(cfg)
             db.flush()
@@ -447,6 +419,15 @@ def generate_schedule(
                 )
             db.flush()
 
+    # Fail before queuing a worker when persisted configuration was written by
+    # an older client or an external database writer.
+    from backend.input_validation import validate_rules
+    validate_rules(list(db.scalars(select(ConstraintRule).where(ConstraintRule.config_id==cfg.config_id))),schedule_type)
+    if not 10<=cfg.solver_time_limit_s<=600 or not 0<=cfg.random_seed<=2147483647:
+        raise HTTPException(422,'Stored solver settings are outside their supported domain.')
+    if schedule_type=='Exam' and db.scalar(select(ExamSlot.exam_slot_id).where(ExamSlot.term_id==payload.term_id).limit(1)) is None:
+        raise HTTPException(422,'An exam configuration requires at least one exam session before generation.')
+
     next_version = _next_schedule_version(db, payload.term_id, schedule_type)
     new_schedule = Schedule(
         term_id=payload.term_id,
@@ -455,9 +436,14 @@ def generate_schedule(
         version_no=next_version,
         status="Generating",
         solver_status=None,
-        generated_by=payload.generated_by or user.user_id,
+        generated_by=user.user_id,
     )
     db.add(new_schedule)
+    db.flush()
+    db.add(AuditLog(user_id=user.user_id,action="GENERATION_QUEUED",entity_type="schedules",entity_id=new_schedule.schedule_id))
+    db.add(new_run(new_schedule.schedule_id,
+        payload.solver_time_limit_s if payload.solver_time_limit_s is not None else cfg.solver_time_limit_s,
+        payload.random_seed if payload.random_seed is not None else cfg.random_seed, submitted_at))
     db.commit()
     db.refresh(new_schedule)
 
@@ -477,6 +463,7 @@ def generate_schedule(
         schedule_id=new_schedule.schedule_id,
         time_limit_override=payload.solver_time_limit_s,
         random_seed_override=payload.random_seed,
+        deadline=submitted_monotonic+(payload.solver_time_limit_s if payload.solver_time_limit_s is not None else cfg.solver_time_limit_s),
     )
 
     return response_payload
@@ -485,6 +472,52 @@ def generate_schedule(
 # ============================================================================
 # Status, Entries & Conflicts (`GET /schedules/{id}/status`, `/entries`, `/conflicts`)
 # ============================================================================
+@router.post('/schedules/{schedule_id}/publish',response_model=ScheduleStatusResponse)
+def publish_schedule(schedule_id:int,db:Session=Depends(get_db),user:CurrentUser=Depends(require_roles('Approver'))):
+    import json
+    from backend.auth import utc_now
+    from backend.schedule_integrity import publication_eligibility,check_fresh
+    lock_inputs(db)
+    sch=db.get(Schedule,schedule_id,populate_existing=True)
+    if sch is None:raise HTTPException(404,'Schedule not found.')
+    if db.get(ScheduleSnapshot,schedule_id) is None:
+        raise HTTPException(409,'This legacy version has no trusted original snapshot; reviewed recovery is required.')
+    publication_eligibility(db,schedule_id)
+    # Reading official history remains snapshot-only. A *new* publication must
+    # additionally prove that this candidate's original inputs are still current.
+    original=json.loads(db.get(ScheduleSnapshot,schedule_id).inputs_json)
+    source_id=original.get('source_schedule_id')
+    if source_id is not None:
+        source=db.get(Schedule,source_id)
+        if source is None or (source.term_id,source.schedule_type)!=(sch.term_id,sch.schedule_type):
+            raise HTTPException(409,'The candidate source version is missing or inconsistent; regenerate.')
+    check_fresh(db,original)
+    previous=db.scalars(select(Schedule).where(Schedule.term_id==sch.term_id,Schedule.schedule_type==sch.schedule_type,Schedule.status=='Published')).all()
+    for old in previous:
+        # Refuse to silently archive an unreadable legacy official version.
+        load_term_dataset(db,old.term_id,config_id=old.config_id,schedule_id=old.schedule_id)
+        old.status='Archived'
+        db.add(AuditLog(user_id=user.user_id,action='ARCHIVE_SCHEDULE',entity_type='schedules',entity_id=old.schedule_id,details=f'Replaced by version {sch.version_no}.'))
+    db.flush()  # Release the unique Published slot before publishing the replacement.
+    sch.status,sch.approved_by,sch.published_at='Published',user.user_id,utc_now()
+    db.add(AuditLog(user_id=user.user_id,action='PUBLISH_SCHEDULE',entity_type='schedules',entity_id=schedule_id))
+    db.commit()
+    return _build_schedule_status_response(db,sch,user)
+
+
+@router.post('/schedules/{schedule_id}/archive',response_model=ScheduleStatusResponse)
+def archive_schedule(schedule_id:int,db:Session=Depends(get_db),user:CurrentUser=Depends(require_roles('Approver'))):
+    lock_inputs(db)
+    sch=db.get(Schedule,schedule_id,populate_existing=True)
+    if sch is None:raise HTTPException(404,'Schedule not found.')
+    if sch.status!='Published':raise HTTPException(409,'Only a Published version can be archived.')
+    load_term_dataset(db,sch.term_id,config_id=sch.config_id,schedule_id=schedule_id)
+    sch.status='Archived'
+    db.add(AuditLog(user_id=user.user_id,action='ARCHIVE_SCHEDULE',entity_type='schedules',entity_id=schedule_id))
+    db.commit()
+    return _build_schedule_status_response(db,sch,user)
+
+
 @router.get("/schedules/{schedule_id}/status", response_model=ScheduleStatusResponse)
 def get_schedule_status(
     schedule_id: int,
@@ -499,7 +532,8 @@ def get_schedule_status(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Schedule {schedule_id} not found.",
         )
-    return _build_schedule_status_response(db, sch)
+    check_schedule_access(db,sch,_user)
+    return _build_schedule_status_response(db, sch, _user)
 
 
 @router.get("/schedules/{schedule_id}/entries", response_model=ScheduleEntriesResponse)
@@ -523,7 +557,12 @@ def get_schedule_entries(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Schedule {schedule_id} not found.",
         )
-    term = db.get(AcademicTerm, sch.term_id)
+    check_schedule_access(db,sch,_user)
+    check_scope_filters(_user,batch_id,instructor_id)
+    if _user.role=="Student":batch_id=_user.batch_id
+    if _user.role=="Faculty":instructor_id=_user.instructor_id
+    context = load_term_dataset(db, sch.term_id, config_id=sch.config_id, schedule_id=schedule_id)
+    term = context.academic_terms[0] if context.academic_terms else None
     hard_violation_count = int(
         db.scalar(
             select(func.count(ConflictLog.conflict_id)).where(
@@ -541,7 +580,7 @@ def get_schedule_entries(
     ).all()
     enriched_tt: list[EnrichedTimetableEntryResponse] = []
     for te in tt_entries_orm:
-        item = _build_enriched_timetable_entry(db, te)
+        item = _build_enriched_timetable_entry(db, te, context)
         if batch_id is not None and item.batch_id != batch_id:
             continue
         if instructor_id is not None and item.instructor_id != instructor_id:
@@ -563,7 +602,7 @@ def get_schedule_entries(
     ).all()
     enriched_exam: list[EnrichedExamEntryResponse] = []
     for ee in exam_entries_orm:
-        item_ex = _build_enriched_exam_entry(db, ee)
+        item_ex = _build_enriched_exam_entry(db, ee, context)
         if course_id is not None and item_ex.course_id != course_id:
             continue
         if exam_date is not None and item_ex.exam_date != exam_date:
@@ -572,14 +611,10 @@ def get_schedule_entries(
             a.room_id != room_id for a in item_ex.room_allocations
         ):
             continue
+        if instructor_id is not None and not any(off.course_id==item_ex.course_id and off.instructor_id==instructor_id for off in context.course_offerings):
+            continue
         if batch_id is not None:
-            batch_offerings = db.scalars(
-                select(CourseOffering).where(
-                    CourseOffering.term_id == sch.term_id,
-                    CourseOffering.course_id == item_ex.course_id,
-                    CourseOffering.batch_id == batch_id,
-                )
-            ).all()
+            batch_offerings = [off for off in context.course_offerings if off.course_id == item_ex.course_id and off.batch_id == batch_id]
             if not batch_offerings:
                 continue
         enriched_exam.append(item_ex)
@@ -591,6 +626,8 @@ def get_schedule_entries(
     )
 
     return ScheduleEntriesResponse(
+        context=view_context(context,_user,enriched_tt,enriched_exam),
+        edit_revision=revision_no(db,schedule_id),
         schedule_id=sch.schedule_id,
         term_id=sch.term_id,
         term_name=term.name if term else "",
@@ -632,6 +669,7 @@ def get_schedule_conflicts(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Schedule {schedule_id} not found.",
         )
+    check_schedule_access(db,sch,_user)
     stmt = select(ConflictLog).where(ConflictLog.schedule_id == schedule_id)
     if conflict_type:
         stmt = stmt.where(ConflictLog.conflict_type == conflict_type)
@@ -663,277 +701,13 @@ def _handle_schedule_entry_update(
     payload: ScheduleEntryUpdateRequest,
     user: CurrentUser,
 ) -> Any:
-    sch = db.get(Schedule, schedule_id)
-    if sch is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Schedule {schedule_id} not found.",
-        )
-
-    # SAF-4 & FR-8.3: Published and Archived schedules are read-only
-    if sch.status in ("Published", "Archived"):
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=(
-                f"Schedule {schedule_id} has status '{sch.status}' and cannot be edited in place "
-                "(SAF-4, FR-8.3). Only 'Generated' or 'Draft' schedules allow manual moves."
-            ),
-        )
-
-    dataset = load_term_dataset(
-        db,
-        term_id=sch.term_id,
-        config_id=sch.config_id,
-        schedule_id=schedule_id,
-    )
-
-    if sch.schedule_type == "Timetable":
-        entry_orm = db.get(TimetableEntry, entry_id)
-        if entry_orm is None or entry_orm.schedule_id != schedule_id:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"TimetableEntry {entry_id} in schedule {schedule_id} not found.",
-            )
-
-        new_slot_id = payload.slot_id if payload.slot_id is not None else entry_orm.slot_id
-        new_room_id = payload.room_id if payload.room_id is not None else entry_orm.room_id
-        new_locked = (
-            payload.is_locked if payload.is_locked is not None else bool(entry_orm.is_locked)
-        )
-
-        slot_orm = db.get(TimeSlot, new_slot_id)
-        if slot_orm is None or slot_orm.term_id != sch.term_id:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"TimeSlot {new_slot_id} in term {sch.term_id} not found.",
-            )
-        room_orm = db.get(Room, new_room_id)
-        if room_orm is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Room {new_room_id} not found.",
-            )
-
-        moved = (new_slot_id != entry_orm.slot_id) or (new_room_id != entry_orm.room_id)
-        new_override = True if moved else bool(entry_orm.is_manual_override)
-
-        # Apply candidate change in memory and run the independent validator (FR-8.4)
-        candidate_entries = [
-            replace(
-                e,
-                slot_id=new_slot_id,
-                room_id=new_room_id,
-                is_locked=new_locked,
-                is_manual_override=new_override,
-            )
-            if e.entry_id == entry_id
-            else e
-            for e in dataset.timetable_entries
-        ]
-        dataset.timetable_entries = candidate_entries
-
-        violations = TimetableValidator().validate(
-            dataset,
-            entries=candidate_entries,
-            config_id=sch.config_id,
-        )
-        hard_violations = [v for v in violations if v.severity == "Hard"]
-
-        if hard_violations:
-            # Order violations directly involving the moved entry/slot/room first
-            def _relevance(v: Any) -> int:
-                aff = v.affected_entities or {}
-                if entry_id in aff.get("entry_ids", []):
-                    return 0
-                if aff.get("offering_id") == entry_orm.offering_id:
-                    return 1
-                if aff.get("slot_id") == new_slot_id or aff.get("room_id") == new_room_id:
-                    return 2
-                return 3
-
-            hard_violations.sort(key=_relevance)
-            violated_codes = list(dict.fromkeys(v.rule_code for v in hard_violations))
-            primary_v = hard_violations[0]
-            detail_msg = (
-                f"Manual move violates hard constraint {', '.join(violated_codes)}: "
-                f"{primary_v.description}"
-            )
-            return JSONResponse(
-                status_code=status.HTTP_409_CONFLICT,
-                content={
-                    "detail": detail_msg,
-                    "rule_code": primary_v.rule_code,
-                    "violated_constraints": violated_codes,
-                    "violations": [v.to_conflict_log_dict() for v in hard_violations],
-                },
-            )
-
-        entry_orm.slot_id = new_slot_id
-        entry_orm.room_id = new_room_id
-        entry_orm.is_locked = new_locked
-        entry_orm.is_manual_override = new_override
-
-        db.add(
-            AuditLog(
-                user_id=user.user_id,
-                action="MANUAL_ADJUST",
-                entity_type="timetable_entries",
-                entity_id=entry_id,
-                details=(
-                    f"schedule_id={schedule_id}, entry_id={entry_id}, "
-                    f"slot_id={new_slot_id}, room_id={new_room_id}, "
-                    f"is_locked={new_locked}, is_manual_override={new_override}"
-                ),
-            )
-        )
-        db.commit()
-        db.refresh(entry_orm)
-        return _build_enriched_timetable_entry(db, entry_orm)
-
-    # Exam schedule entry adjustment (`schedule_type == "Exam"`)
-    exam_entry_orm = db.get(ExamEntry, entry_id)
-    if exam_entry_orm is None or exam_entry_orm.schedule_id != schedule_id:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"ExamEntry {entry_id} in schedule {schedule_id} not found.",
-        )
-
-    target_exam_slot_id = (
-        payload.exam_slot_id
-        if payload.exam_slot_id is not None
-        else (payload.slot_id if payload.slot_id is not None else exam_entry_orm.exam_slot_id)
-    )
-    new_locked = (
-        payload.is_locked
-        if payload.is_locked is not None
-        else bool(exam_entry_orm.is_locked)
-    )
-
-    exam_slot_orm = db.get(ExamSlot, target_exam_slot_id)
-    if exam_slot_orm is None or exam_slot_orm.term_id != sch.term_id:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"ExamSlot {target_exam_slot_id} in term {sch.term_id} not found.",
-        )
-
-    # Build candidate room allocations if room_allocations or room_id was supplied
-    candidate_allocs = list(dataset.exam_room_allocations)
-    new_entry_allocs: list[EngineExamRoomAllocation] | None = None
-
-    if payload.room_allocations is not None:
-        for ra in payload.room_allocations:
-            if db.get(Room, ra.room_id) is None:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"Room {ra.room_id} not found.",
-                )
-        new_entry_allocs = [
-            EngineExamRoomAllocation(
-                allocation_id=-(idx + 1),
-                exam_entry_id=entry_id,
-                room_id=ra.room_id,
-                seats_allocated=ra.seats_allocated,
-            )
-            for idx, ra in enumerate(payload.room_allocations)
-        ]
-    elif payload.room_id is not None:
-        if db.get(Room, payload.room_id) is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Room {payload.room_id} not found.",
-            )
-        new_entry_allocs = [
-            EngineExamRoomAllocation(
-                allocation_id=-1,
-                exam_entry_id=entry_id,
-                room_id=payload.room_id,
-                seats_allocated=exam_entry_orm.student_count,
-            )
-        ]
-
-    if new_entry_allocs is not None:
-        candidate_allocs = [
-            a for a in candidate_allocs if a.exam_entry_id != entry_id
-        ] + new_entry_allocs
-
-    candidate_exam_entries = [
-        replace(
-            e,
-            exam_slot_id=target_exam_slot_id,
-            is_locked=new_locked,
-            is_manual_override=True,
-            room_allocations=(
-                new_entry_allocs if new_entry_allocs is not None else e.room_allocations
-            ),
-        )
-        if e.exam_entry_id == entry_id
-        else e
-        for e in dataset.exam_entries
-    ]
-    dataset.exam_entries = candidate_exam_entries
-    dataset.exam_room_allocations = candidate_allocs
-
-    exam_violations = ExamValidator().validate(
-        dataset,
-        entries=candidate_exam_entries,
-        allocations=candidate_allocs,
-        config_id=sch.config_id,
-    )
-    hard_exam_violations = [v for v in exam_violations if v.severity == "Hard"]
-
-    if hard_exam_violations:
-        violated_codes = list(dict.fromkeys(v.rule_code for v in hard_exam_violations))
-        primary_v = hard_exam_violations[0]
-        detail_msg = (
-            f"Manual exam move violates hard constraint {', '.join(violated_codes)}: "
-            f"{primary_v.description}"
-        )
-        return JSONResponse(
-            status_code=status.HTTP_409_CONFLICT,
-            content={
-                "detail": detail_msg,
-                "rule_code": primary_v.rule_code,
-                "violated_constraints": violated_codes,
-                "violations": [v.to_conflict_log_dict() for v in hard_exam_violations],
-            },
-        )
-
-    exam_entry_orm.exam_slot_id = target_exam_slot_id
-    exam_entry_orm.is_locked = new_locked
-
-    if new_entry_allocs is not None:
-        existing_allocs = db.scalars(
-            select(ExamRoomAllocation).where(
-                ExamRoomAllocation.exam_entry_id == entry_id
-            )
-        ).all()
-        for old_a in existing_allocs:
-            db.delete(old_a)
-        db.flush()
-        for na in new_entry_allocs:
-            db.add(
-                ExamRoomAllocation(
-                    exam_entry_id=entry_id,
-                    room_id=na.room_id,
-                    seats_allocated=na.seats_allocated,
-                )
-            )
-
-    db.add(
-        AuditLog(
-            user_id=user.user_id,
-            action="MANUAL_ADJUST",
-            entity_type="exam_entries",
-            entity_id=entry_id,
-            details=(
-                f"schedule_id={schedule_id}, exam_entry_id={entry_id}, "
-                f"exam_slot_id={target_exam_slot_id}, is_locked={new_locked}"
-            ),
-        )
-    )
-    db.commit()
-    db.refresh(exam_entry_orm)
-    return _build_enriched_exam_entry(db, exam_entry_orm)
+    from backend.manual_edits import apply,ManualEditError
+    try:
+        sch,dataset,number=apply(db,schedule_id,entry_id,payload,user)
+        row=db.get(TimetableEntry if sch.schedule_type=='Timetable' else ExamEntry,entry_id)
+        result=_build_enriched_timetable_entry(db,row,dataset) if sch.schedule_type=='Timetable' else _build_enriched_exam_entry(db,row,dataset)
+        return {**result.model_dump(),'edit_revision':number}
+    except ManualEditError as exc:return JSONResponse(status_code=409,content=exc.payload)
 
 
 @router.put("/schedules/{schedule_id}/entries/{entry_id}")
@@ -942,7 +716,7 @@ def update_schedule_entry(
     entry_id: int,
     payload: ScheduleEntryUpdateRequest,
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> Any:
     """Move or lock a timetable session or exam entry with immediate hard-constraint re-validation."""
     return _handle_schedule_entry_update(db, schedule_id, entry_id, payload, user)
@@ -953,7 +727,7 @@ def update_schedule_entry_from_body(
     schedule_id: int,
     payload: ScheduleEntryUpdateRequest,
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> Any:
     """Table 9 alias (`PUT /schedules/{id}/entries`) reading `entry_id` from the request body."""
     if payload.entry_id is None:
@@ -964,3 +738,10 @@ def update_schedule_entry_from_body(
     return _handle_schedule_entry_update(
         db, schedule_id, payload.entry_id, payload, user
     )
+
+
+@router.post('/schedules/{schedule_id}/undo')
+def undo_schedule(schedule_id:int,payload:UndoScheduleRequest,db:Session=Depends(get_db),user:CurrentUser=Depends(require_roles('Coordinator'))):
+    from backend.manual_edits import undo,ManualEditError
+    try:return undo(db,schedule_id,user,payload.expected_revision)
+    except ManualEditError as exc:return JSONResponse(status_code=409,content=exc.payload)

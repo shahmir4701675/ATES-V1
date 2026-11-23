@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="14.353" timestamp="2026-11-21T19:55:47.682603+05:00" hostname="shahmir"><testcase classname="tests.test_schedule_integrity" name="test_new_generation_uses_current_inputs_and_preserves_versions[1-1-Timetable]" time="12.575"><failure message="AssertionError: assert 'Infeasible' == 'Generated'&#10;  &#10;  - Generated&#10;  + Infeasible">env = (&lt;starlette.testclient.TestClient object at 0x000001AAD3D37E00&gt;, sessionmaker(class_='Session', bind=Engine(sqlite:///...te), 'sqlite:///C:/Users/DELL/AppData/Local/Temp/pytest-of-DELL/pytest-54/test_new_generation_uses_curre0/b004.sqlite')
+schedule_id = 1, config_id = 1, kind = 'Timetable'
+
+    @pytest.mark.parametrize("schedule_id,config_id,kind", [(1,1,"Timetable"),(2,2,"Exam")])
+    def test_new_generation_uses_current_inputs_and_preserves_versions(env, schedule_id, config_id, kind):
+        client, factory, _, _ = env
+        freeze(factory, schedule_id, True)
+        with factory.begin() as session:
+            session.get(m.Course, 1).title = "Current course title"
+        response = client.post("/schedules/generate", json=dict(term_id=1, config_id=config_id, schedule_type=kind, solver_time_limit_s=10))
+        assert response.status_code == 202, response.text
+        new_id = response.json()["schedule_id"]
+&gt;       assert client.get(f"/schedules/{new_id}/status").json()["status"] == "Generated"
+E       AssertionError: assert 'Infeasible' == 'Generated'
+E         
+E         - Generated
+E         + Infeasible
+
+tests\test_schedule_integrity.py:150: AssertionError</failure></testcase></testsuite></testsuites>

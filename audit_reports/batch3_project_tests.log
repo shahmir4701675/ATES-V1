@@ -1,0 +1,46 @@
+........................................................................ [ 12%]
+........................................................................ [ 24%]
+........................................................................ [ 37%]
+........................................................................ [ 49%]
+........................................................................ [ 62%]
+.............................................F.......................... [ 74%]
+........................................................................ [ 87%]
+........................................................................ [ 99%]
+.                                                                        [100%]
+================================== FAILURES ===================================
+_ test_new_generation_uses_current_inputs_and_preserves_versions[1-1-Timetable] _
+
+env = (<starlette.testclient.TestClient object at 0x00000162E278DAE0>, sessionmaker(class_='Session', bind=Engine(sqlite:///...te), 'sqlite:///C:/Users/DELL/AppData/Local/Temp/pytest-of-DELL/pytest-52/test_new_generation_uses_curre0/b004.sqlite')
+schedule_id = 1, config_id = 1, kind = 'Timetable'
+
+    @pytest.mark.parametrize("schedule_id,config_id,kind", [(1,1,"Timetable"),(2,2,"Exam")])
+    def test_new_generation_uses_current_inputs_and_preserves_versions(env, schedule_id, config_id, kind):
+        client, factory, _, _ = env
+        freeze(factory, schedule_id, True)
+        with factory.begin() as session:
+            session.get(m.Course, 1).title = "Current course title"
+        response = client.post("/schedules/generate", json=dict(term_id=1, config_id=config_id, schedule_type=kind, solver_time_limit_s=10))
+        assert response.status_code == 202, response.text
+        new_id = response.json()["schedule_id"]
+>       assert client.get(f"/schedules/{new_id}/status").json()["status"] == "Generated"
+E       AssertionError: assert 'Infeasible' == 'Generated'
+E         
+E         - Generated
+E         + Infeasible
+
+tests\test_schedule_integrity.py:150: AssertionError
+============================== warnings summary ===============================
+.venv\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\DELL\OneDrive\Desktop\ATES-V1\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+tests/test_weekly_grid.py::test_create_rejects_invalid_grid_atomically[patch3]
+tests/test_weekly_grid.py::test_create_rejects_invalid_grid_atomically[patch4]
+tests/test_weekly_grid.py::test_create_rejects_invalid_grid_atomically[patch5]
+  C:\Users\DELL\OneDrive\Desktop\ATES-V1\.venv\Lib\site-packages\fastapi\telemetry\_api.py:244: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+    return function(**arguments)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_schedule_integrity.py::test_new_generation_uses_current_inputs_and_preserves_versions[1-1-Timetable]
+1 failed, 576 passed, 4 warnings in 792.24s (0:13:12)

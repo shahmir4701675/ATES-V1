@@ -1,0 +1,38 @@
+........................................................................ [ 13%]
+........................................................................ [ 27%]
+........................................................................ [ 40%]
+........................................................................ [ 54%]
+........................................................................ [ 68%]
+.......................F................................................ [ 81%]
+........................................................................ [ 95%]
+........................                                                 [100%]
+================================== FAILURES ===================================
+_______________ test_review_does_not_create_a_publish_endpoint ________________
+
+env = (<starlette.testclient.TestClient object at 0x0000019BF0693AC0>, sessionmaker(class_='Session', bind=Engine(sqlite:///...te), 'sqlite:///C:/Users/DELL/AppData/Local/Temp/pytest-of-DELL/pytest-42/test_review_does_not_create_a_0/b004.sqlite')
+
+    def test_review_does_not_create_a_publish_endpoint(env):
+        client, _, _, _ = env
+>       assert client.post("/schedules/1/publish").status_code == 404
+E       AssertionError: assert 403 == 404
+E        +  where 403 = <Response [403 Forbidden]>.status_code
+E        +    where <Response [403 Forbidden]> = post('/schedules/1/publish')
+E        +      where post = <starlette.testclient.TestClient object at 0x0000019BF0693AC0>.post
+
+tests\test_schedule_integrity.py:314: AssertionError
+============================== warnings summary ===============================
+.venv\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\DELL\OneDrive\Desktop\ATES-V1\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+tests/test_backend_api.py::test_master_data_terms_slots_exam_slots_offerings_and_configs
+tests/test_weekly_grid.py::test_create_rejects_invalid_grid_atomically[patch3]
+tests/test_weekly_grid.py::test_create_rejects_invalid_grid_atomically[patch4]
+tests/test_weekly_grid.py::test_create_rejects_invalid_grid_atomically[patch5]
+  C:\Users\DELL\OneDrive\Desktop\ATES-V1\.venv\Lib\site-packages\fastapi\telemetry\_api.py:244: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+    return function(**arguments)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_schedule_integrity.py::test_review_does_not_create_a_publish_endpoint
+1 failed, 527 passed, 5 warnings in 527.28s (0:08:47)

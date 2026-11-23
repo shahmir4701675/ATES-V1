@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1" time="1.534" timestamp="2026-11-21T18:45:40.669943+05:00" hostname="shahmir"><testcase classname="tests.test_schedule_integrity" name="test_review_does_not_publish_or_grant_publication_permission" time="1.317" /></testsuite></testsuites>

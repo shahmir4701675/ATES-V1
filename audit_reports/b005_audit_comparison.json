@@ -1,0 +1,21 @@
+{
+  "old_failed": 12,
+  "current_failed": 11,
+  "newly_failing": [],
+  "fixed": [
+    "test_lab_contiguity_uses_clock_time"
+  ],
+  "remaining": [
+    "test_student_cannot_read_generated_schedule",
+    "test_student_list_contains_published_only",
+    "test_required_endpoint_exists[get-/users-None]",
+    "test_required_endpoint_exists[get-/audit-None]",
+    "test_required_endpoint_exists[post-/import/courses-payload4]",
+    "test_required_endpoint_exists[post-/schedules/1/publish-payload5]",
+    "test_required_endpoint_exists[get-/schedules/1/export?format=csv-None]",
+    "test_required_endpoint_exists[get-/schedules/1/export?format=pdf-None]",
+    "test_exam_manual_override_persisted",
+    "test_mutation_audit_written",
+    "test_default_app_recovers_orphan_on_startup"
+  ]
+}

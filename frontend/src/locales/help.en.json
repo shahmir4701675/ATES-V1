@@ -1,0 +1,70 @@
+{
+  "intro": "Use your own account. Server permissions apply to every request. Schedules shown to Faculty and Students are Published and scoped to their linked identities.",
+  "roles": {
+    "Coordinator": [
+      "Enter active master data and term-specific weekly/exam slots. Preview CSV imports before confirming.",
+      "Create or clone a named configuration, check hard constraints, then generate a new version. The time budget includes startup, input loading, solving and saving.",
+      "Adjust only Generated versions. Labs move as complete blocks. Locks survive regeneration from the latest eligible version. Undo restores all tracked changes to the captured baseline."
+    ],
+    "Approver": [
+      "Choose a term and Generated version in Review & publish. Review conflicts and room/seat allocations.",
+      "Publishing independently validates frozen inputs and freshness, records your approval, and archives the previous Published version for that term and schedule type.",
+      "You may review master data, but cannot modify it. Stale inputs require Coordinator regeneration."
+    ],
+    "Faculty": [
+      "Your account must link to an active instructor. You may read and change only that instructor’s availability.",
+      "View permitted Published timetables and exams. Select the term and version, then export your authorized scope."
+    ],
+    "Student": [
+      "Your account must link to a batch. View only that batch’s Published schedules.",
+      "Choose a term/version, use course/date filters and download your permitted PDF or CSV."
+    ],
+    "Administrator": [
+      "Create accounts, assign roles and trusted instructor/batch links, activate/deactivate accounts and issue password resets in Users & audit.",
+      "Password, role, status or identity-link changes revoke sessions. Retrieve authoritative audit events; logs cannot be edited or deleted through the application.",
+      "Administrators cannot generate or approve schedules."
+    ]
+  },
+  "screens": [
+    [
+      "Dashboard",
+      "Only permitted schedules/actions are shown. Inventory is for administrative reviewers; Faculty and Students use their Published schedule views."
+    ],
+    [
+      "Data management",
+      "Choose the correct term before offerings, enrollments or slots. Weekly intervals must be chronological, equal length and non-overlapping. Adjacent lab slots must also touch in clock time."
+    ],
+    [
+      "Import CSV",
+      "Download the server template for one of six supported data types. Use UTF-8, exact headers, department codes and at most 10 MB. Preview reports invalid row numbers. Confirmation revalidates and atomically persists accepted rows; no data is saved by preview."
+    ],
+    [
+      "Availability",
+      "Faculty may access only their linked instructor. Coordinators may manage instructor availability. Mark unavailable/blocked periods before generation."
+    ],
+    [
+      "Constraints",
+      "Save names, seed, time limit and rules together. Mandatory H01/H02/H03/H08/E01/E04/E05 cannot be disabled. Soft weights: 0–10. S03/S04 parameters: 1–12; E02: 1–5. Unused configurations can be deleted; referenced configurations must be retained. Clone to experiment."
+    ],
+    [
+      "Generate",
+      "Select term, schedule type and configuration. The progress bar shows elapsed budget, not solved percentage. Cancellation goes to the server; wait for acknowledgement. Timeout and worker failure do not prove infeasibility. Retry only after reviewing diagnostics."
+    ],
+    [
+      "Timetable / Exams",
+      "Choose the term and version explicitly. Parallel classes stack in a cell; labs repeat with a continuation marker across occupied cells. Clock windows are those saved with that version. Published/Archived schedules are read-only. CSV/PDF uses current filters and permitted batch/instructor scope."
+    ],
+    [
+      "Review & publish",
+      "Only Approvers publish or archive. Publication uses independent snapshot validation and rejects stale or untrusted legacy contexts. Reloading uses persisted server state."
+    ],
+    [
+      "Conflicts",
+      "Filter severity and constraint type. A failed/expired run may show interruption diagnostics rather than a proof that no solution exists. The existing conflict CSV is separate from schedule exports."
+    ],
+    [
+      "Users & audit / Password",
+      "Use real account administration and audit filters. Change your own password from the account menu. A password reset or account/role change requires signing in again. Never share bearer tokens."
+    ]
+  ]
+}

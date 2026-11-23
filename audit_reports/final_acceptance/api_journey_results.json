@@ -1,0 +1,683 @@
+{
+  "transport": "Real FastAPI TestClient/SQLite and real spawned solvers; NOT browser testing",
+  "checks": [
+    {
+      "method": "POST",
+      "path": "/auth/login",
+      "http": 200,
+      "seconds": 0.3402448999986518,
+      "expected": 200
+    },
+    {
+      "method": "POST",
+      "path": "/users",
+      "http": 201,
+      "seconds": 0.2690470999950776,
+      "expected": 201
+    },
+    {
+      "method": "POST",
+      "path": "/auth/login",
+      "http": 200,
+      "seconds": 0.2810849999950733,
+      "expected": 200
+    },
+    {
+      "method": "POST",
+      "path": "/rooms",
+      "http": 401,
+      "seconds": 0.004979999997885898,
+      "expected": 401
+    },
+    {
+      "method": "POST",
+      "path": "/instructors",
+      "http": 201,
+      "seconds": 0.021149499996681698,
+      "expected": 201
+    },
+    {
+      "method": "POST",
+      "path": "/batches",
+      "http": 201,
+      "seconds": 0.020663100003730506,
+      "expected": 201
+    },
+    {
+      "method": "POST",
+      "path": "/courses",
+      "http": 201,
+      "seconds": 0.02245299999776762,
+      "expected": 201
+    },
+    {
+      "method": "POST",
+      "path": "/instructors",
+      "http": 201,
+      "seconds": 0.01804800001264084,
+      "expected": 201
+    },
+    {
+      "method": "POST",
+      "path": "/batches",
+      "http": 201,
+      "seconds": 0.01827110000886023,
+      "expected": 201
+    },
+    {
+      "method": "POST",
+      "path": "/courses",
+      "http": 201,
+      "seconds": 0.024909300002036616,
+      "expected": 201
+    },
+    {
+      "method": "POST",
+      "path": "/rooms",
+      "http": 201,
+      "seconds": 0.024821699989843182,
+      "expected": 201
+    },
+    {
+      "method": "POST",
+      "path": "/rooms",
+      "http": 201,
+      "seconds": 0.01712720000068657,
+      "expected": 201
+    },
+    {
+      "method": "POST",
+      "path": "/rooms",
+      "http": 201,
+      "seconds": 0.017459499998949468,
+      "expected": 201
+    },
+    {
+      "method": "POST",
+      "path": "/rooms",
+      "http": 201,
+      "seconds": 0.01985189999686554,
+      "expected": 201
+    },
+    {
+      "method": "POST",
+      "path": "/users",
+      "http": 201,
+      "seconds": 0.33746990001236554,
+      "expected": 201
+    },
+    {
+      "method": "POST",
+      "path": "/auth/login",
+      "http": 200,
+      "seconds": 0.33970109999063425,
+      "expected": 200
+    },
+    {
+      "method": "POST",
+      "path": "/users",
+      "http": 201,
+      "seconds": 0.3446392000041669,
+      "expected": 201
+    },
+    {
+      "method": "POST",
+      "path": "/auth/login",
+      "http": 200,
+      "seconds": 0.3429003999917768,
+      "expected": 200
+    },
+    {
+      "method": "POST",
+      "path": "/users",
+      "http": 201,
+      "seconds": 0.35915940000268165,
+      "expected": 201
+    },
+    {
+      "method": "POST",
+      "path": "/users",
+      "http": 201,
+      "seconds": 0.36092310000094585,
+      "expected": 201
+    },
+    {
+      "method": "POST",
+      "path": "/auth/login",
+      "http": 200,
+      "seconds": 0.346097199988435,
+      "expected": 200
+    },
+    {
+      "method": "POST",
+      "path": "/terms",
+      "http": 201,
+      "seconds": 0.023487300000851974,
+      "expected": 201
+    },
+    {
+      "method": "POST",
+      "path": "/terms/1/slots",
+      "http": 201,
+      "seconds": 0.026419100002385676,
+      "expected": 201
+    },
+    {
+      "method": "POST",
+      "path": "/terms/1/slots",
+      "http": 409,
+      "seconds": 0.014970399992307648,
+      "expected": 422
+    },
+    {
+      "method": "POST",
+      "path": "/terms/1/slots",
+      "http": 201,
+      "seconds": 0.020575600006850436,
+      "expected": 201
+    },
+    {
+      "method": "POST",
+      "path": "/terms/1/slots",
+      "http": 422,
+      "seconds": 0.014767400003620423,
+      "expected": 422
+    },
+    {
+      "method": "POST",
+      "path": "/terms/1/slots",
+      "http": 422,
+      "seconds": 0.012105599991627969,
+      "expected": 422
+    },
+    {
+      "method": "POST",
+      "path": "/terms/1/slots",
+      "http": 422,
+      "seconds": 0.014057199994567782,
+      "expected": 422
+    },
+    {
+      "method": "PUT",
+      "path": "/instructors/1/availability",
+      "http": 200,
+      "seconds": 0.02746800000022631,
+      "expected": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/instructors/2/availability",
+      "http": 403,
+      "seconds": 0.014492299989797175,
+      "expected": 403
+    },
+    {
+      "method": "GET",
+      "path": "/instructors/2/availability",
+      "http": 403,
+      "seconds": 0.013918600001488812,
+      "expected": 403
+    },
+    {
+      "method": "POST",
+      "path": "/offerings",
+      "http": 201,
+      "seconds": 0.029979099999764003,
+      "expected": 201
+    },
+    {
+      "method": "POST",
+      "path": "/offerings",
+      "http": 201,
+      "seconds": 0.026762499997857958,
+      "expected": 201
+    },
+    {
+      "method": "POST",
+      "path": "/enrollments",
+      "http": 201,
+      "seconds": 0.028183799993712455,
+      "expected": 201
+    },
+    {
+      "method": "POST",
+      "path": "/enrollments",
+      "http": 201,
+      "seconds": 0.02385010001307819,
+      "expected": 201
+    },
+    {
+      "method": "POST",
+      "path": "/terms/1/exam-slots",
+      "http": 201,
+      "seconds": 0.026470599987078458,
+      "expected": 201
+    },
+    {
+      "method": "POST",
+      "path": "/terms/1/exam-slots",
+      "http": 201,
+      "seconds": 0.022593600006075576,
+      "expected": 201
+    },
+    {
+      "method": "POST",
+      "path": "/configs",
+      "http": 201,
+      "seconds": 0.03465380000125151,
+      "expected": 201
+    },
+    {
+      "method": "POST",
+      "path": "/configs",
+      "http": 201,
+      "seconds": 0.02726770000299439,
+      "expected": 201
+    },
+    {
+      "method": "POST",
+      "path": "/schedules/generate",
+      "http": 403,
+      "seconds": 0.015977000002749264,
+      "expected": 403
+    },
+    {
+      "method": "POST",
+      "path": "/schedules/generate",
+      "http": 202,
+      "seconds": 4.724806400001398,
+      "expected": 202
+    },
+    {
+      "method": "GET",
+      "path": "/schedules/1/entries",
+      "http": 200,
+      "seconds": 0.057805299991741776,
+      "expected": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/schedules/1/entries/1",
+      "http": 200,
+      "seconds": 0.07408039999427274,
+      "expected": 200
+    },
+    {
+      "method": "GET",
+      "path": "/schedules/1/entries",
+      "http": 200,
+      "seconds": 0.03592400001070928,
+      "expected": 200
+    },
+    {
+      "method": "POST",
+      "path": "/schedules/1/undo",
+      "http": 200,
+      "seconds": 0.051482100010616705,
+      "expected": 200
+    },
+    {
+      "method": "GET",
+      "path": "/schedules/1/entries",
+      "http": 200,
+      "seconds": 0.03553229999670293,
+      "expected": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/schedules/1/entries/1",
+      "http": 200,
+      "seconds": 0.06355330000224058,
+      "expected": 200
+    },
+    {
+      "method": "POST",
+      "path": "/schedules/generate",
+      "http": 202,
+      "seconds": 4.472853999992367,
+      "expected": 202
+    },
+    {
+      "method": "GET",
+      "path": "/schedules/2/entries",
+      "http": 200,
+      "seconds": 0.03184799999871757,
+      "expected": 200
+    },
+    {
+      "method": "POST",
+      "path": "/schedules/1/publish",
+      "http": 403,
+      "seconds": 0.015513499994995072,
+      "expected": 403
+    },
+    {
+      "method": "POST",
+      "path": "/schedules/1/publish",
+      "http": 200,
+      "seconds": 0.10373619999154471,
+      "expected": 200
+    },
+    {
+      "method": "POST",
+      "path": "/schedules/2/publish",
+      "http": 200,
+      "seconds": 0.11924309999449179,
+      "expected": 200
+    },
+    {
+      "method": "GET",
+      "path": "/schedules/1/status",
+      "http": 200,
+      "seconds": 0.034855600009905174,
+      "expected": 200
+    },
+    {
+      "method": "GET",
+      "path": "/schedules/1/entries",
+      "http": 403,
+      "seconds": 0.016046100005041808,
+      "expected": 403
+    },
+    {
+      "method": "GET",
+      "path": "/schedules/2/entries",
+      "http": 200,
+      "seconds": 0.04945739998947829,
+      "expected": 200
+    },
+    {
+      "method": "GET",
+      "path": "/schedules/2/entries?batch_id=2",
+      "http": 403,
+      "seconds": 0.03305949999776203,
+      "expected": 403
+    },
+    {
+      "method": "GET",
+      "path": "/schedules/2/entries",
+      "http": 200,
+      "seconds": 0.04976120000355877,
+      "expected": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/schedules/2/entries/3",
+      "http": 409,
+      "seconds": 0.017455499997595325,
+      "expected": 409
+    },
+    {
+      "method": "GET",
+      "path": "/schedules/2/export?format=csv",
+      "http": 200,
+      "seconds": 0.07771839998895302,
+      "expected": 200
+    },
+    {
+      "method": "GET",
+      "path": "/schedules/2/export?format=pdf",
+      "http": 200,
+      "seconds": 0.0745943000074476,
+      "expected": 200
+    },
+    {
+      "method": "POST",
+      "path": "/schedules/generate",
+      "http": 202,
+      "seconds": 4.988709400000516,
+      "expected": 202
+    },
+    {
+      "method": "GET",
+      "path": "/schedules/3/entries",
+      "http": 200,
+      "seconds": 0.03626609999628272,
+      "expected": 200
+    },
+    {
+      "method": "GET",
+      "path": "/schedules/3/export?format=csv",
+      "http": 200,
+      "seconds": 0.04205079999519512,
+      "expected": 200
+    },
+    {
+      "method": "GET",
+      "path": "/schedules/3/export?format=pdf",
+      "http": 200,
+      "seconds": 0.05779239999537822,
+      "expected": 200
+    },
+    {
+      "method": "POST",
+      "path": "/import/courses",
+      "http": 200,
+      "seconds": 0.03116250000311993,
+      "expected": 200
+    },
+    {
+      "method": "POST",
+      "path": "/import/preview/c9b5ef85a8a0a762e194b176b22bcbf266e86e35ec526223/confirm",
+      "http": 200,
+      "seconds": 0.03541090000362601,
+      "expected": 200
+    },
+    {
+      "method": "POST",
+      "path": "/schedules/3/publish",
+      "http": 200,
+      "seconds": 0.0978939999913564,
+      "expected": 200
+    },
+    {
+      "method": "POST",
+      "path": "/schedules/generate",
+      "http": 202,
+      "seconds": 5.251287799997954,
+      "expected": 202
+    },
+    {
+      "method": "PUT",
+      "path": "/rooms/3",
+      "http": 200,
+      "seconds": 0.023286399999051355,
+      "expected": 200
+    },
+    {
+      "method": "POST",
+      "path": "/schedules/4/publish",
+      "http": 409,
+      "seconds": 0.05937930000072811,
+      "expected": 409
+    },
+    {
+      "method": "GET",
+      "path": "/audit",
+      "http": 200,
+      "seconds": 0.021777800007839687,
+      "expected": 200
+    },
+    {
+      "method": "GET",
+      "path": "/audit",
+      "http": 403,
+      "seconds": 0.014818800002103671,
+      "expected": 403
+    },
+    {
+      "method": "PUT",
+      "path": "/terms/1",
+      "http": 200,
+      "seconds": 0.02547749999212101,
+      "expected": 200
+    },
+    {
+      "method": "GET",
+      "path": "/schedules/2/status",
+      "http": 200,
+      "seconds": 0.03443630000401754,
+      "expected": 200
+    },
+    {
+      "method": "GET",
+      "path": "/terms?status=Active",
+      "http": 200,
+      "seconds": 0.017232500002137385,
+      "expected": 200
+    },
+    {
+      "method": "POST",
+      "path": "/schedules/2/archive",
+      "http": 200,
+      "seconds": 0.05892939999466762,
+      "expected": 200
+    },
+    {
+      "method": "POST",
+      "path": "/terms",
+      "http": 201,
+      "seconds": 0.02324419999786187,
+      "expected": 201
+    },
+    {
+      "method": "POST",
+      "path": "/configs",
+      "http": 201,
+      "seconds": 0.032656700001098216,
+      "expected": 201
+    },
+    {
+      "method": "POST",
+      "path": "/schedules/generate",
+      "http": 202,
+      "seconds": 4.271030999996583,
+      "expected": 202
+    },
+    {
+      "method": "GET",
+      "path": "/schedules/5/status",
+      "http": 200,
+      "seconds": 0.01648189999104943,
+      "expected": 200
+    }
+  ],
+  "failures": [],
+  "timetable_oracle": [],
+  "manual_oracle": [],
+  "override_persisted": true,
+  "undo_exact": true,
+  "locked_regeneration": true,
+  "previous_archived": true,
+  "student_scope": [
+    1
+  ],
+  "faculty_scope": [
+    1
+  ],
+  "exam_oracle": [],
+  "heuristic_optimal_counterexample": {
+    "reported_solver_status": "optimal",
+    "entries": [
+      {
+        "is_manual_override": false,
+        "exam_entry_id": 1,
+        "schedule_id": 3,
+        "course_id": 1,
+        "course_code": "C1",
+        "course_title": "Course 1",
+        "exam_slot_id": 1,
+        "exam_date": "2030-12-01",
+        "start_time": "09:00",
+        "end_time": "10:00",
+        "label": "Day 1",
+        "student_count": 1,
+        "is_locked": false,
+        "room_allocations": [
+          {
+            "allocation_id": 1,
+            "room_id": 4,
+            "room_code": "R4",
+            "building": "QA",
+            "seats_allocated": 1
+          }
+        ]
+      },
+      {
+        "is_manual_override": false,
+        "exam_entry_id": 2,
+        "schedule_id": 3,
+        "course_id": 2,
+        "course_code": "C2",
+        "course_title": "Course 2",
+        "exam_slot_id": 1,
+        "exam_date": "2030-12-01",
+        "start_time": "09:00",
+        "end_time": "10:00",
+        "label": "Day 1",
+        "student_count": 1,
+        "is_locked": false,
+        "room_allocations": [
+          {
+            "allocation_id": 2,
+            "room_id": 3,
+            "room_code": "R3",
+            "building": "QA",
+            "seats_allocated": 1
+          }
+        ]
+      }
+    ],
+    "allocations": [
+      {
+        "allocation_id": 1,
+        "room_id": 4,
+        "room_code": "R4",
+        "building": "QA",
+        "seats_allocated": 1,
+        "exam_entry_id": 1
+      },
+      {
+        "allocation_id": 2,
+        "room_id": 3,
+        "room_code": "R3",
+        "building": "QA",
+        "seats_allocated": 1,
+        "exam_entry_id": 2
+      }
+    ],
+    "heuristic_same_batch_same_day": true,
+    "better_distinct_days": true,
+    "alternative_oracle": [],
+    "original_oracle": [],
+    "soft_ES01_weight": 8,
+    "other_soft_weights": 0
+  },
+  "import_counts": {
+    "rows_imported": 1,
+    "rows_rejected": 1
+  },
+  "unrelated_unused_course_edit_does_not_stale": true,
+  "stale_after_relevant_capacity_change": 409,
+  "test_design_note": "Initial exploratory expectation incorrectly treated an unused-course import as a relevant input change. Preserved initial results; current probe distinguishes unrelated edits (allowed) from captured room changes (publication refused).",
+  "audit_actions": [
+    "ARCHIVE_SCHEDULE",
+    "CREATE",
+    "CREATE_ACCOUNT",
+    "EXPORT",
+    "GENERATE_EXAM_SCHEDULE",
+    "GENERATE_TIMETABLE",
+    "GENERATION_QUEUED",
+    "IMPORT",
+    "IMPORT_PREVIEW",
+    "LOGIN",
+    "MANUAL_ADJUST",
+    "PUBLISH_SCHEDULE",
+    "UNDO_MANUAL_CHANGES",
+    "UPDATE"
+  ],
+  "published_status_after_term_closed": "Published",
+  "active_terms_after_closing": [],
+  "incomplete_inputs_status": "Infeasible",
+  "restart_persistence": true
+}

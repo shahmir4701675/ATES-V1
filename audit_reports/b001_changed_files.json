@@ -1,0 +1,174 @@
+[
+  {
+    "status": " M",
+    "path": ".env.example"
+  },
+  {
+    "status": " M",
+    "path": "audit_reports/BUG_REPORT.md"
+  },
+  {
+    "status": " M",
+    "path": "audit_reports/test_audit_probes.py"
+  },
+  {
+    "status": " M",
+    "path": "audit_reports/test_extra_probes.py"
+  },
+  {
+    "status": " M",
+    "path": "backend/database.py"
+  },
+  {
+    "status": " M",
+    "path": "backend/dependencies.py"
+  },
+  {
+    "status": " M",
+    "path": "backend/main.py"
+  },
+  {
+    "status": " M",
+    "path": "backend/models.py"
+  },
+  {
+    "status": " M",
+    "path": "backend/routers/master_data.py"
+  },
+  {
+    "status": " M",
+    "path": "backend/routers/schedules.py"
+  },
+  {
+    "status": " M",
+    "path": "backend/schemas.py"
+  },
+  {
+    "status": " M",
+    "path": "frontend/src/App.tsx"
+  },
+  {
+    "status": " M",
+    "path": "frontend/src/components/AppShell.tsx"
+  },
+  {
+    "status": " M",
+    "path": "frontend/src/pages/LoginPage.tsx"
+  },
+  {
+    "status": " M",
+    "path": "frontend/src/services/api.ts"
+  },
+  {
+    "status": " M",
+    "path": "frontend/src/services/http.ts"
+  },
+  {
+    "status": " M",
+    "path": "frontend/src/services/mockApi.ts"
+  },
+  {
+    "status": " M",
+    "path": "requirements.txt"
+  },
+  {
+    "status": " M",
+    "path": "tests/test_backend_api.py"
+  },
+  {
+    "status": " M",
+    "path": "tests/test_backend_db.py"
+  },
+  {
+    "status": "??",
+    "path": "audit_reports/B001_FIX_REPORT.md"
+  },
+  {
+    "status": "??",
+    "path": "audit_reports/b001_audit_regressions.log"
+  },
+  {
+    "status": "??",
+    "path": "audit_reports/b001_audit_regressions.xml"
+  },
+  {
+    "status": "??",
+    "path": "audit_reports/b001_auth_tests.log"
+  },
+  {
+    "status": "??",
+    "path": "audit_reports/b001_auth_tests.xml"
+  },
+  {
+    "status": "??",
+    "path": "audit_reports/b001_changed_files.json"
+  },
+  {
+    "status": "??",
+    "path": "audit_reports/b001_frontend_checks.log"
+  },
+  {
+    "status": "??",
+    "path": "audit_reports/b001_initial_backend.log"
+  },
+  {
+    "status": "??",
+    "path": "audit_reports/b001_initial_backend.xml"
+  },
+  {
+    "status": "??",
+    "path": "audit_reports/b001_password_smoke.log"
+  },
+  {
+    "status": "??",
+    "path": "audit_reports/b001_password_smoke.py"
+  },
+  {
+    "status": "??",
+    "path": "audit_reports/b001_project_tests.log"
+  },
+  {
+    "status": "??",
+    "path": "audit_reports/b001_project_tests.xml"
+  },
+  {
+    "status": "??",
+    "path": "audit_reports/b001_scope_verification.json"
+  },
+  {
+    "status": "??",
+    "path": "audit_reports/b001_test_results.json"
+  },
+  {
+    "status": "??",
+    "path": "backend/auth.py"
+  },
+  {
+    "status": "??",
+    "path": "backend/auth_password.py"
+  },
+  {
+    "status": "??",
+    "path": "backend/routers/auth.py"
+  },
+  {
+    "status": "??",
+    "path": "conftest.py"
+  },
+  {
+    "status": "??",
+    "path": "db/migrations/001_auth_sessions.postgresql.sql"
+  },
+  {
+    "status": "??",
+    "path": "db/migrations/001_auth_sessions.sqlite.sql"
+  },
+  {
+    "status": "??",
+    "path": "docs/authentication.md"
+  },
+  {
+    "status": "??",
+    "path": "tests/test_auth.py"
+  }
+]

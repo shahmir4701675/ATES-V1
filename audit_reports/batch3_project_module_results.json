@@ -1,0 +1,116 @@
+{
+  "tests.test_auth": {
+    "passed": 37,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "tests.test_backend_api": {
+    "passed": 10,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "tests.test_backend_db": {
+    "passed": 12,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "tests.test_batch1_generation": {
+    "passed": 23,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "tests.test_batch2_accounts": {
+    "passed": 17,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "tests.test_batch2_exports": {
+    "passed": 18,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "tests.test_batch2_imports": {
+    "passed": 28,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "tests.test_batch2_publication": {
+    "passed": 12,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "tests.test_batch2_schedule_access": {
+    "passed": 23,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "tests.test_batch3_adjustments": {
+    "passed": 21,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "tests.test_batch3_integrity": {
+    "passed": 10,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "tests.test_batch3_validation_concurrency": {
+    "passed": 18,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "tests.test_exam_membership": {
+    "passed": 60,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "tests.test_exam_scheduler": {
+    "passed": 13,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "tests.test_lab_contiguity": {
+    "passed": 45,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "tests.test_schedule_integrity": {
+    "passed": 98,
+    "failed": 1,
+    "errors": 0,
+    "skipped": 0
+  },
+  "tests.test_timetable_solver": {
+    "passed": 25,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "tests.test_validator": {
+    "passed": 19,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "tests.test_weekly_grid": {
+    "passed": 87,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  }
+}

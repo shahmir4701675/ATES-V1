@@ -1,0 +1,21 @@
+{
+  "help.title": "Help and user guides",
+  "help.timezone": "Times use Asia/Karachi (24-hour clock).",
+  "nav.help": "Help",
+  "status.timeout": "The end-to-end generation deadline expired. No authoritative result was saved; this does not prove infeasibility.",
+  "status.failure": "The worker was interrupted or failed. No authoritative result was saved. Review the run conflicts before retrying.",
+  "status.unknown": "The solver stopped without proving feasibility or infeasibility. Review diagnostics or retry with a different configuration.",
+  "status.cancelled": "Generation cancelled on the server. No result was saved.",
+  "nav.dashboard": "Dashboard",
+  "nav.users.audit": "Users & audit",
+  "nav.data.management": "Data management",
+  "nav.import.csv": "Import CSV",
+  "nav.availability": "Availability",
+  "nav.constraints": "Constraints",
+  "nav.generate": "Generate",
+  "nav.timetable": "Timetable",
+  "nav.exams": "Exams",
+  "nav.conflicts": "Conflicts",
+  "nav.review.publish": "Review & publish",
+  "nav.my.schedule": "My schedule"
+}

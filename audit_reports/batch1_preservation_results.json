@@ -1,0 +1,31 @@
+{
+  "changed_existing_files": [
+    "backend/adapter.py",
+    "backend/database.py",
+    "backend/main.py",
+    "backend/models.py",
+    "backend/routers/schedules.py",
+    "backend/schedule_integrity.py",
+    "backend/schemas.py",
+    "engine/exam_scheduler.py",
+    "engine/timetable_solver.py",
+    "frontend/src/pages/GeneratePage.tsx",
+    "frontend/src/services/api.ts",
+    "tests/test_auth.py",
+    "tests/test_backend_db.py",
+    "tests/test_schedule_integrity.py"
+  ],
+  "protected_unchanged": {
+    "backend/auth.py": true,
+    "backend/auth_password.py": true,
+    "backend/dependencies.py": true,
+    "engine/constraints.py": true,
+    "engine/validator.py": true,
+    "engine/models.py": true,
+    "engine/weekly_grid.py": true,
+    "engine/exam_membership_validation.py": true,
+    "tests/test_weekly_grid.py": true,
+    "tests/test_exam_membership.py": true,
+    "tests/test_lab_contiguity.py": true
+  }
+}

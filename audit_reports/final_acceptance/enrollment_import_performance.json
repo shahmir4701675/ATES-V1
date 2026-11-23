@@ -1,0 +1,17 @@
+{
+  "input_rows": 5000,
+  "dataset_before": {
+    "courses": 80,
+    "students": 3000
+  },
+  "preview_http": 200,
+  "confirm_http": 200,
+  "preview_s": 0.37914180000370834,
+  "confirm_s": 7.975346699997317,
+  "total_s": 8.354670100001385,
+  "threshold_s": 15,
+  "accepted": 5000,
+  "rejected": 0,
+  "persisted_rows_independent_sql_count": 5000,
+  "notes": "Fresh non-duplicate cross-batch elective/repeater enrollment rows; setup restores 80-course/3000-student dimensions in disposable DB only. Buffered SQL instrumentation."
+}

@@ -1,0 +1,30 @@
+.....F............                                                       [100%]
+================================== FAILURES ===================================
+_______________ test_atomic_lab_room_move_lock_and_durable_undo _______________
+
+env = (<starlette.testclient.TestClient object at 0x000002747173A690>, sessionmaker(class_='Session', bind=Engine(sqlite:///...ne(sqlite:///C%3A/Users/DELL/AppData/Local/Temp/pytest-of-DELL/pytest-45/test_atomic_lab_room_move_lock0/batch.sqlite))
+test_auth_settings = AuthSettings()
+login_as = <function login_as.<locals>.authenticate at 0x0000027471767420>
+
+    def test_atomic_lab_room_move_lock_and_durable_undo(env,test_auth_settings,login_as):
+        client,factory,engine=env;freeze(factory,1)
+        before=client.get('/schedules/1/entries').json()
+        labs=[e for e in before['entries'] if e['offering_id']==1 and e['session_type']=='Lab']
+        assert len(labs)==2
+        eid=labs[0]['entry_id'];oldroom=labs[0]['room_id'];newroom=3 if oldroom==2 else 2
+        response=client.put(f'/schedules/1/entries/{eid}',json={'room_id':newroom,'is_locked':True,'expected_revision':0})
+>       assert response.status_code==200,response.text
+E       AssertionError: {"detail":"Manual change violates hard constraints: H05 Violation: Lab session (entry_id=4, CS-326) is assigned to Lecture room Rm 204 (room_id=2); expected Lab room.","rule_code":"H05","violated_constraints":["H05"],"violations":[{"schedule_id":1,"rule_code":"H05","conflict_type":"RoomType","severity":"Hard","description":"H05 Violation: Lab session (entry_id=4, CS-326) is assigned to Lecture room Rm 204 (room_id=2); expected Lab room.","entity_ref":"entry_id=4, offering_id=1 (CS-326), room_id=2 (Rm 204)","affected_entities":{"entry_id":4,"offering_id":1,"course_code":"CS-326","room_id":2,"room_code":"Rm 204","session_type":"Lab","room_type":"Lecture","slot_id":8},"is_resolved":false},{"schedule_id":1,"rule_code":"H05","conflict_type":"RoomType","severity":"Hard","description":"H05 Violation: Lab session (entry_id=5, CS-326) is assigned to Lecture room Rm 204 (room_id=2); expected Lab room.","entity_ref":"entry_id=5, offering_id=1 (CS-326), room_id=2 (Rm 204)","affected_entities":{"entry_id":5,"offering_id":1,"course_code":"CS-326","room_id":2,"room_code":"Rm 204","session_type":"Lab","room_type":"Lecture","slot_id":9},"is_resolved":false}]}
+E       assert 409 == 200
+E        +  where 409 = <Response [409 Conflict]>.status_code
+
+tests\test_batch3_adjustments.py:27: AssertionError
+============================== warnings summary ===============================
+.venv\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\DELL\OneDrive\Desktop\ATES-V1\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_batch3_adjustments.py::test_atomic_lab_room_move_lock_and_durable_undo
+1 failed, 17 passed, 1 warning in 18.25s

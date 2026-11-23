@@ -1,12 +1,12 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { CalendarCheck2, CirclePlus, Grid3x3, Lock, Pencil, Power, Unlock } from 'lucide-react'
 import { Button, ErrorSummary, Field, InputField, LoadState, Notice, SelectField } from '../../components/ui'
 import { ConfirmDialog, DataTable, Modal } from '../../components/Modal'
 import { Card } from '../../components/ui'
 import { useAsync } from '../../hooks/useAsync'
 import { DAY_NAMES } from '../../data/reference'
-import { activateTerm, closeTerm, createTerm, errorMessage, generateSlotGrid, getTerms, getTimeSlots, updateSlot, updateTerm } from '../../services/api'
-import type { Term, TimeSlot } from '../../types'
+import { activateTerm, closeTerm, createTerm, errorMessage, saveSlotGrid, getTerms, getTimeSlots, updateSlot, updateTerm } from '../../services/api'
+import type { SlotGridInput, Term, TimeSlot } from '../../types'
 import { StatusCell, same, toInt } from './MasterTab'
 
 interface Props { readOnly: boolean; onStatus: (message: string) => void }
@@ -14,6 +14,16 @@ const termStatusCell = (status: Term['status']) => status === 'Active' ? <Status
 const timeToMinutes = (value: string) => { const match = /^(\d{1,2}):(\d{2})$/.exec(value.trim()); return match && Number(match[1]) < 24 && Number(match[2]) < 60 ? Number(match[1]) * 60 + Number(match[2]) : Number.NaN }
 
 type TermForm = { name: string; start_date: string; end_date: string }
+
+export function slotGridInputFromSlots(rows: TimeSlot[]): SlotGridInput {
+  const first = [...rows].sort((a, b) => a.slot_index - b.slot_index || DAY_NAMES.indexOf(a.day_of_week) - DAY_NAMES.indexOf(b.day_of_week))[0]
+  return first ? {
+    working_days: DAY_NAMES.flatMap((day, index) => rows.some((slot) => slot.day_of_week === day) ? [index + 1] : []),
+    first_start_time: first.start_time,
+    slot_length_min: timeToMinutes(first.end_time) - timeToMinutes(first.start_time),
+    slots_per_day: Math.max(...rows.map((slot) => slot.slot_index)),
+  } : { working_days: [1, 2, 3, 4, 5], first_start_time: '08:00', slot_length_min: 60, slots_per_day: 6 }
+}
 
 export function TermsSlotsTab({ readOnly, onStatus }: Props) {
   const terms = useAsync(getTerms, [])
@@ -86,7 +96,7 @@ export function TermsSlotsTab({ readOnly, onStatus }: Props) {
             {row.status !== 'Closed' && <Button variant="secondary" icon={Power} ariaLabel={`Close ${row.label}`} onClick={() => { setActionError(''); setClosing(row) }}>Close</Button>}
           </>} />
       </Card>
-      {selected && <SlotGrid term={selected} terms={list} onTerm={setTermId} readOnly={readOnly} onStatus={onStatus} />}
+      {selected && <SlotGrid key={selected.term_id} term={selected} terms={list} onTerm={setTermId} readOnly={readOnly} onStatus={onStatus} />}
     </LoadState>
     {form && <Modal title={`${form.id === null ? 'Add' : 'Edit'} term`} onClose={() => setForm(null)} footer={<><Button variant="secondary" onClick={() => setForm(null)}>Cancel</Button><Button onClick={() => void save()} disabled={busy}>{busy ? 'Saving…' : 'Save'}</Button></>}>
       <form onSubmit={(event) => { event.preventDefault(); void save() }} noValidate><ErrorSummary errors={messages} /><div className="stack-gap">
@@ -116,10 +126,19 @@ function SlotGrid({ term, terms, onTerm, readOnly, onStatus }: { term: Term; ter
   const [reason, setReason] = useState('')
   const [reasonError, setReasonError] = useState('')
   const [notice, setNotice] = useState('')
+  const [initialized, setInitialized] = useState(false)
 
   const rows = slots.data ?? []
   const usedDays = useMemo(() => DAY_NAMES.filter((name) => rows.some((slot) => slot.day_of_week === name)), [rows])
   const hours = useMemo(() => [...new Map(rows.map((slot) => [slot.slot_index, slot])).values()].sort((a, b) => a.slot_index - b.slot_index), [rows])
+
+  useEffect(() => {
+    if (initialized || slots.loading || slots.error) return
+    const input = slotGridInputFromSlots(slots.data ?? [])
+    setDays(input.working_days); setStart(input.first_start_time)
+    setLength(String(input.slot_length_min)); setPerDay(String(input.slots_per_day))
+    setInitialized(true)
+  }, [initialized, slots.loading, slots.error, slots.data])
 
   const generate = async () => {
     const found: string[] = []
@@ -130,11 +149,11 @@ function SlotGrid({ term, terms, onTerm, readOnly, onStatus }: { term: Term; ter
     if (Number.isNaN(startMinutes)) found.push('First start time must be a valid time such as 08:00.')
     if (!(len > 0)) found.push('Slot length must be a whole number of minutes greater than 0.')
     if (!(count > 0)) found.push('Slots per day must be a whole number greater than 0.')
-    if (!found.length && startMinutes + len * count > 24 * 60) found.push('The last slot would end after midnight. Reduce the slot length or the number of slots.')
+    if (!found.length && startMinutes + len * count >= 24 * 60) found.push('The last slot must end before midnight. Reduce the slot length or the number of slots.')
     setErrors(found)
     if (found.length) return
     setBusy(true); setNotice('')
-    try { const created = await generateSlotGrid(term.term_id, { working_days: days, first_start_time: start, slot_length_min: len, slots_per_day: count }); onStatus(`${created.length} slots generated for ${term.label}.`); slots.reload() }
+    try { const saved = await saveSlotGrid(term.term_id, { working_days: days, first_start_time: start, slot_length_min: len, slots_per_day: count }); onStatus(`${saved.length} slots saved for ${term.label}.`); slots.reload() }
     catch (reasonError) { setErrors([errorMessage(reasonError)]) } finally { setBusy(false) }
   }
   const applyBlock = async (slot: TimeSlot, blocked: boolean, why: string | null) => {
@@ -145,20 +164,20 @@ function SlotGrid({ term, terms, onTerm, readOnly, onStatus }: { term: Term; ter
   return <Card title="Slot grid" actions={<SelectField label="Term" id="slot-term" value={term.term_id} onChange={onTerm} options={terms.map((item) => ({ value: item.term_id, label: item.label }))} />}>
     <div className="stack-gap">
       {!readOnly && <fieldset className="stack-gap" style={{ border: 0, padding: 0, margin: 0 }}>
-        <legend className="eyebrow"><Grid3x3 size={14} aria-hidden="true" /> Generate the weekly grid</legend>
+        <legend className="eyebrow"><Grid3x3 size={14} aria-hidden="true" /> Save the weekly grid</legend>
         <ErrorSummary errors={errors} />
         <div><span className="eyebrow">Working days</span><div className="legend" style={{ marginTop: 8 }}>{DAY_NAMES.map((name, index) => <label key={name} className="check-row" style={{ borderTop: 0, padding: 0 }} title={`Include ${name} in the grid`}><input type="checkbox" checked={days.includes(index + 1)} onChange={(event) => setDays(event.target.checked ? [...days, index + 1] : days.filter((item) => item !== index + 1))} /><span><strong>{name}</strong></span></label>)}</div></div>
         <div className="inline-form">
           <InputField id="slot-start" label="First start time" type="time" value={start} onChange={setStart} tooltip="Start of the first slot of each day." />
           <InputField id="slot-length" label="Slot length (minutes)" type="number" min={1} value={length} onChange={setLength} tooltip="Default 60 minutes." />
           <InputField id="slot-count" label="Slots per day" type="number" min={1} value={perDay} onChange={setPerDay} tooltip="Number of consecutive slots each working day." />
-          <Button icon={Grid3x3} onClick={() => void generate()} disabled={busy}>{busy ? 'Generating…' : 'Generate grid'}</Button>
+          <Button icon={Grid3x3} onClick={() => void generate()} disabled={busy || slots.loading || Boolean(slots.error) || !initialized}>{busy ? 'Saving…' : 'Save grid'}</Button>
         </div>
-        {rows.length > 0 && <p className="subtle-note">{term.label} already has {rows.length} slots. The server rejects a grid that overlaps existing slots.</p>}
+        {rows.length > 0 && <p className="subtle-note">{term.label} has {rows.length} slots. Saving updates their times and preserves blocked periods and slot IDs. Keep the existing slot length, working days and slot indexes; saving cannot remove slots.</p>}
       </fieldset>}
       {notice && <Notice tone="error" title="The slot could not be changed">{notice}</Notice>}
       <LoadState loading={slots.loading} error={slots.error} onRetry={slots.reload}>
-        {rows.length === 0 ? <Notice title={`No slots for ${term.label}`}>{readOnly ? 'The Coordinator has not generated a grid for this term yet.' : 'Generate the weekly grid above.'}</Notice> : <div className="avail-scroll"><div className="avail-grid" style={{ gridTemplateColumns: `110px repeat(${usedDays.length}, minmax(112px, 1fr))` }}>
+        {rows.length === 0 ? <Notice title={`No slots for ${term.label}`}>{readOnly ? 'The Coordinator has not saved a grid for this term yet.' : 'Save the weekly grid above.'}</Notice> : <div className="avail-scroll"><div className="avail-grid" style={{ gridTemplateColumns: `110px repeat(${usedDays.length}, minmax(112px, 1fr))` }}>
           <div className="avail-head">Time</div>{usedDays.map((name) => <div className="avail-head" key={name}>{name}</div>)}
           {hours.flatMap((hour) => [<div className="avail-time" key={`t${hour.slot_index}`}>Slot {hour.slot_index}<span>{hour.start_time}–{hour.end_time}</span></div>, ...usedDays.map((name) => {
             const slot = rows.find((item) => item.slot_index === hour.slot_index && item.day_of_week === name)

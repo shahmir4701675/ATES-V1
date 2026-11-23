@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Lock, LogIn } from 'lucide-react'
+import { LogIn } from 'lucide-react'
 import { Button, Card, ErrorSummary, InputField, Notice } from '../components/ui'
-import { loginMock } from '../services/api'
+import { errorMessage, login } from '../services/api'
 import type { AppUser } from '../types'
 
 export function LoginPage({ onSuccess, onCancel }: { onSuccess: (user: AppUser) => void; onCancel?: () => void }) {
@@ -9,7 +9,6 @@ export function LoginPage({ onSuccess, onCancel }: { onSuccess: (user: AppUser) 
   const [password, setPassword] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [authError, setAuthError] = useState('')
-  const [lockedMinutes, setLockedMinutes] = useState<number | null>(null)
   const [busy, setBusy] = useState(false)
 
   const submit = async () => {
@@ -18,17 +17,12 @@ export function LoginPage({ onSuccess, onCancel }: { onSuccess: (user: AppUser) 
     if (!password) found.password = 'Password is required.'
     setErrors(found)
     setAuthError('')
-    setLockedMinutes(null)
     if (Object.keys(found).length) return
     setBusy(true)
     try {
-      const result = await loginMock(username.trim(), password)
-      if (!result.ok || !result.user) {
-        setAuthError(result.message ?? 'Sign-in failed.')
-        setLockedMinutes(result.locked_minutes ?? null)
-      } else {
-        onSuccess(result.user)
-      }
+      onSuccess(await login(username.trim(), password))
+    } catch (reason) {
+      setAuthError(errorMessage(reason))
     } finally {
       setBusy(false)
     }
@@ -45,14 +39,10 @@ export function LoginPage({ onSuccess, onCancel }: { onSuccess: (user: AppUser) 
         {authError && (
           <Notice tone="error" title="Sign-in blocked">
             {authError}
-            {lockedMinutes !== null && (
-              <div><Lock size={13} aria-hidden="true" /> Remaining lock time: <strong>{lockedMinutes} minutes</strong>.</div>
-            )}
           </Notice>
         )}
-        <InputField id="login-username" label="User name" value={username} error={errors.username} tooltip="Enter your ATES user name (for example aroy, coordinator, approver, mrao, or hbaig to see a locked account)." onChange={setUsername} />
+        <InputField id="login-username" label="User name" value={username} error={errors.username} tooltip="Enter the user name provisioned by your ATES administrator." onChange={setUsername} />
         <InputField id="login-password" label="Password" type="password" value={password} error={errors.password} tooltip="Enter your account password." onChange={setPassword} />
-        <p className="subtle-note">Demo accounts: <code>aroy</code> (Administrator), <code>coordinator</code> (Coordinator), <code>approver</code> (Approver), <code>mrao</code> (Faculty), <code>hbaig</code> (Locked student).</p>
         <div className="form-actions">
           {onCancel && <Button variant="secondary" onClick={onCancel}>Cancel</Button>}
           <Button type="submit" icon={LogIn} disabled={busy}>{busy ? 'Signing in…' : 'Log in'}</Button>

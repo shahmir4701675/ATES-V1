@@ -1,0 +1,19 @@
+{
+  "old_failed": 10,
+  "current_failed": 2,
+  "newly_failing": [],
+  "fixed": [
+    "test_required_endpoint_exists[get-/audit-None]",
+    "test_required_endpoint_exists[get-/schedules/1/export?format=csv-None]",
+    "test_required_endpoint_exists[get-/schedules/1/export?format=pdf-None]",
+    "test_required_endpoint_exists[get-/users-None]",
+    "test_required_endpoint_exists[post-/import/courses-payload4]",
+    "test_required_endpoint_exists[post-/schedules/1/publish-payload5]",
+    "test_student_cannot_read_generated_schedule",
+    "test_student_list_contains_published_only"
+  ],
+  "remaining": [
+    "test_exam_manual_override_persisted",
+    "test_mutation_audit_written"
+  ]
+}

@@ -1,0 +1,28 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+_____ test_real_export_content_and_audit_use_authoritative_context[csv-1] _____
+
+env = (<starlette.testclient.TestClient object at 0x0000023F283682F0>, sessionmaker(class_='Session', bind=Engine(sqlite:///...ne(sqlite:///C%3A/Users/DELL/AppData/Local/Temp/pytest-of-DELL/pytest-36/test_real_export_content_and_a0/batch.sqlite))
+sid = 1, format = 'csv'
+
+    @pytest.mark.parametrize('sid',[1,2])
+    @pytest.mark.parametrize('format',['csv','pdf'])
+    def test_real_export_content_and_audit_use_authoritative_context(env,sid,format):
+        client,factory,_=env;freeze(factory,sid,True)
+        with factory.begin() as s:s.get(m.Room,1).room_code='CHANGED-CURRENT-ROOM'
+        response=client.get(f'/schedules/{sid}/export',params={'format':format})
+>       assert response.status_code==200,response.text[:200]
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = <Response [404 Not Found]>.status_code
+
+tests\test_batch2_exports.py:18: AssertionError
+============================== warnings summary ===============================
+.venv\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\DELL\OneDrive\Desktop\ATES-V1\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_batch2_exports.py::test_real_export_content_and_audit_use_authoritative_context[csv-1]
+1 failed, 14 deselected, 1 warning in 4.74s

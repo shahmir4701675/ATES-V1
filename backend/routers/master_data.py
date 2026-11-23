@@ -15,6 +15,8 @@ from __future__ import annotations
 from datetime import datetime, time, timezone
 import math
 from typing import Any
+from types import SimpleNamespace
+from engine.weekly_grid import validate_weekly_grid, slot_interval
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 from sqlalchemy import or_, select
@@ -22,6 +24,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from backend.dependencies import CurrentUser, get_db, require_roles
+from backend.input_validation import validate_rules
 from backend.models import (
     AcademicTerm,
     AuditLog,
@@ -256,7 +259,7 @@ def list_departments(
 def create_department(
     payload: DepartmentCreate,
     db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> Department:
     dept = Department(code=payload.code.strip(), name=payload.name.strip())
     db.add(dept)
@@ -277,7 +280,7 @@ def update_department(
     department_id: int,
     payload: DepartmentUpdate,
     db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> Department:
     dept = db.get(Department, department_id)
     if dept is None:
@@ -356,7 +359,7 @@ def get_course(
 def create_course(
     payload: CourseCreate,
     db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> Course:
     if db.get(Department, payload.department_id) is None:
         raise HTTPException(
@@ -430,7 +433,7 @@ def update_course(
     course_id: int,
     payload: CourseUpdate,
     db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> Course:
     return _apply_course_update(db, course_id, payload)
 
@@ -439,7 +442,7 @@ def update_course(
 def update_course_from_body(
     payload: CourseUpdate,
     db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> Course:
     if payload.course_id is None:
         raise HTTPException(
@@ -453,7 +456,7 @@ def update_course_from_body(
 def deactivate_course(
     course_id: int,
     db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> Course:
     """Soft-deactivate a course instead of permanently deleting it (`FR-2.11`, `DB-5`)."""
     course = db.get(Course, course_id)
@@ -527,7 +530,7 @@ def get_instructor(
 def create_instructor(
     payload: InstructorCreate,
     db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> Instructor:
     if db.get(Department, payload.department_id) is None:
         raise HTTPException(
@@ -600,7 +603,7 @@ def update_instructor(
     instructor_id: int,
     payload: InstructorUpdate,
     db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> Instructor:
     return _apply_instructor_update(db, instructor_id, payload)
 
@@ -609,7 +612,7 @@ def update_instructor(
 def update_instructor_from_body(
     payload: InstructorUpdate,
     db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> Instructor:
     if payload.instructor_id is None:
         raise HTTPException(
@@ -623,7 +626,7 @@ def update_instructor_from_body(
 def deactivate_instructor(
     instructor_id: int,
     db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> Instructor:
     inst = db.get(Instructor, instructor_id)
     if inst is None:
@@ -648,6 +651,8 @@ def get_instructor_availability(
         require_roles("Coordinator", "Faculty", "Approver", "Administrator")
     ),
 ) -> list[InstructorAvailability]:
+    if _user.role == 'Faculty' and _user.instructor_id != instructor_id:
+        raise HTTPException(403,'Faculty may only read their linked instructor availability.')
     if db.get(Instructor, instructor_id) is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -670,7 +675,7 @@ def update_instructor_availability(
     instructor_id: int,
     payload: AvailabilityBulkUpdate | list[AvailabilityItem] = Body(...),
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(require_roles("Coordinator", "Faculty", "Administrator")),
+    user: CurrentUser = Depends(require_roles("Coordinator", "Faculty")),
 ) -> list[InstructorAvailability]:
     if db.get(Instructor, instructor_id) is None:
         raise HTTPException(
@@ -679,7 +684,6 @@ def update_instructor_availability(
         )
     if (
         user.role == "Faculty"
-        and user.instructor_id is not None
         and user.instructor_id != instructor_id
     ):
         raise HTTPException(
@@ -776,7 +780,7 @@ def get_room(
 def create_room(
     payload: RoomCreate,
     db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> Room:
     room = Room(
         room_code=payload.room_code.strip(),
@@ -833,7 +837,7 @@ def update_room(
     room_id: int,
     payload: RoomUpdate,
     db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> Room:
     return _apply_room_update(db, room_id, payload)
 
@@ -842,7 +846,7 @@ def update_room(
 def update_room_from_body(
     payload: RoomUpdate,
     db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> Room:
     if payload.room_id is None:
         raise HTTPException(
@@ -856,7 +860,7 @@ def update_room_from_body(
 def deactivate_room(
     room_id: int,
     db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> Room:
     room = db.get(Room, room_id)
     if room is None:
@@ -925,7 +929,7 @@ def get_batch(
 def create_batch(
     payload: BatchCreate,
     db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> Batch:
     if db.get(Department, payload.department_id) is None:
         raise HTTPException(
@@ -993,7 +997,7 @@ def update_batch(
     batch_id: int,
     payload: BatchUpdate,
     db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> Batch:
     return _apply_batch_update(db, batch_id, payload)
 
@@ -1002,7 +1006,7 @@ def update_batch(
 def update_batch_from_body(
     payload: BatchUpdate,
     db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> Batch:
     if payload.batch_id is None:
         raise HTTPException(
@@ -1016,7 +1020,7 @@ def update_batch_from_body(
 def deactivate_batch(
     batch_id: int,
     db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> Batch:
     batch = db.get(Batch, batch_id)
     if batch is None:
@@ -1069,7 +1073,7 @@ def get_term(
 def create_term(
     payload: TermCreate,
     db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> TermResponse:
     if payload.status == "Active":
         active_term = db.scalar(
@@ -1153,7 +1157,7 @@ def update_term(
     term_id: int,
     payload: TermUpdate,
     db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> TermResponse:
     return _apply_term_update(db, term_id, payload)
 
@@ -1162,7 +1166,7 @@ def update_term(
 def update_term_from_body(
     payload: TermUpdate,
     db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> TermResponse:
     if payload.term_id is None:
         raise HTTPException(
@@ -1193,6 +1197,30 @@ def list_term_slots(
     return [_serialize_slot(s) for s in slots]
 
 
+def _check_weekly_candidate(db: Session, term_id: int, candidates: list, replacing: set[int] | None = None) -> None:
+    # Use the same lock order as generation/publication and bulk grid saves.
+    from backend.schedule_integrity import lock_inputs
+    lock_inputs(db)
+    # Serialize same-term mutations on databases supporting row locks. Validate
+    # before attaching/mutating ORM rows, so a rejected bulk operation is atomic.
+    db.scalar(select(AcademicTerm).where(AcademicTerm.term_id == term_id).with_for_update())
+    existing = list(db.scalars(select(TimeSlot).where(TimeSlot.term_id == term_id)).all())
+    duration = None
+    if existing:
+        try:
+            start, end = slot_interval(existing[0])
+            duration = end - start
+        except ValueError:
+            pass  # The complete grid below will report the invalid stored row.
+    issues = validate_weekly_grid(
+        [s for s in existing if s.slot_id not in (replacing or set())] + candidates,
+        allow_unassigned_ids=True, expected_duration_minutes=duration,
+    )
+    if issues:
+        code = 409 if any(i.kind in {"overlap", "duplicate_index"} for i in issues) else 422
+        raise HTTPException(status_code=code, detail=" ".join(i.description for i in issues))
+
+
 @router.post(
     "/terms/{term_id}/slots",
     response_model=TimeSlotResponse,
@@ -1202,8 +1230,9 @@ def create_term_slot(
     term_id: int,
     payload: TimeSlotCreate,
     db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> TimeSlotResponse:
+    if payload.term_id is not None and payload.term_id!=term_id:raise HTTPException(422,'Body term_id must match the path term.')
     if db.get(AcademicTerm, term_id) is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -1230,6 +1259,7 @@ def create_term_slot(
         is_blocked=payload.is_blocked,
         block_reason=payload.block_reason.strip() if payload.block_reason else None,
     )
+    _check_weekly_candidate(db, term_id, [slot])
     db.add(slot)
     try:
         db.commit()
@@ -1243,25 +1273,12 @@ def create_term_slot(
     return _serialize_slot(slot)
 
 
-@router.post(
-    "/terms/{term_id}/slots/generate",
-    response_model=list[TimeSlotResponse],
-    status_code=status.HTTP_201_CREATED,
-)
-def generate_term_slot_grid(
-    term_id: int,
-    payload: SlotGridGenerateRequest,
-    db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
-) -> list[TimeSlotResponse]:
-    """Generate the weekly slot grid of a term (`FR-2.7`)."""
-    if db.get(AcademicTerm, term_id) is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Term {term_id} not found.",
-        )
+def _build_slot_grid(term_id: int, payload: SlotGridGenerateRequest) -> list[TimeSlot]:
+    """Build detached candidates; callers validate the whole grid before writing."""
     first_t = _parse_time_str(payload.first_start_time)
     base_minutes = first_t.hour * 60 + first_t.minute
+    if base_minutes + payload.slot_length_min * payload.slots_per_day >= 1440:
+        raise HTTPException(status_code=422, detail="Weekly slots must end before midnight on the same day.")
     created_slots: list[TimeSlot] = []
 
     for day in sorted(set(payload.working_days)):
@@ -1278,9 +1295,28 @@ def generate_term_slot_grid(
                 is_blocked=is_blk,
                 block_reason=payload.block_reason if is_blk else None,
             )
-            db.add(slot)
             created_slots.append(slot)
 
+    return created_slots
+
+
+@router.post(
+    "/terms/{term_id}/slots/generate",
+    response_model=list[TimeSlotResponse],
+    status_code=status.HTTP_201_CREATED,
+)
+def generate_term_slot_grid(
+    term_id: int,
+    payload: SlotGridGenerateRequest,
+    db: Session = Depends(get_db),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
+) -> list[TimeSlotResponse]:
+    """Create new slots; existing indexes remain conflicts on the POST endpoint."""
+    if db.get(AcademicTerm, term_id) is None:
+        raise HTTPException(404, f"Term {term_id} not found.")
+    created_slots = _build_slot_grid(term_id, payload)
+    _check_weekly_candidate(db, term_id, created_slots)
+    db.add_all(created_slots)
     try:
         db.commit()
     except IntegrityError as exc:
@@ -1295,37 +1331,96 @@ def generate_term_slot_grid(
     return [_serialize_slot(s) for s in created_slots]
 
 
+@router.put("/terms/{term_id}/slots/generate", response_model=list[TimeSlotResponse])
+def save_term_slot_grid(
+    term_id: int,
+    payload: SlotGridGenerateRequest,
+    db: Session = Depends(get_db),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
+) -> list[TimeSlotResponse]:
+    """Atomically save a grid without replacing IDs, deleting slots or appending duplicates."""
+    from backend.schedule_integrity import lock_inputs
+
+    candidates = _build_slot_grid(term_id, payload)
+    lock_inputs(db)
+    if db.get(AcademicTerm, term_id) is None:
+        raise HTTPException(404, f"Term {term_id} not found.")
+    existing = list(db.scalars(select(TimeSlot).where(TimeSlot.term_id == term_id)).all())
+    by_key = {(s.day_of_week, s.slot_index): s for s in existing}
+    if len(by_key) != len(existing):
+        raise HTTPException(409, "Stored grid contains duplicate weekday/index pairs; no slots were changed.")
+    requested = {(s.day_of_week, s.slot_index) for s in candidates}
+    if set(by_key) - requested:
+        raise HTTPException(409, "Saving this grid would remove existing slots. Keep all existing working days and slot indexes; no slots were changed.")
+
+    for candidate in candidates:
+        old = by_key.get((candidate.day_of_week, candidate.slot_index))
+        if old is not None:
+            candidate.slot_id = old.slot_id
+            # The grid form edits clock windows, not individual break settings.
+            if "blocked_slot_indices" not in payload.model_fields_set:
+                candidate.is_blocked, candidate.block_reason = old.is_blocked, old.block_reason
+
+    # Exclude rows being updated, not the rest of the grid. B002's validator and
+    # the existing fixed duration still apply before any persistent row changes.
+    _check_weekly_candidate(db, term_id, candidates, {s.slot_id for s in existing})
+    saved = []
+    for candidate in candidates:
+        old = by_key.get((candidate.day_of_week, candidate.slot_index))
+        if old is None:
+            db.add(candidate)
+            saved.append(candidate)
+        else:
+            for field in ("start_time", "end_time", "is_blocked", "block_reason"):
+                setattr(old, field, getattr(candidate, field))
+            saved.append(old)
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(409, "Slot grid conflicts with existing slots; no changes were saved.") from exc
+    for slot in saved:
+        db.refresh(slot)
+    return [_serialize_slot(slot) for slot in saved]
+
+
 @router.put("/terms/{term_id}/slots/{slot_id}", response_model=TimeSlotResponse)
 def update_term_slot(
     term_id: int,
     slot_id: int,
     payload: TimeSlotUpdate,
     db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> TimeSlotResponse:
+    if payload.slot_id is not None and payload.slot_id!=slot_id:raise HTTPException(422,'Body slot_id must match the path.')
     slot = db.get(TimeSlot, slot_id)
     if slot is None or slot.term_id != term_id:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"TimeSlot {slot_id} in term {term_id} not found.",
         )
-    if payload.start_time is not None:
-        slot.start_time = _parse_time_str(payload.start_time)
-    if payload.end_time is not None:
-        slot.end_time = _parse_time_str(payload.end_time)
-    if payload.is_blocked is not None:
-        slot.is_blocked = payload.is_blocked
-    if payload.block_reason is not None:
-        slot.block_reason = payload.block_reason.strip() or None
-    if not slot.is_blocked:
-        slot.block_reason = None
-    elif not slot.block_reason:
-        db.rollback()
+    values = {name: getattr(slot, name) for name in (
+        "slot_id", "term_id", "day_of_week", "slot_index", "start_time", "end_time", "is_blocked", "block_reason"
+    )}
+    for name, value in payload.model_dump(exclude_unset=True).items():
+        if value is not None and name != "slot_id":
+            values[name] = _parse_time_str(value) if name in {"start_time", "end_time"} else value
+    values["block_reason"] = (values["block_reason"] or "").strip() or None
+    if not values["is_blocked"]:
+        values["block_reason"] = None
+    elif not values["block_reason"]:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="block_reason is required when is_blocked is true (FR-2.7).",
         )
-    db.commit()
+    _check_weekly_candidate(db, term_id, [SimpleNamespace(**values)], {slot_id})
+    for name, value in values.items():
+        setattr(slot, name, value)
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="Slot grid conflicts with existing slots.") from exc
     db.refresh(slot)
     return _serialize_slot(slot)
 
@@ -1360,9 +1455,10 @@ def create_term_exam_slot(
     term_id: int,
     payload: ExamSlotCreate,
     db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> ExamSlotResponse:
     """Create an exam session and reject overlapping sessions on the same date (`FR-5.7`)."""
+    if payload.term_id is not None and payload.term_id!=term_id:raise HTTPException(422,'Body term_id must match the path term.')
     if db.get(AcademicTerm, term_id) is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -1464,7 +1560,7 @@ def get_offering(
 def create_offering(
     payload: OfferingCreate,
     db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> OfferingResponse:
     if db.get(AcademicTerm, payload.term_id) is None:
         raise HTTPException(
@@ -1547,7 +1643,7 @@ def update_offering(
     offering_id: int,
     payload: OfferingUpdate,
     db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> OfferingResponse:
     return _apply_offering_update(db, offering_id, payload)
 
@@ -1556,7 +1652,7 @@ def update_offering(
 def update_offering_from_body(
     payload: OfferingUpdate,
     db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> OfferingResponse:
     if payload.offering_id is None:
         raise HTTPException(
@@ -1570,7 +1666,7 @@ def update_offering_from_body(
 def delete_offering(
     offering_id: int,
     db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> None:
     off = db.get(CourseOffering, offering_id)
     if off is None:
@@ -1618,7 +1714,7 @@ def list_enrollments(
 def create_enrollment(
     payload: EnrollmentCreate,
     db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> Enrollment:
     if db.get(CourseOffering, payload.offering_id) is None:
         raise HTTPException(
@@ -1649,7 +1745,7 @@ def create_enrollment(
 def delete_enrollment(
     enrollment_id: int,
     db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> None:
     enr = db.get(Enrollment, enrollment_id)
     if enr is None:
@@ -1703,13 +1799,14 @@ def get_config(
 def create_config(
     payload: ConfigCreate,
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> ConfigResponse:
     if db.get(AcademicTerm, payload.term_id) is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Term {payload.term_id} not found.",
         )
+    if payload.rules is not None:validate_rules(payload.rules,payload.schedule_type)
     if payload.rules:
         for r in payload.rules:
             if r.rule_code in MANDATORY_RULES_ALL and not r.is_enabled:
@@ -1724,7 +1821,7 @@ def create_config(
         name=payload.name.strip(),
         solver_time_limit_s=payload.solver_time_limit_s,
         random_seed=payload.random_seed,
-        created_by=payload.created_by or user.user_id,
+        created_by=user.user_id,
     )
     db.add(cfg)
     try:
@@ -1736,40 +1833,13 @@ def create_config(
             detail=f"Config '{payload.name}' already exists for this term and schedule type.",
         ) from exc
 
-    if payload.rules is not None:
-        for r in payload.rules:
-            inferred_type = (
-                r.rule_type
-                if r.rule_type is not None
-                else ("Soft" if r.rule_code.startswith(("S", "ES")) else "Hard")
-            )
-            db.add(
-                ConstraintRule(
-                    config_id=cfg.config_id,
-                    rule_code=r.rule_code,
-                    rule_type=inferred_type,
-                    is_enabled=r.is_enabled,
-                    weight=r.weight,
-                    param_value=r.param_value,
-                )
-            )
-    else:
-        catalogue = (
-            DEFAULT_TIMETABLE_CATALOGUE
-            if payload.schedule_type == "Timetable"
-            else DEFAULT_EXAM_CATALOGUE
-        )
-        for code, r_type, enabled, weight, param in catalogue:
-            db.add(
-                ConstraintRule(
-                    config_id=cfg.config_id,
-                    rule_code=code,
-                    rule_type=r_type,
-                    is_enabled=enabled,
-                    weight=weight,
-                    param_value=param,
-                )
-            )
+    catalogue = DEFAULT_TIMETABLE_CATALOGUE if payload.schedule_type == 'Timetable' else DEFAULT_EXAM_CATALOGUE
+    overrides={r.rule_code:r for r in payload.rules or []}
+    for code,kind,enabled,weight,param in catalogue:
+        rule=overrides.get(code)
+        db.add(ConstraintRule(config_id=cfg.config_id,rule_code=code,rule_type=kind,
+            is_enabled=rule.is_enabled if rule else enabled,weight=rule.weight if rule else weight,
+            param_value=rule.param_value if rule else param))
 
     db.commit()
     db.refresh(cfg)
@@ -1779,12 +1849,17 @@ def create_config(
 def _apply_config_update(
     db: Session, config_id: int, payload: ConfigUpdate
 ) -> ConfigResponse:
+    from backend.schedule_integrity import lock_inputs
+    lock_inputs(db)
     cfg = db.get(SchedulingConfig, config_id)
     if cfg is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"SchedulingConfig {config_id} not found.",
         )
+    if payload.rules is not None:
+        validate_rules(payload.rules,cfg.schedule_type)
+        _write_config_rules(db,cfg,payload.rules)
     if payload.name is not None:
         cfg.name = payload.name.strip()
     if payload.solver_time_limit_s is not None:
@@ -1809,7 +1884,7 @@ def update_config(
     config_id: int,
     payload: ConfigUpdate,
     db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> ConfigResponse:
     return _apply_config_update(db, config_id, payload)
 
@@ -1818,7 +1893,7 @@ def update_config(
 def update_config_from_body(
     payload: ConfigUpdate,
     db: Session = Depends(get_db),
-    _user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    _user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> ConfigResponse:
     if payload.config_id is None:
         raise HTTPException(
@@ -1855,8 +1930,10 @@ def update_config_rules(
     config_id: int,
     payload: ConstraintRulesUpdatePayload | list[ConstraintRuleInput] = Body(...),
     db: Session = Depends(get_db),
-    user: CurrentUser = Depends(require_roles("Coordinator", "Administrator")),
+    user: CurrentUser = Depends(require_roles("Coordinator")),
 ) -> list[ConstraintRule]:
+    from backend.schedule_integrity import lock_inputs
+    lock_inputs(db)
     cfg = db.get(SchedulingConfig, config_id)
     if cfg is None:
         raise HTTPException(
@@ -1865,6 +1942,15 @@ def update_config_rules(
         )
     items = payload.rules if isinstance(payload, ConstraintRulesUpdatePayload) else payload
 
+    validate_rules(items,cfg.schedule_type)
+    _write_config_rules(db,cfg,items)
+    db.add(AuditLog(user_id=user.user_id,action='CONFIG_CHANGE',entity_type='scheduling_configs',entity_id=config_id,details=f'Updated {len(items)} rules.'))
+    db.commit()
+    return list(db.scalars(select(ConstraintRule).where(ConstraintRule.config_id==config_id).order_by(ConstraintRule.rule_id)))
+
+
+def _write_config_rules(db,cfg,items):
+    config_id=cfg.config_id
     for item in items:
         if item.rule_code in MANDATORY_RULES_ALL and not item.is_enabled:
             raise HTTPException(
@@ -1886,8 +1972,7 @@ def update_config_rules(
             existing.is_enabled = item.is_enabled
             existing.weight = item.weight
             existing.param_value = item.param_value
-            if item.rule_type is not None:
-                existing.rule_type = item.rule_type
+            existing.rule_type = inferred_type
         else:
             db.add(
                 ConstraintRule(
@@ -1900,20 +1985,31 @@ def update_config_rules(
                 )
             )
 
-    db.add(
-        AuditLog(
-            user_id=user.user_id,
-            action="CONFIG_CHANGE",
-            entity_type="scheduling_configs",
-            entity_id=config_id,
-            details=f"Updated {len(items)} constraint rules on config_id={config_id}.",
-        )
-    )
+
+
+@router.delete('/configs/{config_id}',status_code=204)
+def delete_config(config_id:int,db:Session=Depends(get_db),user:CurrentUser=Depends(require_roles('Coordinator'))):
+    from backend.schedule_integrity import lock_inputs
+    from backend.models import Schedule
+    lock_inputs(db)
+    cfg=db.get(SchedulingConfig,config_id)
+    if cfg is None:raise HTTPException(404,'Configuration not found.')
+    if db.scalar(select(Schedule.schedule_id).where(Schedule.config_id==config_id).limit(1)) is not None:
+        raise HTTPException(409,'A schedule references this configuration. Clone it instead; historical configurations cannot be deleted.')
+    for rule in db.scalars(select(ConstraintRule).where(ConstraintRule.config_id==config_id)).all():db.delete(rule)
+    db.flush()
+    db.delete(cfg)
     db.commit()
-    return list(
-        db.scalars(
-            select(ConstraintRule)
-            .where(ConstraintRule.config_id == config_id)
-            .order_by(ConstraintRule.rule_id)
-        ).all()
-    )
+
+
+@router.put('/terms/{term_id}/exam-slots/{slot_id}',response_model=ExamSlotResponse)
+def update_exam_slot(term_id:int,slot_id:int,payload:ExamSlotUpdate,db:Session=Depends(get_db),user:CurrentUser=Depends(require_roles('Coordinator'))):
+    from backend.schedule_integrity import lock_inputs
+    lock_inputs(db)
+    row=db.get(ExamSlot,slot_id)
+    if row is None or row.term_id!=term_id:raise HTTPException(404,'Exam slot not found in this term.')
+    if payload.exam_slot_id is not None and payload.exam_slot_id!=slot_id:raise HTTPException(422,'Body exam_slot_id must match the path.')
+    for key,value in payload.model_dump(exclude_unset=True,exclude={'exam_slot_id'}).items():
+        if value is None and key!='label':raise HTTPException(422,'Required exam fields cannot be null.')
+        setattr(row,key,_parse_time_str(value) if key in {'start_time','end_time'} else value)
+    db.commit();return _serialize_exam_slot(row)

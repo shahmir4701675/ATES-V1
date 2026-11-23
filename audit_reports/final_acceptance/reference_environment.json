@@ -1,0 +1,21 @@
+{
+  "folder": "C:\\Users\\DELL\\AppData\\Local\\Temp\\ates_acceptance_8t32e5uf",
+  "database_url": "sqlite:///C:/Users/DELL/AppData/Local/Temp/ates_acceptance_8t32e5uf/reference.sqlite",
+  "port": 8769,
+  "pid": 22476,
+  "dataset": {
+    "offerings": 150,
+    "rooms": 60,
+    "weekly_slots": 48,
+    "courses": 80,
+    "exam_courses": 80,
+    "students": 3000,
+    "instructors": 40,
+    "batches": 30,
+    "enrollments": 15010,
+    "exam_sessions": 10
+  },
+  "logical_cpus": 8,
+  "configuration": "All hard enabled; soft weights zero",
+  "notes": "Deterministic synthetic reference data; random disposable credentials never logged. SQLite/local loopback; not a production benchmark."
+}

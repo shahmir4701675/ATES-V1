@@ -1,0 +1,6 @@
+warning: in the working copy of 'backend/database.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/dependencies.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/main.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/models.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/schemas.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/src/pages/ExamSchedulePage.tsx', LF will be replaced by CRLF the next time Git touches it

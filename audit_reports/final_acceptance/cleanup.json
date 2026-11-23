@@ -1,0 +1,6 @@
+{
+  "audit_reference_port_still_listening": false,
+  "disposable_server_shutdown_observed": true,
+  "temporary_plaintext_password_files_removed": true,
+  "production_data_modified": false
+}

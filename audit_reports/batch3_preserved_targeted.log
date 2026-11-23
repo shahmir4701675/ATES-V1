@@ -1,0 +1,48 @@
+.........FF..                                                            [100%]
+================================== FAILURES ===================================
+_________ test_manual_move_cannot_add_resources_to_frozen_context[1] __________
+
+env = (<starlette.testclient.TestClient object at 0x00000178B9FCAF10>, sessionmaker(class_='Session', bind=Engine(sqlite:///...te), 'sqlite:///C:/Users/DELL/AppData/Local/Temp/pytest-of-DELL/pytest-47/test_manual_move_cannot_add_re0/b004.sqlite')
+schedule_id = 1
+
+    @pytest.mark.parametrize("schedule_id", [1,2])
+    def test_manual_move_cannot_add_resources_to_frozen_context(env,schedule_id):
+        client,factory,_,_ = env
+        freeze(factory,schedule_id)
+        new_room = client.post("/rooms",json=dict(room_code="NEW-B004",building="A",capacity=100,room_type="Lecture"))
+        assert new_room.status_code == 201
+        room_id = new_room.json()["room_id"]
+        response = client.put(f"/schedules/{schedule_id}/entries/1",json=dict(room_id=room_id))
+>       assert response.status_code == 409
+E       assert 422 == 409
+E        +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+tests\test_schedule_integrity.py:433: AssertionError
+_________ test_manual_move_cannot_add_resources_to_frozen_context[2] __________
+
+env = (<starlette.testclient.TestClient object at 0x00000178BA1BDAE0>, sessionmaker(class_='Session', bind=Engine(sqlite:///...te), 'sqlite:///C:/Users/DELL/AppData/Local/Temp/pytest-of-DELL/pytest-47/test_manual_move_cannot_add_re1/b004.sqlite')
+schedule_id = 2
+
+    @pytest.mark.parametrize("schedule_id", [1,2])
+    def test_manual_move_cannot_add_resources_to_frozen_context(env,schedule_id):
+        client,factory,_,_ = env
+        freeze(factory,schedule_id)
+        new_room = client.post("/rooms",json=dict(room_code="NEW-B004",building="A",capacity=100,room_type="Lecture"))
+        assert new_room.status_code == 201
+        room_id = new_room.json()["room_id"]
+        response = client.put(f"/schedules/{schedule_id}/entries/1",json=dict(room_id=room_id))
+>       assert response.status_code == 409
+E       assert 422 == 409
+E        +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+tests\test_schedule_integrity.py:433: AssertionError
+============================== warnings summary ===============================
+.venv\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\DELL\OneDrive\Desktop\ATES-V1\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_schedule_integrity.py::test_manual_move_cannot_add_resources_to_frozen_context[1]
+FAILED tests/test_schedule_integrity.py::test_manual_move_cannot_add_resources_to_frozen_context[2]
+2 failed, 11 passed, 168 deselected, 1 warning in 30.48s

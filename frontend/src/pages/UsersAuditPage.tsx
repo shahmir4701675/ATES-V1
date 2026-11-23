@@ -1,9 +1,11 @@
+import { formatTimestamp } from '../locales'
 import { useState } from 'react'
 import { CheckCircle2, CirclePlus, Lock, Pencil, XCircle } from 'lucide-react'
-import { Button, Card, ErrorSummary, Field, InputField, LoadState, Notice, PageHeader, SelectField } from '../components/ui'
+import { Button, Card, ErrorSummary, Field, InputField, LoadState, PageHeader, SelectField } from '../components/ui'
 import { DataTable, Modal } from '../components/Modal'
+import { useDebouncedValue } from '../hooks/useDebouncedValue'
 import { useAsync } from '../hooks/useAsync'
-import { errorMessage, getAuditLogMock, getBatches, getInstructors, getUsersMock, saveUserMock } from '../services/api'
+import { errorMessage, getAuditPage, getAuditActions, getBatches, getInstructors, getUsersPage, saveUser } from '../services/api'
 import type { AppUser, AppUserInput, UserRole } from '../types'
 
 const ROLES: UserRole[] = ['Administrator', 'Coordinator', 'Approver', 'Faculty', 'Student']
@@ -29,17 +31,29 @@ export function UsersAuditPage({ onStatus }: { onStatus: (message: string) => vo
   const [serverError, setServerError] = useState('')
   const [busy, setBusy] = useState(false)
 
-  const base = useAsync(() => Promise.all([getUsersMock(), getInstructors(), getBatches()]), [])
-  const audit = useAsync(() => getAuditLogMock({ user_id: userFilter || undefined, action: actionFilter || undefined, from: fromDate || undefined, to: toDate || undefined }), [userFilter, actionFilter, fromDate, toDate])
+  const [userPage, setUserPage] = useState(1)
+  const [auditPage, setAuditPage] = useState(1)
+  const [userQuery, setUserQuery] = useState('')
+  const [auditQuery, setAuditQuery] = useState('')
+  const [userSort, setUserSort] = useState<{ key: string; dir: 1 | -1 }>({ key: 'user_id', dir: 1 })
+  const [auditSort, setAuditSort] = useState<{ key: string; dir: 1 | -1 }>({ key: 'time', dir: -1 })
+  const debouncedUserQuery = useDebouncedValue(userQuery)
+  const debouncedAuditQuery = useDebouncedValue(auditQuery)
+  const debouncedUserFilter = useDebouncedValue(userFilter)
+  const base = useAsync(() => Promise.all([getInstructors(), getBatches()]), [])
+  const usersPage = useAsync(() => getUsersPage({ page: userPage, q: debouncedUserQuery, sort: userSort.key, direction: userSort.dir === 1 ? 'asc' : 'desc' }), [userPage, debouncedUserQuery, userSort])
+  const audit = useAsync(() => tab === 'audit' ? getAuditPage({ page: auditPage, q: debouncedAuditQuery, sort: auditSort.key, direction: auditSort.dir === 1 ? 'asc' : 'desc' }, { user_id: debouncedUserFilter || undefined, action: actionFilter || undefined, from: fromDate || undefined, to: toDate || undefined }) : Promise.resolve({ items: [], total: 0 }), [tab, auditPage, debouncedAuditQuery, auditSort, debouncedUserFilter, actionFilter, fromDate, toDate])
+  const auditActions = useAsync(() => tab === 'audit' ? getAuditActions() : Promise.resolve([]), [tab])
 
-  const [users, instructors, batches] = base.data ?? [[], [], []]
-  const auditRows = audit.data ?? []
-  const actions = [...new Set(auditRows.map((item) => item.action))].sort()
+  const [instructors, batches] = base.data ?? [[], []]
+  const users = usersPage.data?.items ?? []
+  const auditRows = audit.data?.items ?? []
+  const actions = auditActions.data ?? []
 
   const instructorLabel = (id: string | null) => instructors.find((item) => item.instructor_id === id)?.full_name ?? ''
   const batchLabel = (id: string | null) => {
     const batch = batches.find((item) => item.batch_id === id)
-    return batch ? `${batch.program_code} ${batch.batch_year} · ${batch.section}` : ''
+    return batch ? `${batch.program_code} ${batch.batch_year} Â· ${batch.section}` : ''
   }
 
   const openUser = (user?: AppUser) => {
@@ -68,7 +82,7 @@ export function UsersAuditPage({ onStatus }: { onStatus: (message: string) => vo
     setBusy(true)
     setServerError('')
     try {
-      await saveUserMock(id, {
+      await saveUser(id, {
         ...form,
         username: form.username.trim(),
         full_name: form.full_name.trim(),
@@ -78,7 +92,7 @@ export function UsersAuditPage({ onStatus }: { onStatus: (message: string) => vo
       })
       onStatus(`Account '${form.username.trim()}' ${id === null ? 'created' : 'updated'}.`)
       setEditing(null)
-      base.reload()
+      usersPage.reload()
     } catch (reason) {
       setServerError(errorMessage(reason))
     } finally {
@@ -90,29 +104,29 @@ export function UsersAuditPage({ onStatus }: { onStatus: (message: string) => vo
 
   return <div className="page-stack">
     <PageHeader eyebrow="Administration" title="Users and audit log" description="Manage user accounts, role assignments, instructor/batch links and inspect the read-only governance audit trail." />
-    <Notice tone="info" title="Awaiting backend authentication routes">
-      Account management and the audit log currently use <code>getUsersMock</code>, <code>saveUserMock</code> and <code>getAuditLogMock</code> in the API service until <code>/users</code> and <code>/audit</code> are added on the server.
-    </Notice>
     <div className="tabs" role="tablist" aria-label="Administration sections">
       <button type="button" role="tab" aria-selected={tab === 'users'} className="tab" onClick={() => setTab('users')}>User accounts</button>
       <button type="button" role="tab" aria-selected={tab === 'audit'} className="tab" onClick={() => setTab('audit')}>Audit log (read-only)</button>
     </div>
 
     {tab === 'users' ? (
-      <LoadState loading={base.loading} error={base.error} onRetry={base.reload}>
+      <LoadState loading={base.loading || (!usersPage.data && usersPage.loading)} error={base.error || usersPage.error} onRetry={() => { base.reload(); usersPage.reload() }}>
         <Card title="User accounts">
+          {usersPage.loading && <p role="status">Updating accounts…</p>}
           <DataTable
             rows={users}
             rowKey={(row) => row.user_id}
             caption="User accounts"
+            remote={{ page: userPage, total: usersPage.data?.total ?? 0, query: userQuery, sort: userSort, onPage: setUserPage, onQuery: (value) => { setUserQuery(value); setUserPage(1) }, onSort: (key) => { setUserSort({ key, dir: userSort.key === key && userSort.dir === 1 ? -1 : 1 }); setUserPage(1) } }}
             searchText={(row) => `${row.username} ${row.full_name} ${row.email} ${row.role} ${row.account_status}`}
             toolbar={<Button icon={CirclePlus} onClick={() => openUser()}>Add account</Button>}
             columns={[
+              { key: 'user_id', label: 'User ID', value: (row) => Number(row.user_id) },
               { key: 'username', label: 'User name', value: (row) => row.username, render: (row) => <strong>{row.username}</strong> },
               { key: 'name', label: 'Full name', value: (row) => row.full_name },
               { key: 'email', label: 'E-mail', value: (row) => row.email },
               { key: 'role', label: 'Role', value: (row) => row.role },
-              { key: 'link', label: 'Instructor / batch link', value: (row) => instructorLabel(row.instructor_id) || batchLabel(row.batch_id) || '—' },
+              { key: 'link', sortable: false, label: 'Instructor / batch link', value: (row) => instructorLabel(row.instructor_id) || batchLabel(row.batch_id) || 'â€”' },
               { key: 'status', label: 'Status', value: (row) => row.account_status, render: (row) => statusCell(row.account_status) },
             ]}
             actions={(row) => <Button variant="secondary" icon={Pencil} onClick={() => openUser(row)} ariaLabel={`Edit ${row.username}`}>Edit</Button>}
@@ -120,23 +134,25 @@ export function UsersAuditPage({ onStatus }: { onStatus: (message: string) => vo
         </Card>
       </LoadState>
     ) : (
-      <LoadState loading={audit.loading} error={audit.error} onRetry={audit.reload}>
+      <LoadState loading={!audit.data && audit.loading} error={audit.error || auditActions.error} onRetry={() => { audit.reload(); auditActions.reload() }}>
         <Card className="filter-card no-print">
           <div className="filter-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
-            <SelectField label="User" id="aud-user" value={userFilter} onChange={setUserFilter} options={[{ value: '', label: 'All users' }, ...users.map((item) => ({ value: item.user_id, label: `${item.username} (${item.full_name})` }))]} />
-            <SelectField label="Action" id="aud-action" value={actionFilter} onChange={setActionFilter} options={[{ value: '', label: 'All actions' }, ...actions.map((item) => ({ value: item, label: item }))]} />
-            <InputField label="From date" id="aud-from" type="date" required={false} value={fromDate} onChange={setFromDate} tooltip="Filter entries on or after this date." />
-            <InputField label="To date" id="aud-to" type="date" required={false} value={toDate} onChange={setToDate} tooltip="Filter entries on or before this date." />
+            <InputField label="User ID" id="aud-user" type="number" min={1} required={false} value={userFilter} onChange={(value) => { setUserFilter(value); setAuditPage(1) }} tooltip="Optional account ID, shown in the User accounts table. Empty includes all users." />
+            <SelectField label="Action" id="aud-action" value={actionFilter} onChange={(value) => { setActionFilter(value); setAuditPage(1) }} options={[{ value: '', label: 'All actions' }, ...actions.map((item) => ({ value: item, label: item }))]} />
+            <InputField label="From date" id="aud-from" type="date" required={false} value={fromDate} onChange={(value) => { setFromDate(value); setAuditPage(1) }} tooltip="Filter entries on or after this date." />
+            <InputField label="To date" id="aud-to" type="date" required={false} value={toDate} onChange={(value) => { setToDate(value); setAuditPage(1) }} tooltip="Filter entries on or before this date." />
           </div>
         </Card>
         <Card title="Audit log">
+          {audit.loading && <p role="status">Updating audit entries…</p>}
           <DataTable
             rows={auditRows}
             rowKey={(row) => row.log_id}
             caption="Read-only system audit log"
+            remote={{ page: auditPage, total: audit.data?.total ?? 0, query: auditQuery, sort: auditSort, onPage: setAuditPage, onQuery: (value) => { setAuditQuery(value); setAuditPage(1) }, onSort: (key) => { setAuditSort({ key, dir: auditSort.key === key && auditSort.dir === 1 ? -1 : 1 }); setAuditPage(1) } }}
             searchText={(row) => `${row.username} ${row.action} ${row.entity_type ?? ''} ${row.details}`}
             columns={[
-              { key: 'time', label: 'Timestamp', value: (row) => row.created_at, render: (row) => <span className="tabular">{new Date(row.created_at).toLocaleString('en-GB')}</span> },
+              { key: 'time', label: 'Timestamp', value: (row) => row.created_at, render: (row) => <span className="tabular">{formatTimestamp(row.created_at)}</span> },
               { key: 'user', label: 'User', value: (row) => row.username, render: (row) => <strong>{row.username}</strong> },
               { key: 'action', label: 'Action', value: (row) => row.action, render: (row) => <code>{row.action}</code> },
               { key: 'entity', label: 'Entity', value: (row) => `${row.entity_type ?? ''} ${row.entity_id ?? ''}` },
@@ -152,7 +168,7 @@ export function UsersAuditPage({ onStatus }: { onStatus: (message: string) => vo
         title={editing.id === null ? 'Add user account' : 'Edit user account'}
         onClose={() => setEditing(null)}
         wide
-        footer={<><Button variant="secondary" onClick={() => setEditing(null)}>Cancel</Button><Button onClick={() => void save()} disabled={busy}>{busy ? 'Saving…' : 'Save'}</Button></>}
+        footer={<><Button variant="secondary" onClick={() => setEditing(null)}>Cancel</Button><Button onClick={() => void save()} disabled={busy}>{busy ? 'Savingâ€¦' : 'Save'}</Button></>}
       >
         <form onSubmit={(event) => { event.preventDefault(); void save() }} noValidate>
           <ErrorSummary errors={summaryErrors} />
@@ -162,13 +178,13 @@ export function UsersAuditPage({ onStatus }: { onStatus: (message: string) => vo
             <InputField id="usr-email" label="E-mail" type="email" value={editing.form.email} error={errors.email} tooltip="Unique institutional e-mail address." onChange={(val) => setEditing({ ...editing, form: { ...editing.form, email: val } })} />
             <SelectField label="Role" id="usr-role" value={editing.form.role} onChange={(val) => setEditing({ ...editing, form: { ...editing.form, role: val as UserRole } })} options={ROLES.map((item) => ({ value: item, label: item }))} hint="Determines navigation and permissions." />
             <SelectField label="Account status" id="usr-status" value={editing.form.account_status} onChange={(val) => setEditing({ ...editing, form: { ...editing.form, account_status: val as AppUser['account_status'] } })} options={STATUSES.map((item) => ({ value: item, label: item }))} hint="Active, Locked or Deactivated." />
-            {editing.id === null && (
-              <InputField id="usr-pass" label="Initial password" type="password" value={editing.form.password ?? ''} error={errors.password} tooltip="Minimum 8 characters." onChange={(val) => setEditing({ ...editing, form: { ...editing.form, password: val } })} />
+            {(
+              <InputField id="usr-pass" label={editing.id === null ? "Initial password" : "Reset password (optional)"} type="password" value={editing.form.password ?? ''} error={errors.password} tooltip="Minimum 8 characters." onChange={(val) => setEditing({ ...editing, form: { ...editing.form, password: val } })} />
             )}
             {editing.form.role === 'Faculty' && (
               <Field label="Linked instructor" htmlFor="usr-inst" error={errors.instructor_id} tooltip="Required when the role is Faculty.">
                 <select id="usr-inst" value={editing.form.instructor_id ?? ''} onChange={(event) => setEditing({ ...editing, form: { ...editing.form, instructor_id: event.target.value || null } })}>
-                  <option value="">Select instructor…</option>
+                  <option value="">Select instructorâ€¦</option>
                   {instructors.map((item) => <option key={item.instructor_id} value={item.instructor_id}>{item.full_name} ({item.email})</option>)}
                 </select>
               </Field>
@@ -176,8 +192,8 @@ export function UsersAuditPage({ onStatus }: { onStatus: (message: string) => vo
             {editing.form.role === 'Student' && (
               <Field label="Linked batch" htmlFor="usr-batch" error={errors.batch_id} tooltip="Required when the role is Student.">
                 <select id="usr-batch" value={editing.form.batch_id ?? ''} onChange={(event) => setEditing({ ...editing, form: { ...editing.form, batch_id: event.target.value || null } })}>
-                  <option value="">Select batch…</option>
-                  {batches.map((item) => <option key={item.batch_id} value={item.batch_id}>{item.program_code} {item.batch_year} · {item.section}</option>)}
+                  <option value="">Select batchâ€¦</option>
+                  {batches.map((item) => <option key={item.batch_id} value={item.batch_id}>{item.program_code} {item.batch_year} Â· {item.section}</option>)}
                 </select>
               </Field>
             )}

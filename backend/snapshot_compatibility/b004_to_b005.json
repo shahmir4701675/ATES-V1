@@ -1,0 +1,33 @@
+{
+  "reason": "Reviewed B005 correction of SRS H09 physical continuity; original input JSON remains authoritative and is never rewritten.",
+  "source": {
+    "engine": {
+      "models.py": "5747a1ce73b15c31231894b8f3e2833a90da9280d76ce68355386b737b180a20",
+      "constraints.py": "373af9a0e53261a2706f00871af42db2654181c3f2e2e84df98cebc6f7265c32",
+      "validator.py": "833c5362d135eef164a2ba1121ecbe63ce62955d31857c933740460eb9c09477",
+      "weekly_grid.py": "9ce455657bf5d49476952e968b11b8cf5945e0d13ca0a60cf1c6ab97985d2b8c",
+      "exam_membership_validation.py": "02f9b8e8d3ec58bc822b74050423259e70c8cccfcda46cd9a78ecaabb0693e33",
+      "timetable_solver.py": "4952d41609f259f82daa4a5e50e7b8ff3320820a8fd44323649c462db7d77d0f",
+      "exam_scheduler.py": "409fe0b72830de5cc08791d99c2c9777b8d79d47a104525af4b3f06faa367f6d"
+    },
+    "dependencies": {
+      "ortools": "9.15.6755",
+      "networkx": "3.7"
+    }
+  },
+  "target": {
+    "engine": {
+      "models.py": "5747a1ce73b15c31231894b8f3e2833a90da9280d76ce68355386b737b180a20",
+      "constraints.py": "fcca7fe837ff6951644514365345caf6edff3b6465f9ca0d15f58496741c8e5b",
+      "validator.py": "833c5362d135eef164a2ba1121ecbe63ce62955d31857c933740460eb9c09477",
+      "weekly_grid.py": "9ce455657bf5d49476952e968b11b8cf5945e0d13ca0a60cf1c6ab97985d2b8c",
+      "exam_membership_validation.py": "02f9b8e8d3ec58bc822b74050423259e70c8cccfcda46cd9a78ecaabb0693e33",
+      "timetable_solver.py": "30c3ff97db61c3da36dc99dfe012eb9fc24290159aa760a05fbe39e7ca7f12ec",
+      "exam_scheduler.py": "409fe0b72830de5cc08791d99c2c9777b8d79d47a104525af4b3f06faa367f6d"
+    },
+    "dependencies": {
+      "ortools": "9.15.6755",
+      "networkx": "3.7"
+    }
+  }
+}

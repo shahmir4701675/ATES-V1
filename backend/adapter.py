@@ -15,6 +15,7 @@ from __future__ import annotations
 from datetime import date, datetime, time, timezone
 from decimal import Decimal
 from typing import Sequence
+from copy import deepcopy
 
 from sqlalchemy import Engine, func, select
 from sqlalchemy.orm import Session, sessionmaker
@@ -40,6 +41,7 @@ from backend.models import (
     SchedulingConfig as SchedulingConfigORM,
     TimeSlot as TimeSlotORM,
     TimetableEntry as TimetableEntryORM,
+    ScheduleSnapshot,
 )
 from engine.exam_scheduler import ExamScheduleResult
 from engine.models import (
@@ -76,11 +78,12 @@ def _format_date(value: date | str) -> str:
 def _format_time(value: time | str) -> str:
     """Format a `datetime.time` or time string as `'HH:MM'`."""
     if isinstance(value, time):
+        if value.microsecond:
+            return value.isoformat(timespec="microseconds")
+        if value.second or value.tzinfo is not None:
+            return value.isoformat(timespec="seconds")
         return value.strftime("%H:%M")
-    parts = str(value).strip().split(":")
-    if len(parts) >= 2:
-        return f"{int(parts[0]):02d}:{int(parts[1]):02d}"
-    return str(value)
+    return str(value).strip()
 
 
 def _format_datetime(value: datetime | str | None) -> str | None:
@@ -110,6 +113,7 @@ def load_term_dataset(
     config_id: int | None = None,
     schedule_id: int | None = None,
     include_existing_schedules: bool = True,
+    use_snapshot: bool = True,
 ) -> TimetableDataset:
     """Load all master, offering, enrollment, slot, and config records for `term_id` into `TimetableDataset`.
 
@@ -127,6 +131,21 @@ def load_term_dataset(
     Raises:
         ValueError: If `term_id` (or specified `config_id` / `schedule_id`) does not exist.
     """
+    if schedule_id is not None and use_snapshot:
+        from backend.schedule_integrity import hydrate_snapshot, SnapshotIntegrityError
+        sch = session.get(ScheduleORM, schedule_id)
+        if sch is None or sch.term_id != term_id or (config_id is not None and sch.config_id != config_id):
+            raise SnapshotIntegrityError("Requested version context does not match term/configuration.")
+        snapshot = session.get(ScheduleSnapshot, schedule_id)
+        if snapshot is not None:
+            return hydrate_snapshot(session, snapshot, sch)
+        if sch.status in {"Published", "Archived"}:
+            raise SnapshotIntegrityError("Legacy official version has no authoritative snapshot; reviewed recovery required.")
+    elif use_snapshot and include_existing_schedules:
+        official = session.scalar(select(ScheduleORM.schedule_id).where(ScheduleORM.term_id == term_id, ScheduleORM.status.in_(("Published", "Archived"))).limit(1))
+        if official is not None:
+            from backend.schedule_integrity import SnapshotIntegrityError
+            raise SnapshotIntegrityError("Select an explicit version for historical inputs, or explicitly load current inputs for generation.")
     term_orm = session.get(AcademicTermORM, term_id)
     if term_orm is None:
         raise ValueError(f"AcademicTerm with term_id={term_id} does not exist.")
@@ -262,7 +281,7 @@ def load_term_dataset(
             exam_slot_id=e.exam_slot_id,
             student_count=e.student_count,
             is_locked=bool(e.is_locked),
-            is_manual_override=False,
+            is_manual_override=bool(e.is_manual_override),
             room_allocations=list(allocs_by_entry.get(e.exam_entry_id, [])),
         )
         for e in exam_entries_orm
@@ -456,12 +475,17 @@ def load_term_dataset(
 
 def _next_schedule_version(session: Session, term_id: int, schedule_type: str) -> int:
     """Compute the next sequential `version_no` for `(term_id, schedule_type)` (`SAF-2`)."""
+    from backend.schedule_integrity import lock_inputs
+    lock_inputs(session)
     max_version = session.scalar(
         select(func.max(ScheduleORM.version_no)).where(
             ScheduleORM.term_id == term_id,
             ScheduleORM.schedule_type == schedule_type,
         )
     )
+    if int(max_version or 0)>=32767:
+        from backend.schedule_integrity import SnapshotIntegrityError
+        raise SnapshotIntegrityError("Schedule version number range exhausted; no version was allocated.")
     return int(max_version or 0) + 1
 
 
@@ -518,6 +542,8 @@ def save_timetable_result(
     generated_by: int,
     version_no: int | None = None,
     schedule_id: int | None = None,
+    source_context: dict | None = None,
+    run_token: str | None = None,
 ) -> ScheduleORM:
     """Persist a `TimetableSolveResult` inside a single atomic database transaction (`DB-6`, `SAF-2`).
 
@@ -532,6 +558,10 @@ def save_timetable_result(
     schedules remain untouched (`SAF-2`).
     """
     with session_scope(session_or_factory) as session:
+        from backend.schedule_integrity import lock_inputs, finish_version
+        lock_inputs(session)
+        from backend.generation import guard_save, finish_run
+        if schedule_id is not None: guard_save(session,schedule_id,run_token)
         is_feasible = result.solver_status in ("optimal", "feasible") and not any(
             v.severity == "Hard" for v in result.violations
         )
@@ -546,6 +576,8 @@ def save_timetable_result(
             schedule_orm = session.get(ScheduleORM, schedule_id)
             if schedule_orm is None:
                 raise ValueError(f"Schedule with schedule_id={schedule_id} does not exist.")
+            if schedule_orm.status != "Generating" or schedule_orm.term_id != term_id or schedule_orm.config_id != config_id or schedule_orm.schedule_type != "Timetable":
+                raise ValueError("Only the matching Generating version may receive a solver result.")
             schedule_orm.status = schedule_status
             schedule_orm.solver_status = result.solver_status
             schedule_orm.objective_score = _to_decimal(obj_score)
@@ -610,6 +642,11 @@ def save_timetable_result(
             )
         )
         session.flush()
+        if is_feasible:
+            finish_version(session, schedule_orm, source_context)
+            from backend.manual_edits import generation_baseline
+            generation_baseline(session,schedule_orm,source_context)
+        finish_run(session,schedule_orm.schedule_id,run_token)
         return schedule_orm
 
 
@@ -622,6 +659,8 @@ def save_exam_result(
     generated_by: int,
     version_no: int | None = None,
     schedule_id: int | None = None,
+    source_context: dict | None = None,
+    run_token: str | None = None,
 ) -> ScheduleORM:
     """Persist an `ExamScheduleResult` inside a single atomic database transaction (`DB-6`, `SAF-2`).
 
@@ -633,6 +672,10 @@ def save_exam_result(
     4. An `audit_logs` entry recording the examination scheduler run.
     """
     with session_scope(session_or_factory) as session:
+        from backend.schedule_integrity import lock_inputs, finish_version
+        lock_inputs(session)
+        from backend.generation import guard_save, finish_run
+        if schedule_id is not None: guard_save(session,schedule_id,run_token)
         is_feasible = result.status in ("optimal", "feasible") and not any(
             v.severity == "Hard" for v in result.violations
         )
@@ -647,6 +690,8 @@ def save_exam_result(
             schedule_orm = session.get(ScheduleORM, schedule_id)
             if schedule_orm is None:
                 raise ValueError(f"Schedule with schedule_id={schedule_id} does not exist.")
+            if schedule_orm.status != "Generating" or schedule_orm.term_id != term_id or schedule_orm.config_id != config_id or schedule_orm.schedule_type != "Exam":
+                raise ValueError("Only the matching Generating version may receive a solver result.")
             schedule_orm.status = schedule_status
             schedule_orm.solver_status = result.status
             schedule_orm.objective_score = _to_decimal(obj_score)
@@ -684,6 +729,7 @@ def save_exam_result(
                     course_id=entry.course_id,
                     exam_slot_id=entry.exam_slot_id,
                     student_count=entry.student_count,
+                    is_manual_override=bool(entry.is_manual_override),
                     is_locked=bool(entry.is_locked),
                 )
                 session.add(exam_entry_orm)
@@ -725,6 +771,11 @@ def save_exam_result(
             )
         )
         session.flush()
+        if is_feasible:
+            finish_version(session, schedule_orm, source_context)
+            from backend.manual_edits import generation_baseline
+            generation_baseline(session,schedule_orm,source_context)
+        finish_run(session,schedule_orm.schedule_id,run_token)
         return schedule_orm
 
 
@@ -737,6 +788,7 @@ def save_engine_result(
     generated_by: int,
     version_no: int | None = None,
     schedule_id: int | None = None,
+    source_context: dict | None = None,
 ) -> ScheduleORM:
     """Unified dispatcher that persists either a `TimetableSolveResult` or `ExamScheduleResult` in one transaction."""
     if isinstance(result, TimetableSolveResult):
@@ -748,6 +800,7 @@ def save_engine_result(
             generated_by=generated_by,
             version_no=version_no,
             schedule_id=schedule_id,
+            source_context=source_context,
         )
     if isinstance(result, ExamScheduleResult):
         return save_exam_result(
@@ -758,6 +811,7 @@ def save_engine_result(
             generated_by=generated_by,
             version_no=version_no,
             schedule_id=schedule_id,
+            source_context=source_context,
         )
     raise TypeError(
         f"Unsupported engine result type: {type(result).__name__}. "
@@ -781,21 +835,28 @@ class TermScheduleAdapter:
     ) -> TimetableDataset:
         """Load `term_id` from the database into an `engine.models.TimetableDataset`."""
         if isinstance(self._session_or_factory, Session):
-            return load_term_dataset(
+            from backend.schedule_integrity import lock_inputs
+            lock_inputs(self._session_or_factory)
+            dataset = load_term_dataset(
                 self._session_or_factory,
                 term_id=term_id,
                 config_id=config_id,
                 schedule_id=schedule_id,
                 include_existing_schedules=include_existing_schedules,
             )
-        with session_scope(self._session_or_factory) as session:
-            return load_term_dataset(
+        else:
+            with session_scope(self._session_or_factory) as session:
+                from backend.schedule_integrity import lock_inputs
+                lock_inputs(session)
+                dataset = load_term_dataset(
                 session,
                 term_id=term_id,
                 config_id=config_id,
                 schedule_id=schedule_id,
                 include_existing_schedules=include_existing_schedules,
-            )
+                )
+        self._loaded_inputs = deepcopy(dataset) if schedule_id is None else None
+        return dataset
 
     def save_result(
         self,
@@ -807,6 +868,9 @@ class TermScheduleAdapter:
         version_no: int | None = None,
     ) -> ScheduleORM:
         """Save a `TimetableSolveResult` or `ExamScheduleResult` back to the database in one transaction."""
+        from backend.schedule_integrity import make_context
+        source = getattr(self, "_loaded_inputs", None)
+        context = make_context(source, term_id, "Timetable" if isinstance(result, TimetableSolveResult) else "Exam", config_id) if source is not None else None
         return save_engine_result(
             self._session_or_factory,
             result,
@@ -814,4 +878,5 @@ class TermScheduleAdapter:
             config_id=config_id,
             generated_by=generated_by,
             version_no=version_no,
+            source_context=context,
         )

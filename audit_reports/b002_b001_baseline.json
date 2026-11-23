@@ -1,0 +1,19 @@
+{
+  "backend/auth.py": "3075e99d5bf3c5b26f1931d42d318952acab2df6f41515e8e3dd60f2a3f91fce",
+  "backend/auth_password.py": "49e4f975465779d13c0307e5fae52c5dbedbe2ce574e5b48c95e4d2fe2295beb",
+  "backend/dependencies.py": "a746fc4a86edac4f41fd4e26e242c179f1f100d13b6bfe509b46d8e850837576",
+  "backend/main.py": "f309bd2142bc5b2e7112f3968b3f0a243da24eb6c627b694730a00e3c1387e3c",
+  "backend/routers/auth.py": "b3ccbbe4841f254d0abc39c4f039647ca34c83bd18201dc76ff16fca1e9e31e7",
+  "conftest.py": "f4933510c0ad8256c96fc942bac5168b5fd5643e5850b55be2853c640841cb57",
+  "tests/test_auth.py": "edea4077c197f61961845f207a19c8871dad91b893cb89a409f3efff05b6f934",
+  "frontend/src/App.tsx": "7955b9da45d373e8bdb9480f94d111a5b683106d11bcf888168047591868706c",
+  "frontend/src/components/AppShell.tsx": "7911394a1c2dc11917f2aea8ffb297b25a57b798bf51dd9cdeb3d7113c15ffac",
+  "frontend/src/pages/LoginPage.tsx": "fcae9708e5ffc26081c140c60e4ae23dc598aee0ec1626462d03e501d0653dbf",
+  "frontend/src/services/api.ts": "09d045dfa50286e6aa75171452960c03e4b3baaebdd556a0651ba6cdc6f9eaaf",
+  "frontend/src/services/http.ts": "e11b672e0f7a91378b837f9ac26050f3dca91671701fb7b01f377442ca22775e",
+  "frontend/src/services/mockApi.ts": "0df6f06045590072d764e8c7c2260fcc5a3ecb00e58087baa0fc61b3076790ee",
+  ".env.example": "4a203a23b307336a8e515e354d38ea540da7ee4f0803af8061b187bb82ce3b65",
+  "requirements.txt": "0829362ca8b24efc49f60604213767edc97ea3f11145447453852305bd39efeb",
+  "db/migrations/001_auth_sessions.postgresql.sql": "42eff8e315999cf6a7fbaf1ce4715e602929873ff902bed47d7c274e969da9c4",
+  "db/migrations/001_auth_sessions.sqlite.sql": "04353ec4e860be5f66fd571bc0faf0e5fdb38cefa54f633ff42c4ebd3673fa04"
+}

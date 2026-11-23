@@ -140,8 +140,19 @@ def test_all_21_models_match_schema_sql():
     )
     orm_table_names = set(Base.metadata.tables.keys())
 
-    assert len(sql_table_names) == 21
-    assert len(ALL_MODELS) == 21
+    assert len(sql_table_names) == 21  # Original SRS business schema is preserved.
+    migration_sql = (PROJECT_ROOT / "db/migrations/001_auth_sessions.postgresql.sql").read_text(encoding="utf-8")
+    sql_table_names.update(re.findall(r"CREATE TABLE\s+(\w+)\s*\(", migration_sql))
+    snapshot_sql = (PROJECT_ROOT / "db/migrations/002_schedule_snapshots.postgresql.sql").read_text(encoding="utf-8")
+    sql_table_names.update(re.findall(r"CREATE TABLE(?:\s+IF NOT EXISTS)?\s+(\w+)\s*\(", snapshot_sql))
+    run_sql = (PROJECT_ROOT / "db/migrations/003_generation_runs.postgresql.sql").read_text(encoding="utf-8")
+    sql_table_names.update(re.findall(r"CREATE TABLE(?:\s+IF NOT EXISTS)?\s+(\w+)\s*\(", run_sql))
+    stage_sql = (PROJECT_ROOT / "db/migrations/004_import_staging.postgresql.sql").read_text(encoding="utf-8")
+    sql_table_names.update(re.findall(r"CREATE TABLE(?:\s+IF NOT EXISTS)?\s+(\w+)\s*\(", stage_sql))
+    edit_sql = (PROJECT_ROOT / "db/migrations/005_adjustment_integrity.postgresql.sql").read_text(encoding="utf-8")
+    sql_table_names.update(re.findall(r"CREATE TABLE(?:\s+IF NOT EXISTS)?\s+(\w+)\s*\(", edit_sql))
+    assert len(sql_table_names) == 28
+    assert len(ALL_MODELS) == 28
     assert orm_table_names == sql_table_names
 
     expected_columns: dict[str, set[str]] = {
@@ -276,6 +287,7 @@ def test_all_21_models_match_schema_sql():
             "exam_slot_id",
             "student_count",
             "is_locked",
+            "is_manual_override",
         },
         "exam_room_allocations": {
             "allocation_id",
@@ -317,6 +329,10 @@ def test_all_21_models_match_schema_sql():
     for table_name, cols in expected_columns.items():
         actual_cols = {c.name for c in Base.metadata.tables[table_name].columns}
         assert actual_cols == cols, f"Column mismatch on table {table_name}"
+    assert set(Base.metadata.tables["auth_sessions"].columns.keys()) == {
+        "auth_session_id", "token_id", "user_id", "credential_fingerprint",
+        "created_at", "last_seen_at", "expires_at",
+    }
 
 
 # ============================================================================

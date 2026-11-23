@@ -1,0 +1,4 @@
+{
+  "status": "Not Verified",
+  "reason": "No safely isolated PostgreSQL instance was available; psql, postgres, pg_ctl and docker were not found on PATH. No existing database was contacted."
+}

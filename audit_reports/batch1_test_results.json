@@ -1,0 +1,62 @@
+{
+  "project": {
+    "total": 430,
+    "passed": 430,
+    "failed": 0,
+    "skipped": 0,
+    "failures": []
+  },
+  "prior_regressions_included_in_project": {
+    "B001": 37,
+    "B002": 87,
+    "B003": 60,
+    "B004": 99,
+    "B005": 45
+  },
+  "batch1_regressions_included_in_project": 23,
+  "original_audit": {
+    "total": 28,
+    "passed": 18,
+    "failed": 10,
+    "skipped": 0,
+    "failures": [
+      "test_student_cannot_read_generated_schedule",
+      "test_student_list_contains_published_only",
+      "test_required_endpoint_exists[get-/users-None]",
+      "test_required_endpoint_exists[get-/audit-None]",
+      "test_required_endpoint_exists[post-/import/courses-payload4]",
+      "test_required_endpoint_exists[post-/schedules/1/publish-payload5]",
+      "test_required_endpoint_exists[get-/schedules/1/export?format=csv-None]",
+      "test_required_endpoint_exists[get-/schedules/1/export?format=pdf-None]",
+      "test_exam_manual_override_persisted",
+      "test_mutation_audit_written"
+    ]
+  },
+  "frontend": {
+    "app_typescript": "Passed (exit 0)",
+    "tooling_typescript": "Passed (exit 0)",
+    "production_build": "Passed (exit 0)"
+  },
+  "new_sqlite_run_control_migration": "Passed: additive/repeatable disposable database test included in Batch 1 regressions",
+  "postgresql": "Not Verified",
+  "audit_comparison": {
+    "old_failed": 11,
+    "current_failed": 10,
+    "newly_failing": [],
+    "fixed": [
+      "test_default_app_recovers_orphan_on_startup"
+    ],
+    "remaining": [
+      "test_student_cannot_read_generated_schedule",
+      "test_student_list_contains_published_only",
+      "test_required_endpoint_exists[get-/users-None]",
+      "test_required_endpoint_exists[get-/audit-None]",
+      "test_required_endpoint_exists[post-/import/courses-payload4]",
+      "test_required_endpoint_exists[post-/schedules/1/publish-payload5]",
+      "test_required_endpoint_exists[get-/schedules/1/export?format=csv-None]",
+      "test_required_endpoint_exists[get-/schedules/1/export?format=pdf-None]",
+      "test_exam_manual_override_persisted",
+      "test_mutation_audit_written"
+    ]
+  }
+}

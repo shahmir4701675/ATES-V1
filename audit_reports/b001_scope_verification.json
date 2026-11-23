@@ -1,0 +1,45 @@
+{
+  "algorithmsAndSeedInputsUnchanged": true,
+  "files": [
+    {
+      "path": "data/infeasible_timetable.json",
+      "unchanged": true
+    },
+    {
+      "path": "data/overconstrained_exam.json",
+      "unchanged": true
+    },
+    {
+      "path": "data/seed_exam.json",
+      "unchanged": true
+    },
+    {
+      "path": "data/seed_timetable.json",
+      "unchanged": true
+    },
+    {
+      "path": "engine/constraints.py",
+      "unchanged": true
+    },
+    {
+      "path": "engine/exam_scheduler.py",
+      "unchanged": true
+    },
+    {
+      "path": "engine/models.py",
+      "unchanged": true
+    },
+    {
+      "path": "engine/timetable_solver.py",
+      "unchanged": true
+    },
+    {
+      "path": "engine/validator.py",
+      "unchanged": true
+    },
+    {
+      "path": "engine/__init__.py",
+      "unchanged": true
+    }
+  ]
+}

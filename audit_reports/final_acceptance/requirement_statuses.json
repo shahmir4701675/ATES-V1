@@ -1,0 +1,1391 @@
+{
+  "summary": {
+    "total": 228,
+    "counts": {
+      "Fully verified": 95,
+      "Partially verified": 119,
+      "Incorrect": 5,
+      "Not verified": 9
+    },
+    "strict_verified_percent": 41.67,
+    "functional_total": 83,
+    "functional_counts": {
+      "Fully verified": 52,
+      "Partially verified": 28,
+      "Incorrect": 2,
+      "Not verified": 1
+    },
+    "functional_verified_percent": 62.65,
+    "method": "One unit per inherited traceability ID; all applicable; only Fully verified earns1, all other statuses0; no partial-credit score; overlapping FR/UR/UC are disclosed."
+  },
+  "requirements": [
+    {
+      "id": "FR-1.1",
+      "requirement": "Authenticate username/password; JWT expires after 30 minutes inactivity",
+      "status": "Fully verified",
+      "evidence": "A: real JWT/session, bcrypt, lockout, expiry, logout and role-negative tests; backend/auth.py and routers/auth.py."
+    },
+    {
+      "id": "FR-1.2",
+      "requirement": "Salted bcrypt cost >=12; minimum password length 8",
+      "status": "Fully verified",
+      "evidence": "A: real JWT/session, bcrypt, lockout, expiry, logout and role-negative tests; backend/auth.py and routers/auth.py."
+    },
+    {
+      "id": "FR-1.3",
+      "requirement": "Lock after five failed logins for 15 minutes and record event",
+      "status": "Fully verified",
+      "evidence": "A: real JWT/session, bcrypt, lockout, expiry, logout and role-negative tests; backend/auth.py and routers/auth.py."
+    },
+    {
+      "id": "FR-1.4",
+      "requirement": "Logout ends session; user can change own password",
+      "status": "Fully verified",
+      "evidence": "A: real JWT/session, bcrypt, lockout, expiry, logout and role-negative tests; backend/auth.py and routers/auth.py."
+    },
+    {
+      "id": "FR-1.5",
+      "requirement": "Authorize every API request; forbidden requests return 403",
+      "status": "Fully verified",
+      "evidence": "A: real JWT/session, bcrypt, lockout, expiry, logout and role-negative tests; backend/auth.py and routers/auth.py."
+    },
+    {
+      "id": "FR-1.6",
+      "requirement": "Administrator manages accounts, resets passwords and links Faculty/Student",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_batch2_accounts (17 cases); J: accounts for all roles created through authenticated administration; backend/routers/accounts.py."
+    },
+    {
+      "id": "FR-1.7",
+      "requirement": "Deactivate accounts with recorded actions rather than delete",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_batch2_accounts (17 cases); J: accounts for all roles created through authenticated administration; backend/routers/accounts.py."
+    },
+    {
+      "id": "FR-1.8",
+      "requirement": "Show only permitted menus and buttons",
+      "status": "Partially verified",
+      "evidence": "J/A verify server permission enforcement; role-aware navigation exists. Actual menu/button visibility and keyboard traversal were not browser-tested (W)."
+    },
+    {
+      "id": "FR-2.1",
+      "requirement": "Create/view/edit/deactivate courses with unique code and required attributes",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_backend_api, tests.test_batch3_validation_concurrency; J: authenticated CRUD and invalid-input responses; backend/routers/master_data.py and schemas.py."
+    },
+    {
+      "id": "FR-2.2",
+      "requirement": "Reject zero total contact hours and negative hour/credit values",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_backend_api, tests.test_batch3_validation_concurrency; J: authenticated CRUD and invalid-input responses; backend/routers/master_data.py and schemas.py."
+    },
+    {
+      "id": "FR-2.3",
+      "requirement": "Instructor CRUD with unique email, department and workload limits",
+      "status": "Partially verified",
+      "evidence": "CRUD, uniqueness/workload bounds implemented and exercised (B/J); R accepted instructor email not-an-email with HTTP 201. Email-format validation remains incomplete."
+    },
+    {
+      "id": "FR-2.4",
+      "requirement": "Room CRUD with unique code, building, positive capacity and permitted type",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_backend_api, tests.test_batch3_validation_concurrency; J: authenticated CRUD and invalid-input responses; backend/routers/master_data.py and schemas.py."
+    },
+    {
+      "id": "FR-2.5",
+      "requirement": "Batch CRUD with programme, admission year, section and positive strength",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_backend_api, tests.test_batch3_validation_concurrency; J: authenticated CRUD and invalid-input responses; backend/routers/master_data.py and schemas.py."
+    },
+    {
+      "id": "FR-2.6",
+      "requirement": "Create terms with dates; mark exactly one term Active",
+      "status": "Partially verified",
+      "evidence": "J/B verify dates and at-most-one Active guard. Closing the only term leaves zero Active; FR wording exactly one conflicts with SRS database at-most-one wording (G04)."
+    },
+    {
+      "id": "FR-2.7",
+      "requirement": "Generate equal slot grid and block individual slots with reason",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_weekly_grid (87 cases), tests.test_lab_contiguity (45); V/J: actual fixed-grid generation and exact required session counts; engine/weekly_grid.py and engine/validator.py."
+    },
+    {
+      "id": "FR-2.8",
+      "requirement": "Create offerings; reject duplicate course/batch/term",
+      "status": "Partially verified",
+      "evidence": "Creation/duplicate checking verified (B/J). A referenced offering instructor change returns 409 under the historical composite FK (X); a future-assignment/revision workflow is unresolved."
+    },
+    {
+      "id": "FR-2.9",
+      "requirement": "Derive required lecture sessions/lab blocks from course hours and slot length",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_weekly_grid (87 cases), tests.test_lab_contiguity (45); V/J: actual fixed-grid generation and exact required session counts; engine/weekly_grid.py and engine/validator.py."
+    },
+    {
+      "id": "FR-2.10",
+      "requirement": "Add/view/remove student enrollment links",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_exam_membership (60 cases); J/R: explicit enrollments persisted and used; L: 5,000 new enrollment links independently counted in SQL."
+    },
+    {
+      "id": "FR-2.11",
+      "requirement": "Preserve all schedule-referenced records; offer deactivation",
+      "status": "Partially verified",
+      "evidence": "Referenced deletions are refused and ordinary entities deactivate (B). CourseOffering has no active/deactivation field; referenced offerings can only be retained (master_data.py delete_offering)."
+    },
+    {
+      "id": "FR-2.12",
+      "requirement": "Search/sort/page every master list; default 25 rows",
+      "status": "Partially verified",
+      "evidence": "List search/sort/pagination code exists; not every master list/default-25 browser interaction has executed acceptance evidence (W)."
+    },
+    {
+      "id": "FR-3.1",
+      "requirement": "Faculty edits only own weekly availability",
+      "status": "Partially verified",
+      "evidence": "J/B verify own-instructor read/write and deny other/unlinked identities. Weekly-grid availability UI has not been exercised in a browser (W)."
+    },
+    {
+      "id": "FR-3.2",
+      "requirement": "Coordinator edits any instructor availability",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_batch2_schedule_access ownership/availability cases; J: Coordinator/Faculty access; V/R: absent availability rows default available and marked rows respected."
+    },
+    {
+      "id": "FR-3.3",
+      "requirement": "All unmarked slots are available",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_batch2_schedule_access ownership/availability cases; J: Coordinator/Faculty access; V/R: absent availability rows default available and marked rows respected."
+    },
+    {
+      "id": "FR-3.4",
+      "requirement": "Warn changes affect schedules only after regeneration",
+      "status": "Partially verified",
+      "evidence": "Immutable snapshots preserve original availability (B/R); actual frontend warning visibility/wording was not browser-tested (W)."
+    },
+    {
+      "id": "FR-4.1",
+      "requirement": "UTF-8 CSV up to 10 MB; six entity types and downloadable templates",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_batch2_imports (28) covers all six types, UTF-8/size/template/ownership/rollback/history. J: valid/rejected row confirmation; R/L: genuine 5,000-row persistence; backend/csv_imports.py and routers/imports.py."
+    },
+    {
+      "id": "FR-4.2",
+      "requirement": "Validate every row including referenced records before storing",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_batch2_imports (28) covers all six types, UTF-8/size/template/ownership/rollback/history. J: valid/rejected row confirmation; R/L: genuine 5,000-row persistence; backend/csv_imports.py and routers/imports.py."
+    },
+    {
+      "id": "FR-4.3",
+      "requirement": "Rejected-row report includes line, column and reason",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_batch2_imports (28) covers all six types, UTF-8/size/template/ownership/rollback/history. J: valid/rejected row confirmation; R/L: genuine 5,000-row persistence; backend/csv_imports.py and routers/imports.py."
+    },
+    {
+      "id": "FR-4.4",
+      "requirement": "Import valid rows or cancel the whole operation",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_batch2_imports (28) covers all six types, UTF-8/size/template/ownership/rollback/history. J: valid/rejected row confirmation; R/L: genuine 5,000-row persistence; backend/csv_imports.py and routers/imports.py."
+    },
+    {
+      "id": "FR-4.5",
+      "requirement": "Persist filename, user, time and import/rejection counts",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_batch2_imports (28) covers all six types, UTF-8/size/template/ownership/rollback/history. J: valid/rejected row confirmation; R/L: genuine 5,000-row persistence; backend/csv_imports.py and routers/imports.py."
+    },
+    {
+      "id": "FR-5.1",
+      "requirement": "Default H01-H10/S01-S06/E01-E05/ES01-ES03 rules and metadata",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_batch4_config_generation (25), tests.test_batch3_validation_concurrency; J: persisted configurations/exam sessions and rejected malformed grid; backend/routers/master_data.py, schemas.py and rule catalogue validation."
+    },
+    {
+      "id": "FR-5.2",
+      "requirement": "Never disable H01/H02/H03/H08/E01/E04/E05",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_batch4_config_generation (25), tests.test_batch3_validation_concurrency; J: persisted configurations/exam sessions and rejected malformed grid; backend/routers/master_data.py, schemas.py and rule catalogue validation."
+    },
+    {
+      "id": "FR-5.3",
+      "requirement": "Warn before disabling optional hard rule and log change",
+      "status": "Partially verified",
+      "evidence": "Mandatory protection/config audit verified (A/B); optional-rule confirmation UI exists but has no browser acceptance execution; direct API has no explicit confirmation token (W)."
+    },
+    {
+      "id": "FR-5.4",
+      "requirement": "Weights 0-10 and integer parameters for soft/exam limits",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_batch4_config_generation (25), tests.test_batch3_validation_concurrency; J: persisted configurations/exam sessions and rejected malformed grid; backend/routers/master_data.py, schemas.py and rule catalogue validation."
+    },
+    {
+      "id": "FR-5.5",
+      "requirement": "Solver limit 10-600 seconds default 120 and random seed",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_batch4_config_generation (25), tests.test_batch3_validation_concurrency; J: persisted configurations/exam sessions and rejected malformed grid; backend/routers/master_data.py, schemas.py and rule catalogue validation."
+    },
+    {
+      "id": "FR-5.6",
+      "requirement": "Save/clone configs and delete unused configs",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_batch4_config_generation (25), tests.test_batch3_validation_concurrency; J: persisted configurations/exam sessions and rejected malformed grid; backend/routers/master_data.py, schemas.py and rule catalogue validation."
+    },
+    {
+      "id": "FR-5.7",
+      "requirement": "Define exam windows; reject same-date overlap",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_batch4_config_generation (25), tests.test_batch3_validation_concurrency; J: persisted configurations/exam sessions and rejected malformed grid; backend/routers/master_data.py, schemas.py and rule catalogue validation."
+    },
+    {
+      "id": "FR-5.8",
+      "requirement": "Validate config before run incl at least one exam session",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_batch4_config_generation (25), tests.test_batch3_validation_concurrency; J: persisted configurations/exam sessions and rejected malformed grid; backend/routers/master_data.py, schemas.py and rule catalogue validation."
+    },
+    {
+      "id": "FR-6.1",
+      "requirement": "Check input completeness and report every defect before solving",
+      "status": "Incorrect",
+      "evidence": "J: empty Planned-term generation accepted (202) and becomes Infeasible, whereas SRS Figure 12 requires input defects before solve with status staying Draft; no complete Draft preflight workflow (G03)."
+    },
+    {
+      "id": "FR-6.2",
+      "requirement": "Start chosen term/config run with new Generating version",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_timetable_solver (25), test_batch1_generation (23), Batch3/4 fencing; J: real worker generation, lock-preserving regeneration and persistence; R/V: 210 generated entries independently satisfy H01-H10. Default-weight reference performance is separately not accepted (P-2)."
+    },
+    {
+      "id": "FR-6.3",
+      "requirement": "CP-SAT slot-room variable per session; enforce enabled H01-H10",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_timetable_solver (25), test_batch1_generation (23), Batch3/4 fencing; J: real worker generation, lock-preserving regeneration and persistence; R/V: 210 generated entries independently satisfy H01-H10. Default-weight reference performance is separately not accepted (P-2)."
+    },
+    {
+      "id": "FR-6.4",
+      "requirement": "Maximize weighted satisfied soft constraints within limit",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_timetable_solver (25), test_batch1_generation (23), Batch3/4 fencing; J: real worker generation, lock-preserving regeneration and persistence; R/V: 210 generated entries independently satisfy H01-H10. Default-weight reference performance is separately not accepted (P-2)."
+    },
+    {
+      "id": "FR-6.5",
+      "requirement": "Stop at configured limit; best feasible result or Infeasible",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_timetable_solver (25), test_batch1_generation (23), Batch3/4 fencing; J: real worker generation, lock-preserving regeneration and persistence; R/V: 210 generated entries independently satisfy H01-H10. Default-weight reference performance is separately not accepted (P-2)."
+    },
+    {
+      "id": "FR-6.6",
+      "requirement": "Progress/elapsed display and actual safe cancellation",
+      "status": "Partially verified",
+      "evidence": "R: real server cancellation stops worker in 0.133s and saves no entries; B verifies races/deadlines. Browser elapsed/progress/loading/cancel messaging not executed (W)."
+    },
+    {
+      "id": "FR-6.7",
+      "requirement": "Independent validator before save; invalid result never Generated",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_timetable_solver (25), test_batch1_generation (23), Batch3/4 fencing; J: real worker generation, lock-preserving regeneration and persistence; R/V: 210 generated entries independently satisfy H01-H10. Default-weight reference performance is separately not accepted (P-2)."
+    },
+    {
+      "id": "FR-6.8",
+      "requirement": "Persist entries, objective, status and runtime; mark Generated",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_timetable_solver (25), test_batch1_generation (23), Batch3/4 fencing; J: real worker generation, lock-preserving regeneration and persistence; R/V: 210 generated entries independently satisfy H01-H10. Default-weight reference performance is separately not accepted (P-2)."
+    },
+    {
+      "id": "FR-6.9",
+      "requirement": "Same data/config/seed should produce same schedule",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_timetable_solver (25), test_batch1_generation (23), Batch3/4 fencing; J: real worker generation, lock-preserving regeneration and persistence; R/V: 210 generated entries independently satisfy H01-H10. Default-weight reference performance is separately not accepted (P-2)."
+    },
+    {
+      "id": "FR-6.10",
+      "requirement": "Preserve locked slot/room in new run",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_timetable_solver (25), test_batch1_generation (23), Batch3/4 fencing; J: real worker generation, lock-preserving regeneration and persistence; R/V: 210 generated entries independently satisfy H01-H10. Default-weight reference performance is separately not accepted (P-2)."
+    },
+    {
+      "id": "FR-7.1",
+      "requirement": "Conflict graph course vertices; edge for any shared student",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_exam_scheduler (13), test_exam_membership (60); J/V: generated exams checked using independent explicit student-set, interval, capacity and exact-seat oracle. Reference-size completion not verified successfully (P-3)."
+    },
+    {
+      "id": "FR-7.2",
+      "requirement": "DSATUR then exact CP-SAT fallback when sessions insufficient",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_exam_scheduler (13), test_exam_membership (60); J/V: generated exams checked using independent explicit student-set, interval, capacity and exact-seat oracle. Reference-size completion not verified successfully (P-3)."
+    },
+    {
+      "id": "FR-7.3",
+      "requirement": "Maximum configured exams per student per day",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_exam_scheduler (13), test_exam_membership (60); J/V: generated exams checked using independent explicit student-set, interval, capacity and exact-seat oracle. Reference-size completion not verified successfully (P-3)."
+    },
+    {
+      "id": "FR-7.4",
+      "requirement": "Rooms cover exact student count; no session room reuse",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_exam_scheduler (13), test_exam_membership (60); J/V: generated exams checked using independent explicit student-set, interval, capacity and exact-seat oracle. Reference-size completion not verified successfully (P-3)."
+    },
+    {
+      "id": "FR-7.5",
+      "requirement": "Infeasible reports session shortfall and unplaced courses",
+      "status": "Partially verified",
+      "evidence": "B covers fallback/session shortfall and conflicts. Reference timeouts expose terminal TimedOut but schedule header Infeasible; useful per-course/session-shortfall explanations for every failure were not demonstrated."
+    },
+    {
+      "id": "FR-7.6",
+      "requirement": "Prefer batch exams on different days and minimal rooms",
+      "status": "Partially verified",
+      "evidence": "B tests ES objectives and room selection. J/O proves a hard-feasible alternative improves enabled ES01 while returned greedy result does not; global soft optimality is unproven."
+    },
+    {
+      "id": "FR-7.7",
+      "requirement": "Persist exams/allocations and run stats; mark Generated",
+      "status": "Partially verified",
+      "evidence": "J persists correct exam entries/allocations, but DSATUR returns solver_status=optimal without an optimality proof, including a strictly improvable ES01 example (O/G02)."
+    },
+    {
+      "id": "FR-8.1",
+      "requirement": "Validate any schedule; report type/severity/entities/description",
+      "status": "Partially verified",
+      "evidence": "Independent gates work during generation/publication/edits (B/J). Complete user-triggered validate-any-version/report workflow is not demonstrated; historical untrusted versions fail closed."
+    },
+    {
+      "id": "FR-8.2",
+      "requirement": "Display/filter conflict report and export CSV",
+      "status": "Partially verified",
+      "evidence": "B verifies conflict API; frontend client CSV code exists. Browser filtering/download unexecuted; conflict CSV bypasses backend export audit (G05/W)."
+    },
+    {
+      "id": "FR-8.3",
+      "requirement": "Coordinator moves session/exam slot and room only when Generated",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_batch3_adjustments (21); J: Generated-only real room move, persisted override, lock/unlock, undo and regeneration; Published editing refused. backend/manual_edits.py."
+    },
+    {
+      "id": "FR-8.4",
+      "requirement": "Revalidate moves within1s; reject hard violations by name",
+      "status": "Partially verified",
+      "evidence": "J real small-fixture move validates; R reference lock-validation=0.483s. Complete physical lab/exam move at reference size was not timed; P-4 remains partial."
+    },
+    {
+      "id": "FR-8.5",
+      "requirement": "Persist manual override marker on changed entries",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_batch3_adjustments (21); J: Generated-only real room move, persisted override, lock/unlock, undo and regeneration; Published editing refused. backend/manual_edits.py."
+    },
+    {
+      "id": "FR-8.6",
+      "requirement": "Coordinator can lock/unlock sessions/exams",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_batch3_adjustments (21); J: Generated-only real room move, persisted override, lock/unlock, undo and regeneration; Published editing refused. backend/manual_edits.py."
+    },
+    {
+      "id": "FR-8.7",
+      "requirement": "Undo all manual changes of version",
+      "status": "Partially verified",
+      "evidence": "J exact undo succeeds; B validates revision checksums/concurrent edits. Pre-upgrade versions restore first tracked pre-edit state, not provable original pre-upgrade generation state."
+    },
+    {
+      "id": "FR-9.1",
+      "requirement": "Six schedule statuses with only specified transitions",
+      "status": "Incorrect",
+      "evidence": "J: closing term leaves Published status unchanged; SRS Table 26 requires Archived. Draft creation/duplicate/preflight transitions are also incomplete (G03/G04)."
+    },
+    {
+      "id": "FR-9.2",
+      "requirement": "Only Approver publishes Generated zero-hard-violation schedule",
+      "status": "Fully verified",
+      "evidence": "B: test_batch2_publication (12), schedule_access (23), integrity (99). J: Approver-only snapshot validation, atomic previous archival and own-scope Published-only access; second-client restart sees state."
+    },
+    {
+      "id": "FR-9.3",
+      "requirement": "One published per term/type; previous becomes Archived",
+      "status": "Fully verified",
+      "evidence": "B: test_batch2_publication (12), schedule_access (23), integrity (99). J: Approver-only snapshot validation, atomic previous archival and own-scope Published-only access; second-client restart sees state."
+    },
+    {
+      "id": "FR-9.4",
+      "requirement": "Faculty/Students can view Published only",
+      "status": "Fully verified",
+      "evidence": "B: test_batch2_publication (12), schedule_access (23), integrity (99). J: Approver-only snapshot validation, atomic previous archival and own-scope Published-only access; second-client restart sees state."
+    },
+    {
+      "id": "FR-9.5",
+      "requirement": "Retain numbered versions; duplicate draft; view archives",
+      "status": "Partially verified",
+      "evidence": "B/J retain numbered history and archive views. No complete duplicate-to-Draft/return-to-earlier-version workflow; legacy rollback baseline cannot be inferred."
+    },
+    {
+      "id": "FR-9.6",
+      "requirement": "Approver sees sessions/score/conflict summary before publish",
+      "status": "Partially verified",
+      "evidence": "Review data/receipt API exists (B); actual Approver review summary and confirmation before publishing were not browser-tested (W)."
+    },
+    {
+      "id": "FR-10.1",
+      "requirement": "Weekly timetable grid by selected batch/instructor/room/course",
+      "status": "Partially verified",
+      "evidence": "Source and D server-rendered tests support grid stacking, filters, role defaults and metadata. J proves backend filters/scopes; actual rendered browser workflows, statuses and refresh behavior remain untested (W)."
+    },
+    {
+      "id": "FR-10.2",
+      "requirement": "Show code/title/type/instructor/room/day/time on every session",
+      "status": "Partially verified",
+      "evidence": "Source and D server-rendered tests support grid stacking, filters, role defaults and metadata. J proves backend filters/scopes; actual rendered browser workflows, statuses and refresh behavior remain untested (W)."
+    },
+    {
+      "id": "FR-10.3",
+      "requirement": "Filter timetable by term/version/batch/instructor/room/course/day",
+      "status": "Partially verified",
+      "evidence": "Source and D server-rendered tests support grid stacking, filters, role defaults and metadata. J proves backend filters/scopes; actual rendered browser workflows, statuses and refresh behavior remain untested (W)."
+    },
+    {
+      "id": "FR-10.4",
+      "requirement": "Date/time ordered exams filtered by date/batch/course/room",
+      "status": "Partially verified",
+      "evidence": "Source and D server-rendered tests support grid stacking, filters, role defaults and metadata. J proves backend filters/scopes; actual rendered browser workflows, statuses and refresh behavior remain untested (W)."
+    },
+    {
+      "id": "FR-10.5",
+      "requirement": "Own Faculty/Student timetable/exams by default",
+      "status": "Partially verified",
+      "evidence": "Source and D server-rendered tests support grid stacking, filters, role defaults and metadata. J proves backend filters/scopes; actual rendered browser workflows, statuses and refresh behavior remain untested (W)."
+    },
+    {
+      "id": "FR-10.6",
+      "requirement": "Visually distinguish labs/locked/manual entries",
+      "status": "Partially verified",
+      "evidence": "Source and D server-rendered tests support grid stacking, filters, role defaults and metadata. J proves backend filters/scopes; actual rendered browser workflows, statuses and refresh behavior remain untested (W)."
+    },
+    {
+      "id": "FR-10.7",
+      "requirement": "Dashboard active term, schedule status and master counts",
+      "status": "Partially verified",
+      "evidence": "Source and D server-rendered tests support grid stacking, filters, role defaults and metadata. J proves backend filters/scopes; actual rendered browser workflows, statuses and refresh behavior remain untested (W)."
+    },
+    {
+      "id": "FR-10.8",
+      "requirement": "Schedule views usable at360px",
+      "status": "Not verified",
+      "evidence": "W: no browser initialized; 360px horizontal overflow, interaction and readability were not measured. Responsive classes are insufficient evidence."
+    },
+    {
+      "id": "FR-11.1",
+      "requirement": "A4 landscape PDF with institution/term/version/filter/date",
+      "status": "Fully verified",
+      "evidence": "B: test_batch2_exports (18), including scope/filter/long Unicode/grouping cases. J/R/F: real CSV and A4 landscape PDF, filenames, metadata, allocation rows and representative rendered pages; 30 batch pages. Local-time footer caveat tracked under DB-8/I18N."
+    },
+    {
+      "id": "FR-11.2",
+      "requirement": "Schedule CSV with specified columns and row granularity",
+      "status": "Fully verified",
+      "evidence": "B: test_batch2_exports (18), including scope/filter/long Unicode/grouping cases. J/R/F: real CSV and A4 landscape PDF, filenames, metadata, allocation rows and representative rendered pages; 30 batch pages. Local-time footer caveat tracked under DB-8/I18N."
+    },
+    {
+      "id": "FR-11.3",
+      "requirement": "All batches or instructors in one PDF one per page",
+      "status": "Fully verified",
+      "evidence": "B: test_batch2_exports (18), including scope/filter/long Unicode/grouping cases. J/R/F: real CSV and A4 landscape PDF, filenames, metadata, allocation rows and representative rendered pages; 30 batch pages. Local-time footer caveat tracked under DB-8/I18N."
+    },
+    {
+      "id": "FR-11.4",
+      "requirement": "Exports restricted to permitted schedules",
+      "status": "Fully verified",
+      "evidence": "B: test_batch2_exports (18), including scope/filter/long Unicode/grouping cases. J/R/F: real CSV and A4 landscape PDF, filenames, metadata, allocation rows and representative rendered pages; 30 batch pages. Local-time footer caveat tracked under DB-8/I18N."
+    },
+    {
+      "id": "FR-11.5",
+      "requirement": "Audit every export",
+      "status": "Partially verified",
+      "evidence": "Schedule export endpoint logs real exports (B/J). ConflictReportPage.tsx creates its CSV locally without any backend EXPORT event (G05)."
+    },
+    {
+      "id": "FR-12.1",
+      "requirement": "Audit login/failure/account/import/config/generation/move/publish/export",
+      "status": "Partially verified",
+      "evidence": "A/B/J cover authenticated CRUD, account, import, config, generation, movement and publication events. Client-only conflict CSV export has no authoritative audit event (G05)."
+    },
+    {
+      "id": "FR-12.2",
+      "requirement": "Administrator-only audit with user/date/action filters",
+      "status": "Fully verified",
+      "evidence": "B: accounts and Batch3 integrity tests; J: Administrator-only audit retrieval; M: append-only update/delete guards and transactional audit persistence. backend/mutation_audit.py and db/migrations/005*."
+    },
+    {
+      "id": "FR-12.3",
+      "requirement": "Users cannot modify/delete audit entries",
+      "status": "Fully verified",
+      "evidence": "B: accounts and Batch3 integrity tests; J: Administrator-only audit retrieval; M: append-only update/delete guards and transactional audit persistence. backend/mutation_audit.py and db/migrations/005*."
+    },
+    {
+      "id": "UR-01",
+      "requirement": "Secure role-scoped username/password login",
+      "status": "Partially verified",
+      "evidence": "Related FRs above have backend/test evidence (A/B/J/R); end-user completion across browser login, navigation, forms, feedback and downloads was not executed (W). Specific functional gaps also apply where noted in the related FR."
+    },
+    {
+      "id": "UR-02",
+      "requirement": "Administrator manages accounts and one role",
+      "status": "Partially verified",
+      "evidence": "Related FRs above have backend/test evidence (A/B/J/R); end-user completion across browser login, navigation, forms, feedback and downloads was not executed (W). Specific functional gaps also apply where noted in the related FR."
+    },
+    {
+      "id": "UR-03",
+      "requirement": "Only permitted functions visible and usable",
+      "status": "Partially verified",
+      "evidence": "Related FRs above have backend/test evidence (A/B/J/R); end-user completion across browser login, navigation, forms, feedback and downloads was not executed (W). Specific functional gaps also apply where noted in the related FR."
+    },
+    {
+      "id": "UR-04",
+      "requirement": "Manage/search/deactivate courses",
+      "status": "Partially verified",
+      "evidence": "Related FRs above have backend/test evidence (A/B/J/R); end-user completion across browser login, navigation, forms, feedback and downloads was not executed (W). Specific functional gaps also apply where noted in the related FR."
+    },
+    {
+      "id": "UR-05",
+      "requirement": "Manage/search/deactivate instructors with workload",
+      "status": "Partially verified",
+      "evidence": "Related FRs above have backend/test evidence (A/B/J/R); end-user completion across browser login, navigation, forms, feedback and downloads was not executed (W). Specific functional gaps also apply where noted in the related FR."
+    },
+    {
+      "id": "UR-06",
+      "requirement": "Manage/search/deactivate rooms",
+      "status": "Partially verified",
+      "evidence": "Related FRs above have backend/test evidence (A/B/J/R); end-user completion across browser login, navigation, forms, feedback and downloads was not executed (W). Specific functional gaps also apply where noted in the related FR."
+    },
+    {
+      "id": "UR-07",
+      "requirement": "Manage/search/deactivate batches",
+      "status": "Partially verified",
+      "evidence": "Related FRs above have backend/test evidence (A/B/J/R); end-user completion across browser login, navigation, forms, feedback and downloads was not executed (W). Specific functional gaps also apply where noted in the related FR."
+    },
+    {
+      "id": "UR-08",
+      "requirement": "Define term/working days/grid/blocked slots",
+      "status": "Partially verified",
+      "evidence": "Related FRs above have backend/test evidence (A/B/J/R); end-user completion across browser login, navigation, forms, feedback and downloads was not executed (W). Specific functional gaps also apply where noted in the related FR."
+    },
+    {
+      "id": "UR-09",
+      "requirement": "Assign course/batch/instructor offering per term",
+      "status": "Partially verified",
+      "evidence": "Related FRs above have backend/test evidence (A/B/J/R); end-user completion across browser login, navigation, forms, feedback and downloads was not executed (W). Specific functional gaps also apply where noted in the related FR."
+    },
+    {
+      "id": "UR-10",
+      "requirement": "Faculty own and Coordinator any availability",
+      "status": "Partially verified",
+      "evidence": "Related FRs above have backend/test evidence (A/B/J/R); end-user completion across browser login, navigation, forms, feedback and downloads was not executed (W). Specific functional gaps also apply where noted in the related FR."
+    },
+    {
+      "id": "UR-11",
+      "requirement": "Record student course enrollment including electives/repeats",
+      "status": "Partially verified",
+      "evidence": "Related FRs above have backend/test evidence (A/B/J/R); end-user completion across browser login, navigation, forms, feedback and downloads was not executed (W). Specific functional gaps also apply where noted in the related FR."
+    },
+    {
+      "id": "UR-12",
+      "requirement": "CSV imports with every rejected row explained",
+      "status": "Partially verified",
+      "evidence": "Related FRs above have backend/test evidence (A/B/J/R); end-user completion across browser login, navigation, forms, feedback and downloads was not executed (W). Specific functional gaps also apply where noted in the related FR."
+    },
+    {
+      "id": "UR-13",
+      "requirement": "Optional rules/weights/time limits configuration",
+      "status": "Partially verified",
+      "evidence": "Related FRs above have backend/test evidence (A/B/J/R); end-user completion across browser login, navigation, forms, feedback and downloads was not executed (W). Specific functional gaps also apply where noted in the related FR."
+    },
+    {
+      "id": "UR-14",
+      "requirement": "Define exam sessions and daily exam maximum",
+      "status": "Partially verified",
+      "evidence": "Related FRs above have backend/test evidence (A/B/J/R); end-user completion across browser login, navigation, forms, feedback and downloads was not executed (W). Specific functional gaps also apply where noted in the related FR."
+    },
+    {
+      "id": "UR-15",
+      "requirement": "Generate complete conflict-free weekly timetable",
+      "status": "Partially verified",
+      "evidence": "Related FRs above have backend/test evidence (A/B/J/R); end-user completion across browser login, navigation, forms, feedback and downloads was not executed (W). Specific functional gaps also apply where noted in the related FR."
+    },
+    {
+      "id": "UR-16",
+      "requirement": "Generate all exams with rooms and no student clash",
+      "status": "Partially verified",
+      "evidence": "Related FRs above have backend/test evidence (A/B/J/R); end-user completion across browser login, navigation, forms, feedback and downloads was not executed (W). Specific functional gaps also apply where noted in the related FR."
+    },
+    {
+      "id": "UR-17",
+      "requirement": "Explain conflicting data/rules when no schedule possible",
+      "status": "Partially verified",
+      "evidence": "Related FRs above have backend/test evidence (A/B/J/R); end-user completion across browser login, navigation, forms, feedback and downloads was not executed (W). Specific functional gaps also apply where noted in the related FR."
+    },
+    {
+      "id": "UR-18",
+      "requirement": "Regenerate and retain earlier versions",
+      "status": "Partially verified",
+      "evidence": "Related FRs above have backend/test evidence (A/B/J/R); end-user completion across browser login, navigation, forms, feedback and downloads was not executed (W). Specific functional gaps also apply where noted in the related FR."
+    },
+    {
+      "id": "UR-19",
+      "requirement": "Manual moves with immediate rule warnings",
+      "status": "Partially verified",
+      "evidence": "Related FRs above have backend/test evidence (A/B/J/R); end-user completion across browser login, navigation, forms, feedback and downloads was not executed (W). Specific functional gaps also apply where noted in the related FR."
+    },
+    {
+      "id": "UR-20",
+      "requirement": "Lock sessions across regeneration",
+      "status": "Partially verified",
+      "evidence": "Related FRs above have backend/test evidence (A/B/J/R); end-user completion across browser login, navigation, forms, feedback and downloads was not executed (W). Specific functional gaps also apply where noted in the related FR."
+    },
+    {
+      "id": "UR-21",
+      "requirement": "Approver review/approve/publish",
+      "status": "Partially verified",
+      "evidence": "Related FRs above have backend/test evidence (A/B/J/R); end-user completion across browser login, navigation, forms, feedback and downloads was not executed (W). Specific functional gaps also apply where noted in the related FR."
+    },
+    {
+      "id": "UR-22",
+      "requirement": "Filter timetable by batch/instructor/room/course/day",
+      "status": "Partially verified",
+      "evidence": "Related FRs above have backend/test evidence (A/B/J/R); end-user completion across browser login, navigation, forms, feedback and downloads was not executed (W). Specific functional gaps also apply where noted in the related FR."
+    },
+    {
+      "id": "UR-23",
+      "requirement": "Filter exams by date/batch/course/room",
+      "status": "Partially verified",
+      "evidence": "Related FRs above have backend/test evidence (A/B/J/R); end-user completion across browser login, navigation, forms, feedback and downloads was not executed (W). Specific functional gaps also apply where noted in the related FR."
+    },
+    {
+      "id": "UR-24",
+      "requirement": "Published-only and own default schedules",
+      "status": "Partially verified",
+      "evidence": "Related FRs above have backend/test evidence (A/B/J/R); end-user completion across browser login, navigation, forms, feedback and downloads was not executed (W). Specific functional gaps also apply where noted in the related FR."
+    },
+    {
+      "id": "UR-25",
+      "requirement": "Export current schedule as PDF/CSV",
+      "status": "Partially verified",
+      "evidence": "Related FRs above have backend/test evidence (A/B/J/R); end-user completion across browser login, navigation, forms, feedback and downloads was not executed (W). Specific functional gaps also apply where noted in the related FR."
+    },
+    {
+      "id": "UR-26",
+      "requirement": "Administrator sees trusted who/what/when log",
+      "status": "Partially verified",
+      "evidence": "Related FRs above have backend/test evidence (A/B/J/R); end-user completion across browser login, navigation, forms, feedback and downloads was not executed (W). Specific functional gaps also apply where noted in the related FR."
+    },
+    {
+      "id": "UR-27",
+      "requirement": "Archive older published schedules and view them",
+      "status": "Partially verified",
+      "evidence": "Related FRs above have backend/test evidence (A/B/J/R); end-user completion across browser login, navigation, forms, feedback and downloads was not executed (W). Specific functional gaps also apply where noted in the related FR."
+    },
+    {
+      "id": "UC-01",
+      "requirement": "Log In with role-limited session",
+      "status": "Partially verified",
+      "evidence": "J/B execute backend basic/negative workflow portions; actual complete UI basic/alternative flows, focus and feedback were not executed (W). Consult matching FR rows for known gaps."
+    },
+    {
+      "id": "UC-02",
+      "requirement": "Manage User Accounts",
+      "status": "Partially verified",
+      "evidence": "J/B execute backend basic/negative workflow portions; actual complete UI basic/alternative flows, focus and feedback were not executed (W). Consult matching FR rows for known gaps."
+    },
+    {
+      "id": "UC-03",
+      "requirement": "View Audit Log",
+      "status": "Partially verified",
+      "evidence": "J/B execute backend basic/negative workflow portions; actual complete UI basic/alternative flows, focus and feedback were not executed (W). Consult matching FR rows for known gaps."
+    },
+    {
+      "id": "UC-04",
+      "requirement": "Manage Master Data",
+      "status": "Partially verified",
+      "evidence": "J/B execute backend basic/negative workflow portions; actual complete UI basic/alternative flows, focus and feedback were not executed (W). Consult matching FR rows for known gaps."
+    },
+    {
+      "id": "UC-05",
+      "requirement": "Import CSV and confirm valid rows",
+      "status": "Partially verified",
+      "evidence": "J/B execute backend basic/negative workflow portions; actual complete UI basic/alternative flows, focus and feedback were not executed (W). Consult matching FR rows for known gaps."
+    },
+    {
+      "id": "UC-06",
+      "requirement": "Configure Constraints and save named configs",
+      "status": "Partially verified",
+      "evidence": "J/B execute backend basic/negative workflow portions; actual complete UI basic/alternative flows, focus and feedback were not executed (W). Consult matching FR rows for known gaps."
+    },
+    {
+      "id": "UC-07",
+      "requirement": "Define Exam Sessions",
+      "status": "Partially verified",
+      "evidence": "J/B execute backend basic/negative workflow portions; actual complete UI basic/alternative flows, focus and feedback were not executed (W). Consult matching FR rows for known gaps."
+    },
+    {
+      "id": "UC-08",
+      "requirement": "Generate Timetable new version",
+      "status": "Partially verified",
+      "evidence": "J/B execute backend basic/negative workflow portions; actual complete UI basic/alternative flows, focus and feedback were not executed (W). Consult matching FR rows for known gaps."
+    },
+    {
+      "id": "UC-09",
+      "requirement": "Generate Exam Schedule",
+      "status": "Partially verified",
+      "evidence": "J/B execute backend basic/negative workflow portions; actual complete UI basic/alternative flows, focus and feedback were not executed (W). Consult matching FR rows for known gaps."
+    },
+    {
+      "id": "UC-10",
+      "requirement": "Validate Input Data before generation",
+      "status": "Incorrect",
+      "evidence": "J executes real backend workflow portions with authenticated roles; no browser basic/alternative-flow acceptance (W). UC-10 additionally has wrong input-defect lifecycle (FR-6.1/G03)."
+    },
+    {
+      "id": "UC-11",
+      "requirement": "View Conflict Report",
+      "status": "Partially verified",
+      "evidence": "J/B execute backend basic/negative workflow portions; actual complete UI basic/alternative flows, focus and feedback were not executed (W). Consult matching FR rows for known gaps."
+    },
+    {
+      "id": "UC-12",
+      "requirement": "Manual adjustment/locking with revalidation",
+      "status": "Partially verified",
+      "evidence": "J/B execute backend basic/negative workflow portions; actual complete UI basic/alternative flows, focus and feedback were not executed (W). Consult matching FR rows for known gaps."
+    },
+    {
+      "id": "UC-13",
+      "requirement": "Approve/Publish and archive previous",
+      "status": "Partially verified",
+      "evidence": "J/B execute backend basic/negative workflow portions; actual complete UI basic/alternative flows, focus and feedback were not executed (W). Consult matching FR rows for known gaps."
+    },
+    {
+      "id": "UC-14",
+      "requirement": "View weekly timetable with authorized filters",
+      "status": "Partially verified",
+      "evidence": "J/B execute backend basic/negative workflow portions; actual complete UI basic/alternative flows, focus and feedback were not executed (W). Consult matching FR rows for known gaps."
+    },
+    {
+      "id": "UC-15",
+      "requirement": "View exams with authorized filters",
+      "status": "Partially verified",
+      "evidence": "J/B execute backend basic/negative workflow portions; actual complete UI basic/alternative flows, focus and feedback were not executed (W). Consult matching FR rows for known gaps."
+    },
+    {
+      "id": "UC-16",
+      "requirement": "Download shown PDF/CSV",
+      "status": "Partially verified",
+      "evidence": "J/B execute backend basic/negative workflow portions; actual complete UI basic/alternative flows, focus and feedback were not executed (W). Consult matching FR rows for known gaps."
+    },
+    {
+      "id": "UC-17",
+      "requirement": "Set own/any instructor availability by role",
+      "status": "Partially verified",
+      "evidence": "J/B execute backend basic/negative workflow portions; actual complete UI basic/alternative flows, focus and feedback were not executed (W). Consult matching FR rows for known gaps."
+    },
+    {
+      "id": "H01",
+      "requirement": "Instructor at most one session per slot (mandatory)",
+      "status": "Fully verified",
+      "evidence": "A: tests.test_validator negative case for H01; B: weekly-grid/lab/timetable suites; V independently recomputes actual intervals, references, counts, availability, rooms and workloads on 210 real generated entries. Enabled hard constraints only; no source helper reused by oracle."
+    },
+    {
+      "id": "H02",
+      "requirement": "Room at most one session per slot (mandatory)",
+      "status": "Fully verified",
+      "evidence": "A: tests.test_validator negative case for H02; B: weekly-grid/lab/timetable suites; V independently recomputes actual intervals, references, counts, availability, rooms and workloads on 210 real generated entries. Enabled hard constraints only; no source helper reused by oracle."
+    },
+    {
+      "id": "H03",
+      "requirement": "Batch at most one session per slot (mandatory)",
+      "status": "Fully verified",
+      "evidence": "A: tests.test_validator negative case for H03; B: weekly-grid/lab/timetable suites; V independently recomputes actual intervals, references, counts, availability, rooms and workloads on 210 real generated entries. Enabled hard constraints only; no source helper reused by oracle."
+    },
+    {
+      "id": "H04",
+      "requirement": "Room capacity at least offering enrolled count",
+      "status": "Fully verified",
+      "evidence": "A: tests.test_validator negative case for H04; B: weekly-grid/lab/timetable suites; V independently recomputes actual intervals, references, counts, availability, rooms and workloads on 210 real generated entries. Enabled hard constraints only; no source helper reused by oracle."
+    },
+    {
+      "id": "H05",
+      "requirement": "Labs in Lab rooms and lectures in Lecture rooms",
+      "status": "Fully verified",
+      "evidence": "A: tests.test_validator negative case for H05; B: weekly-grid/lab/timetable suites; V independently recomputes actual intervals, references, counts, availability, rooms and workloads on 210 real generated entries. Enabled hard constraints only; no source helper reused by oracle."
+    },
+    {
+      "id": "H06",
+      "requirement": "No teaching in instructor unavailable slot",
+      "status": "Fully verified",
+      "evidence": "A: tests.test_validator negative case for H06; B: weekly-grid/lab/timetable suites; V independently recomputes actual intervals, references, counts, availability, rooms and workloads on 210 real generated entries. Enabled hard constraints only; no source helper reused by oracle."
+    },
+    {
+      "id": "H07",
+      "requirement": "No sessions in blocked slots",
+      "status": "Fully verified",
+      "evidence": "A: tests.test_validator negative case for H07; B: weekly-grid/lab/timetable suites; V independently recomputes actual intervals, references, counts, availability, rooms and workloads on 210 real generated entries. Enabled hard constraints only; no source helper reused by oracle."
+    },
+    {
+      "id": "H08",
+      "requirement": "Exact lecture and lab session counts per offering (mandatory)",
+      "status": "Fully verified",
+      "evidence": "A: tests.test_validator negative case for H08; B: weekly-grid/lab/timetable suites; V independently recomputes actual intervals, references, counts, availability, rooms and workloads on 210 real generated entries. Enabled hard constraints only; no source helper reused by oracle."
+    },
+    {
+      "id": "H09",
+      "requirement": "Lab consecutive clock slots on one day and one room",
+      "status": "Fully verified",
+      "evidence": "A: tests.test_validator negative case for H09; B: weekly-grid/lab/timetable suites; V independently recomputes actual intervals, references, counts, availability, rooms and workloads on 210 real generated entries. Enabled hard constraints only; no source helper reused by oracle."
+    },
+    {
+      "id": "H10",
+      "requirement": "Daily and weekly instructor teaching hours respected",
+      "status": "Fully verified",
+      "evidence": "A: tests.test_validator negative case for H10; B: weekly-grid/lab/timetable suites; V independently recomputes actual intervals, references, counts, availability, rooms and workloads on 210 real generated entries. Enabled hard constraints only; no source helper reused by oracle."
+    },
+    {
+      "id": "S01",
+      "requirement": "Minimize idle batch gaps",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_timetable_solver dedicated S01 expected-placement/objective tests and zero-weight/disabled/hard-priority cases; S05 additionally has real API test_batch1_generation previous-unlocked/locked/absent-history cases. This verifies soft preference behavior on fixtures, not universal optimality."
+    },
+    {
+      "id": "S02",
+      "requirement": "Spread offering sessions over days",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_timetable_solver dedicated S02 expected-placement/objective tests and zero-weight/disabled/hard-priority cases; S05 additionally has real API test_batch1_generation previous-unlocked/locked/absent-history cases. This verifies soft preference behavior on fixtures, not universal optimality."
+    },
+    {
+      "id": "S03",
+      "requirement": "Prefer at most configured batch sessions per day",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_timetable_solver dedicated S03 expected-placement/objective tests and zero-weight/disabled/hard-priority cases; S05 additionally has real API test_batch1_generation previous-unlocked/locked/absent-history cases. This verifies soft preference behavior on fixtures, not universal optimality."
+    },
+    {
+      "id": "S04",
+      "requirement": "Prefer at most configured consecutive instructor slots",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_timetable_solver dedicated S04 expected-placement/objective tests and zero-weight/disabled/hard-priority cases; S05 additionally has real API test_batch1_generation previous-unlocked/locked/absent-history cases. This verifies soft preference behavior on fixtures, not universal optimality."
+    },
+    {
+      "id": "S05",
+      "requirement": "Prefer prior version slot and room",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_timetable_solver dedicated S05 expected-placement/objective tests and zero-weight/disabled/hard-priority cases; S05 additionally has real API test_batch1_generation previous-unlocked/locked/absent-history cases. This verifies soft preference behavior on fixtures, not universal optimality."
+    },
+    {
+      "id": "S06",
+      "requirement": "Prefer smallest fitting room",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_timetable_solver dedicated S06 expected-placement/objective tests and zero-weight/disabled/hard-priority cases; S05 additionally has real API test_batch1_generation previous-unlocked/locked/absent-history cases. This verifies soft preference behavior on fixtures, not universal optimality."
+    },
+    {
+      "id": "E01",
+      "requirement": "Shared-student courses use different sessions (mandatory)",
+      "status": "Fully verified",
+      "evidence": "A: tests.test_validator negative case for E01; B: membership/exam suites; J/V independently check actual exam intervals, explicit shared students, daily limits, room capacity/seats, exclusive rooms and complete course counts. Reference 80-course completion failed separately (P-3)."
+    },
+    {
+      "id": "E02",
+      "requirement": "Daily student exam count <= configured maximum",
+      "status": "Fully verified",
+      "evidence": "A: tests.test_validator negative case for E02; B: membership/exam suites; J/V independently check actual exam intervals, explicit shared students, daily limits, room capacity/seats, exclusive rooms and complete course counts. Reference 80-course completion failed separately (P-3)."
+    },
+    {
+      "id": "E03",
+      "requirement": "Exact seats equal students and do not exceed capacity",
+      "status": "Fully verified",
+      "evidence": "A: tests.test_validator negative case for E03; B: membership/exam suites; J/V independently check actual exam intervals, explicit shared students, daily limits, room capacity/seats, exclusive rooms and complete course counts. Reference 80-course completion failed separately (P-3)."
+    },
+    {
+      "id": "E04",
+      "requirement": "Room used by at most one exam per session (mandatory)",
+      "status": "Fully verified",
+      "evidence": "A: tests.test_validator negative case for E04; B: membership/exam suites; J/V independently check actual exam intervals, explicit shared students, daily limits, room capacity/seats, exclusive rooms and complete course counts. Reference 80-course completion failed separately (P-3)."
+    },
+    {
+      "id": "E05",
+      "requirement": "Each required course exactly one valid exam session (mandatory)",
+      "status": "Fully verified",
+      "evidence": "A: tests.test_validator negative case for E05; B: membership/exam suites; J/V independently check actual exam intervals, explicit shared students, daily limits, room capacity/seats, exclusive rooms and complete course counts. Reference 80-course completion failed separately (P-3)."
+    },
+    {
+      "id": "ES01",
+      "requirement": "Spread one batch exams across days",
+      "status": "Partially verified",
+      "evidence": "O/J: distinct-day alternative has zero hard violations and improves the only positive soft preference; returned DSATUR result is nevertheless labelled optimal. Preference tests exist (B); complete API optimization guarantee is unproven."
+    },
+    {
+      "id": "ES02",
+      "requirement": "Minimize rooms per exam",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_exam_scheduler dedicated room-count and same-building expected-result cases; engine/exam_scheduler.py allocation preferences. These are preferences, not mathematical optimality claims."
+    },
+    {
+      "id": "ES03",
+      "requirement": "Keep rooms for one exam in same building",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_exam_scheduler dedicated room-count and same-building expected-result cases; engine/exam_scheduler.py allocation preferences. These are preferences, not mathematical optimality claims."
+    },
+    {
+      "id": "P-1",
+      "requirement": "95% ordinary requests <=2s with50 concurrent users",
+      "status": "Incorrect",
+      "evidence": "R: 50 distinct authenticated users, four waves, 200/200 HTTP200; p95 12.239s exceeds <=2s. Single local Windows/SQLite instance, real published own-batch schedule read."
+    },
+    {
+      "id": "P-2",
+      "requirement": "Reference timetable within configured limit; typical <=60s",
+      "status": "Partially verified",
+      "evidence": "R: default-weight feasible reference input times out at 120.348s with no schedule. Zero-soft diagnostic generates in 91.387s (<120 but >typical60). One sample cannot establish typical performance; default soft workload not accepted."
+    },
+    {
+      "id": "P-3",
+      "requirement": "Reference exam generation <=30s",
+      "status": "Incorrect",
+      "evidence": "R: 80-course reference exam timed out without a schedule at 30.225s default and 30.273s zero-soft. V supplies a hard-feasible independent witness; timeout is not a proof of infeasibility."
+    },
+    {
+      "id": "P-4",
+      "requirement": "Manual move validation <=1s",
+      "status": "Partially verified",
+      "evidence": "J: small actual move works. R: reference lock-only validation 0.483s; full physical multi-slot move at reference size not measured."
+    },
+    {
+      "id": "P-5",
+      "requirement": "Validate/import5000 rows <=15s",
+      "status": "Fully verified",
+      "evidence": "R/L: buffered-instrumentation real preview+confirmation of 5,000 courses=4.008s and 5,000 enrollment rows=8.355s, all persisted; <=15s. Initial synchronous per-query logging trial=15.803s is retained as perturbed diagnostic, not a passing run."
+    },
+    {
+      "id": "P-6",
+      "requirement": "Single export<=5s; all-batch PDF<=30s",
+      "status": "Partially verified",
+      "evidence": "R/F: reference timetable CSV .225s, PDF .771s, 30-batch PDF .900s meet targets. Tiny real exam exports inspected, but reference 80-course exam export unavailable because generation timed out."
+    },
+    {
+      "id": "P-7",
+      "requirement": "Schedule-view queries <=500ms reference size",
+      "status": "Partially verified",
+      "evidence": "R: 100 indexed schedule-entry lookups p95 .996ms/max6.959ms. Not all SQL statements behind every schedule view or PostgreSQL plans were measured."
+    },
+    {
+      "id": "P-8",
+      "requirement": "Generation isolation worker process; other requests slowdown<=20%",
+      "status": "Partially verified",
+      "evidence": "R: separate actual solver process; paired 30-read trial mean slowdown18.84% but p95 slowdown27.57%. SRS aggregation is unspecified; no unconditional <=20% acceptance claimed."
+    },
+    {
+      "id": "SAF-1",
+      "requirement": "Never publish a hard-invalid schedule; independent validator gate",
+      "status": "Fully verified",
+      "evidence": "B: integrity, cancellation/concurrency/publication/rollback negatives; J/R: stale publication 409, real worker cancellation leaves zero entries and earlier version intact. Independent validator and fenced atomic save remain enforced."
+    },
+    {
+      "id": "SAF-2",
+      "requirement": "Failed/cancelled/timed-out generation leaves prior schedules unchanged; atomic result save",
+      "status": "Fully verified",
+      "evidence": "B: integrity, cancellation/concurrency/publication/rollback negatives; J/R: stale publication 409, real worker cancellation leaves zero entries and earlier version intact. Independent validator and fenced atomic save remain enforced."
+    },
+    {
+      "id": "SAF-3",
+      "requirement": "Confirm destructive changes and explain consequence",
+      "status": "Partially verified",
+      "evidence": "Confirmation components/source exist; destructive/irreversible consequence wording and keyboard confirmation were not browser-tested (W)."
+    },
+    {
+      "id": "SAF-4",
+      "requirement": "Published schedule immutable; changes require new validated approved version",
+      "status": "Partially verified",
+      "evidence": "B/J/R prove modern snapshots immutable across room edits/restarts and Published/Archived direct edits denied. Legacy versions lacking recoverable original context remain unverified; no automatic rewrite was attempted (G08)."
+    },
+    {
+      "id": "SAF-5",
+      "requirement": "Daily automatic backups; retain7; prove restore of all data",
+      "status": "Not verified",
+      "evidence": "No daily/7-retention operational backup scheduler or completed restore drill was executed. Installation guidance alone is insufficient operational evidence."
+    },
+    {
+      "id": "SAF-6",
+      "requirement": "Retain older versions for rollback",
+      "status": "Partially verified",
+      "evidence": "J/B retain and read history; restoring an older Published version through a reviewed new version is not a complete demonstrated workflow; legacy original inputs may be unavailable."
+    },
+    {
+      "id": "SEC-1",
+      "requirement": "Login before every application function; passwords>=8",
+      "status": "Fully verified",
+      "evidence": "A: 37 fresh authentication/session/forgery/inactive/lockout/role tests. B/J: real account and role workflows; no password/token values copied into audit outputs. Public login/docs are intentional entrypoints, not protected business functions."
+    },
+    {
+      "id": "SEC-2",
+      "requirement": "Only salted slow bcrypt>=12 hashes; never log/return passwords",
+      "status": "Fully verified",
+      "evidence": "A: 37 fresh authentication/session/forgery/inactive/lockout/role tests. B/J: real account and role workflows; no password/token values copied into audit outputs. Public login/docs are intentional entrypoints, not protected business functions."
+    },
+    {
+      "id": "SEC-3",
+      "requirement": "Server RBAC every request",
+      "status": "Fully verified",
+      "evidence": "A: 37 fresh authentication/session/forgery/inactive/lockout/role tests. B/J: real account and role workflows; no password/token values copied into audit outputs. Public login/docs are intentional entrypoints, not protected business functions."
+    },
+    {
+      "id": "SEC-4",
+      "requirement": "30-minute inactivity timeout;5-failure15-minute lock",
+      "status": "Fully verified",
+      "evidence": "A: 37 fresh authentication/session/forgery/inactive/lockout/role tests. B/J: real account and role workflows; no password/token values copied into audit outputs. Public login/docs are intentional entrypoints, not protected business functions."
+    },
+    {
+      "id": "SEC-5",
+      "requirement": "HTTPS TLS>=1.2; refuse/redirect HTTP",
+      "status": "Not verified",
+      "evidence": "Local disposable server used HTTP only. Production TLS>=1.2, redirect/refusal, proxy/header/cookie settings and certificates were not tested."
+    },
+    {
+      "id": "SEC-6",
+      "requirement": "Server validation; parameterized ORM; escape rendered text",
+      "status": "Partially verified",
+      "evidence": "A/B verify many malformed values/ORM transactions; malformed instructor email is accepted (R). Browser escaping/injection acceptance was not executed (W)."
+    },
+    {
+      "id": "SEC-7",
+      "requirement": "CSV-only<=10MB; parse as data; outside web root",
+      "status": "Fully verified",
+      "evidence": "B: tests.test_batch2_imports file-size/type/encoding/staging ownership cases; J/R/L real UTF-8 CSV parsed as data and staged in relational storage, not executable/public uploads."
+    },
+    {
+      "id": "SEC-8",
+      "requirement": "Least-privilege DB account; env-supplied secrets",
+      "status": "Partially verified",
+      "evidence": "A verifies no fallback secret; fixture supplies random settings without loading production credentials. PostgreSQL restricted grants and deployment secret management were not exercised."
+    },
+    {
+      "id": "SEC-9",
+      "requirement": "Immutable trusted security audit",
+      "status": "Partially verified",
+      "evidence": "A/B/M verify immutable actor-attributed security logs and denied modifications. Required action completeness has conflict-export gap (FR-12.1); PostgreSQL triggers unexecuted."
+    },
+    {
+      "id": "SEC-10",
+      "requirement": "Minimal personal data; Students own-batch Published; Faculty Published only",
+      "status": "Fully verified",
+      "evidence": "A/B/J/R: trusted linked identity, own-batch/own-instructor Published filtering and cross-scope403; account password hashes never returned. Personal fields match scheduling purpose in inspected schema."
+    },
+    {
+      "id": "DB-1",
+      "requirement": "All business data relational with21 tables; none only in files",
+      "status": "Fully verified",
+      "evidence": "B/M/X: relational models cover all 21 SRS business tables plus seven supporting tables; real imports, snapshots, runs, approvals/history persist in SQLite across client/application restart (J). Exports/guides are derived files, not sole business storage."
+    },
+    {
+      "id": "DB-2",
+      "requirement": "3NF except justified instructor/batch copies with clash enforcement",
+      "status": "Partially verified",
+      "evidence": "Relational decomposition/composite assignment FK inspected (B/X); no exhaustive functional-dependency/3NF proof or PostgreSQL enforcement run. Snapshot JSON is a deliberate versioned archival denormalization requiring documented exception."
+    },
+    {
+      "id": "DB-3",
+      "requirement": "Integer surrogate PKs and enforced relationships",
+      "status": "Partially verified",
+      "evidence": "B/M verify integer business PKs and enforced FKs. Supporting import_stages uses VARCHAR(64) nonce PK; literal all-tables integer-key clause needs an accepted exception (X)."
+    },
+    {
+      "id": "DB-4",
+      "requirement": "DB NOT NULL/UNIQUE/CHECK rules beyond app validation",
+      "status": "Partially verified",
+      "evidence": "B/M exercise CHECK/UNIQUE/NOT NULL/FK negatives in SQLite. Full every-column parity and PostgreSQL constraints were not executed."
+    },
+    {
+      "id": "DB-5",
+      "requirement": "No deletion of referenced records; append-only logs",
+      "status": "Partially verified",
+      "evidence": "B/M prove referenced deletion and append-only log guards. Referenced offerings lack the required deactivation alternative (FR-2.11); PG behavior unexecuted."
+    },
+    {
+      "id": "DB-6",
+      "requirement": "Generation result saved atomically",
+      "status": "Fully verified",
+      "evidence": "B: failed save/validation/cancellation/concurrent version tests; M: transactional migration rollback. J/R: authoritative entries/receipt commit together, cancelled result has zero entries."
+    },
+    {
+      "id": "DB-7",
+      "requirement": "Index every FK and schedule/slot/room/instructor lookups",
+      "status": "Partially verified",
+      "evidence": "M/X inspect FK/schedule indexes; R confirms actual indexed lookup. Composite offering FK has individual component indexes, not a matching full composite index; do not infer an unindexed FK from that alone. All-view/PG performance unverified."
+    },
+    {
+      "id": "DB-8",
+      "requirement": "UTF8; event timestampsUTC displayed Asia/Karachi",
+      "status": "Partially verified",
+      "evidence": "D verifies frontend Asia/Karachi formatter; real UTF-8 CSV accepted. F shows human-readable PDF generated-at footer in UTC, not specified Asia/Karachi; complex-script shaping remains untested."
+    },
+    {
+      "id": "DB-9",
+      "requirement": "Schema only through versioned migrations; PG/SQLite equivalent",
+      "status": "Partially verified",
+      "evidence": "M: seven disposable SQLite upgrade/idempotency/rollback cases across001-005. ORM create_all also exists; real upgraded PostgreSQL and deployment migration-only policy are unverified."
+    },
+    {
+      "id": "C-1",
+      "requirement": "Python OR-Tools/NetworkX; React/Tailwind; open-source components",
+      "status": "Fully verified",
+      "evidence": "Inspected requirements/lock/package files and actual B/J/R executions use Python, OR-Tools CP-SAT, NetworkX, FastAPI/SQLAlchemy, React and Tailwind; no substitute solver or mock scheduling results used."
+    },
+    {
+      "id": "C-2",
+      "requirement": "All functions REST/JSON overHTTPS; no frontend business rules",
+      "status": "Partially verified",
+      "evidence": "J/R prove REST/JSON authority and real downloads; production HTTPS unverified (SEC-5), and client conflict export has no authoritative export event."
+    },
+    {
+      "id": "C-3",
+      "requirement": "Relational storage via ORM; same code PostgreSQL/SQLite",
+      "status": "Partially verified",
+      "evidence": "Windows SQLite executed; SQLAlchemy/dialect migrations present. Linux/PostgreSQL compatibility is source-supported only, not executed."
+    },
+    {
+      "id": "C-4",
+      "requirement": "Every generation run bounded by configured limit default 120s",
+      "status": "Fully verified",
+      "evidence": "B: shared end-to-end deadline/cancellation races/startup tests; R observes terminal TimedOut with no valid result. Measured ~0.2-0.35s polling/cleanup overhead is reported; no late result saved."
+    },
+    {
+      "id": "C-5",
+      "requirement": "Salted hashes/encrypted traffic/every API authorized",
+      "status": "Partially verified",
+      "evidence": "A verifies salted hashes and protected API authorization. Encrypted production traffic was not verified (SEC-5)."
+    },
+    {
+      "id": "C-6",
+      "requirement": "Equal fixed weekly slots; whole sessions; consecutive labs",
+      "status": "Fully verified",
+      "evidence": "B: 87 weekly-grid and45 lab regressions; A/V: actual clock-time continuity, equal duration, no malformed/cross-midnight slot acceptance and whole-session counts."
+    },
+    {
+      "id": "C-7",
+      "requirement": "Four-student semester delivery using free tools",
+      "status": "Not verified",
+      "evidence": "Team composition, semester delivery and complete free-tool/licensing history are external project facts not independently verified."
+    },
+    {
+      "id": "C-8",
+      "requirement": "LaTeX SRS; UML2; specified requirement IDs",
+      "status": "Partially verified",
+      "evidence": "Existing62-page SRS and UML/requirement inventory inspected; complete original LaTeX build/UML2 validation was not reproduced."
+    },
+    {
+      "id": "C-9",
+      "requirement": "Current Chrome/Firefox/Edge/Safari without plugins",
+      "status": "Not verified",
+      "evidence": "W: no actual Chrome/Firefox/Edge/Safari run; no cross-browser acceptance evidence."
+    },
+    {
+      "id": "Q-01",
+      "requirement": "Correctness: independent validation; zero hard violations incl reference-size case; one negative test per H/E",
+      "status": "Partially verified",
+      "evidence": "A supplies one negative for every H/E; V validates real reference timetable and tiny exams. No completed reference-size application exam output; independent witness is not an app output."
+    },
+    {
+      "id": "Q-02",
+      "requirement": "Reliability:99% valid runs; failure explanations; restart interrupted recovery",
+      "status": "Partially verified",
+      "evidence": "B verifies startup recovery/idempotency and safe failures. No statistically defined99% valid-run campaign; reference workloads timed out and heuristic optimal metadata is incorrect."
+    },
+    {
+      "id": "Q-03",
+      "requirement": "Availability99%08:00-18:00 working days per month",
+      "status": "Not verified",
+      "evidence": "No month-long08:00-18:00 uptime measurements or deployment monitoring supplied."
+    },
+    {
+      "id": "Q-04",
+      "requirement": "Usability:<15min import-to-generation; own view<=2clicks; useful errors; AA contrast",
+      "status": "Partially verified",
+      "evidence": "Useful backend errors and role defaults verified (A/B/J). <15min novice task, <=2click own view and WCAG contrast were not measured with real users/browser."
+    },
+    {
+      "id": "Q-05",
+      "requirement": "Maintainability:constraint interfaces/layers/config/exporter;>=70% coverage; pinned dependencies",
+      "status": "Partially verified",
+      "evidence": "Layered modules/constraint tests exist (B); >=70%engine line coverage not measured; full exporter/constraint extensibility and pinned-environment acceptance not independently demonstrated."
+    },
+    {
+      "id": "Q-06",
+      "requirement": "Portability:Linux/Windows; PG/SQLite tests; four browsers; one-command packaging",
+      "status": "Partially verified",
+      "evidence": "WindowsSQLite/frontend build executed. Linux, PostgreSQL, four browsers and one-command production packaging were not verified."
+    },
+    {
+      "id": "Q-07",
+      "requirement": "Testability:repeatable seed/sample expected results/traceability",
+      "status": "Partially verified",
+      "evidence": "B has deterministic-seed and expected fixtures; this report supplies traceability. Repeatability under different hardware/deadline search outcomes and every SRS UI scenario remains unverified."
+    },
+    {
+      "id": "Q-08",
+      "requirement": "Interoperability:UTF8 CSV,JSON/OpenAPI,PDF",
+      "status": "Fully verified",
+      "evidence": "J/R/F/X: genuine UTF-8 CSV import/export, JSON APIs, generated OpenAPI (HTTP200/51 paths), binary PDF content and independently inspected pages."
+    },
+    {
+      "id": "Q-09",
+      "requirement": "Adaptability:new term/data/rules without code; retain usable configs",
+      "status": "Partially verified",
+      "evidence": "J/B persist new terms/data/configs. Per-term week-start absent; referenced offering reassignment refused (X); future-course/assignment adaptation needs review."
+    },
+    {
+      "id": "Q-10",
+      "requirement": "Flexibility:new rule/exporter/role with localized changes",
+      "status": "Partially verified",
+      "evidence": "Constraint interface/unit extensions exist; adding a role/exporter still touches catalogues/routes/UI. Full localized-change extensibility was not demonstrated."
+    },
+    {
+      "id": "Q-11",
+      "requirement": "Robustness:bad rows isolated; invalid input explanatory; cancelled/timeouts safe",
+      "status": "Partially verified",
+      "evidence": "A/B/J safe rollback/invalid rows/cancellation proven. G02/G03/email/timeout explanation and browser feedback gaps prevent full robustness acceptance."
+    },
+    {
+      "id": "Q-12",
+      "requirement": "Reusability:engine/validator/CSV independent web layer; schema/templates documented",
+      "status": "Partially verified",
+      "evidence": "Engine/validator run independently of HTTP and documented schema/templates exist (B/D). Whole CSV subsystem depends on DB/role context; reuse/adoption by another institution was not executed."
+    },
+    {
+      "id": "Q-13",
+      "requirement": "Scalability:double reference offerings/rooms without redesign, within configurable limit",
+      "status": "Not verified",
+      "evidence": "No double-reference300-offering/120-room scalability run executed; reference exam already fails completion target."
+    },
+    {
+      "id": "UI-01",
+      "requirement": "Shared layout; primary colored right action and adjacent Cancel",
+      "status": "Partially verified",
+      "evidence": "Shared components, error IDs, confirmation/pagination and labels inspected; D verifies selected SSR error/resource output. Every form, contrast/icon/status/focus/keyboard behavior not browser-tested (W)."
+    },
+    {
+      "id": "UI-02",
+      "requirement": "Destructive/irreversible actions require confirmation",
+      "status": "Partially verified",
+      "evidence": "Shared components, error IDs, confirmation/pagination and labels inspected; D verifies selected SSR error/resource output. Every form, contrast/icon/status/focus/keyboard behavior not browser-tested (W)."
+    },
+    {
+      "id": "UI-03",
+      "requirement": "Red field errors plus top-of-form summary",
+      "status": "Partially verified",
+      "evidence": "Shared components, error IDs, confirmation/pagination and labels inspected; D verifies selected SSR error/resource output. Every form, contrast/icon/status/focus/keyboard behavior not browser-tested (W)."
+    },
+    {
+      "id": "UI-04",
+      "requirement": "Fixed status area; icon plus color for success/warning/error",
+      "status": "Partially verified",
+      "evidence": "Shared components, error IDs, confirmation/pagination and labels inspected; D verifies selected SSR error/resource output. Every form, contrast/icon/status/focus/keyboard behavior not browser-tested (W)."
+    },
+    {
+      "id": "UI-05",
+      "requirement": "Default25-row table pagination",
+      "status": "Partially verified",
+      "evidence": "Shared components, error IDs, confirmation/pagination and labels inspected; D verifies selected SSR error/resource output. Every form, contrast/icon/status/focus/keyboard behavior not browser-tested (W)."
+    },
+    {
+      "id": "UI-06",
+      "requirement": "Text/background WCAG2.1AA contrast",
+      "status": "Not verified",
+      "evidence": "W: browser startup unavailable; no measured contrast ratios or360px rendered interaction/overflow acceptance."
+    },
+    {
+      "id": "UI-07",
+      "requirement": "Visible label and tooltip for every form field",
+      "status": "Partially verified",
+      "evidence": "Shared components, error IDs, confirmation/pagination and labels inspected; D verifies selected SSR error/resource output. Every form, contrast/icon/status/focus/keyboard behavior not browser-tested (W)."
+    },
+    {
+      "id": "UI-08",
+      "requirement": "Responsive from360px",
+      "status": "Not verified",
+      "evidence": "W: browser startup unavailable; no measured contrast ratios or360px rendered interaction/overflow acceptance."
+    },
+    {
+      "id": "DOC-01",
+      "requirement": "Role-based user manual PDF with screenshots/tasks",
+      "status": "Partially verified",
+      "evidence": "D: role-based five-page PDF exists. Screenshot-based task manual remains explicitly incomplete; frontend/public/help/user-manual.pdf."
+    },
+    {
+      "id": "DOC-02",
+      "requirement": "Tooltips per form field and help page per screen",
+      "status": "Partially verified",
+      "evidence": "D: role-specific help exists and selected field labels/tooltips tested. Every-field/every-screen tooltip/help coverage and browser discoverability remain incomplete."
+    },
+    {
+      "id": "DOC-03",
+      "requirement": "CSV templates with sample rows and field-by-field explanations",
+      "status": "Fully verified",
+      "evidence": "D/B: six CSV example files and csv-fields.md, two-page quick-start.pdf and installation.md/installation.pdf inspected; baseline tests.test_batch4_documentation verifies packaged documentation. Documentation presence is not deployment verification."
+    },
+    {
+      "id": "DOC-04",
+      "requirement": "Two-page quick-start guide data entry through publication",
+      "status": "Fully verified",
+      "evidence": "D/B: six CSV example files and csv-fields.md, two-page quick-start.pdf and installation.md/installation.pdf inspected; baseline tests.test_batch4_documentation verifies packaged documentation. Documentation presence is not deployment verification."
+    },
+    {
+      "id": "DOC-05",
+      "requirement": "Installation and administration guide",
+      "status": "Fully verified",
+      "evidence": "D/B: six CSV example files and csv-fields.md, two-page quick-start.pdf and installation.md/installation.pdf inspected; baseline tests.test_batch4_documentation verifies packaged documentation. Documentation presence is not deployment verification."
+    },
+    {
+      "id": "DOC-06",
+      "requirement": "Interactive OpenAPI documentation",
+      "status": "Partially verified",
+      "evidence": "X: /openapi.json and /docs HTTP200,51 resource paths; interactive Swagger authorization/try-it-out not exercised in browser (W)."
+    },
+    {
+      "id": "IF-01",
+      "requirement": "Standard browser input and OS printing; no special hardware",
+      "status": "Partially verified",
+      "evidence": "Ordinary HTML/REST/download design; no special hardware apparent. Browser input/OS printing workflow not actually executed (W)."
+    },
+    {
+      "id": "IF-02",
+      "requirement": "Separate solver worker process; OS files/environment/log interfaces",
+      "status": "Fully verified",
+      "evidence": "B/J/R: actual spawned worker processes, cancellation and files/DB/environment integration exercised on Windows. Reference workers are genuine CP-SAT/DSATUR executions."
+    },
+    {
+      "id": "IF-03",
+      "requirement": "TLS1.2 JSON/JWT; multipart CSV<=10MB; correct file content types",
+      "status": "Partially verified",
+      "evidence": "J/R/F verify JSON/JWT, multipart CSV and PDF/CSV MIME. TLS1.2 production channel is unverified (SEC-5)."
+    },
+    {
+      "id": "IF-04",
+      "requirement": "Browser polls generation status every2seconds",
+      "status": "Partially verified",
+      "evidence": "frontend/src polling source uses2s. No browser network trace confirms actual polling/lifecycle behavior (W)."
+    },
+    {
+      "id": "IF-05",
+      "requirement": "Table9 REST resource coverage",
+      "status": "Fully verified",
+      "evidence": "X/B/J: OpenAPI resource inventory and real calls cover SRS Table9 login/master/availability/config/import/generation/status/entries/conflicts/publish/archive/export/audit;51 paths. Draft/preflight gaps assessed separately, not hidden as REST coverage."
+    },
+    {
+      "id": "LEGAL-01",
+      "requirement": "SRS5.2:university privacy rules; only scheduling PII; licence notices delivered",
+      "status": "Partially verified",
+      "evidence": "Inspected minimal scheduling PII and open-source dependencies. University privacy-policy signoff, complete delivered third-party licence notices and operational compliance were not verified."
+    },
+    {
+      "id": "I18N-01",
+      "requirement": "SRS5.3:English/UTF8 Urdu-ready strings separated;24h Asia/Karachi; configurable first weekday",
+      "status": "Partially verified",
+      "evidence": "D: UTF-8/English resources and Karachi frontend formatting. Source scan finds447 static JSX display nodes/attributes outside resources across21 files (not447 unique phrases); week-start field absent; PDF footerUTC; Urdu shaping unverified."
+    },
+    {
+      "id": "REUSE-01",
+      "requirement": "SRS5.4:independent engine/constraints; adoptable schema and CSV template documentation",
+      "status": "Partially verified",
+      "evidence": "B/D: independent engine/constraint modules and schema/templates documented. Complete external adoption, full web-independent import reuse and deployment were not executed."
+    }
+  ]
+}

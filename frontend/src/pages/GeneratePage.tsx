@@ -54,11 +54,12 @@ export function GeneratePage({ onNavigate, onStatus }: { onNavigate: (path: stri
     }
   }
 
-  const cancel = () => {
+  const cancel = async () => {
     if (!run) return
-    cancelGeneration(run.run_id)
-    void poll(run.run_id)
-    onStatus('Stopped following the run. No schedule was published.')
+    try {
+      await cancelGeneration(run.run_id)
+      await poll(run.run_id)
+    } catch (reason) { setError(errorMessage(reason)) }
   }
 
   const reset = () => { stopPolling(); setConfig({ term_id: '', schedule_type: 'Timetable', time_limit: 120 }); setConfigId(''); setRun(null); setError(''); setPollError('') }
@@ -74,7 +75,7 @@ export function GeneratePage({ onNavigate, onStatus }: { onNavigate: (path: stri
           <SelectField label="Term" value={termId} onChange={(value) => { setConfig((current) => ({ ...current, term_id: value })); setConfigId('') }} options={(terms.data ?? []).map((term) => ({ value: term.term_id, label: `${term.label}${term.status === 'Active' ? ' (active)' : ''}` }))} hint="Schedules are generated against one academic term." id="term" />
           <SelectField label="Schedule type" value={type} onChange={(value) => { setConfig((current) => ({ ...current, schedule_type: value as ScheduleType })); setConfigId('') }} options={[{ value: 'Timetable', label: 'Timetable' }, { value: 'Exam schedule', label: 'Exam schedule' }]} hint="Choose the record that the solver should produce." id="schedule-type" />
           <SelectField label="Configuration" value={configId} onChange={(value) => { setConfigId(value); const chosen = configs.data?.find((item) => item.config_id === value); if (chosen) setConfig((current) => ({ ...current, time_limit: chosen.solver_time_limit_s })) }} options={[{ value: '', label: 'Server default for this term' }, ...(configs.data ?? []).map((item) => ({ value: item.config_id, label: item.name }))]} hint="Constraint set, weights and solver settings. Manage them in Settings." id="config" />
-          <Field label="Time limit" htmlFor="time-limit" hint={`Allowed range: ${MIN_LIMIT}–${MAX_LIMIT} seconds. Default is 120 seconds.`} error={limitInvalid ? `Enter a whole number from ${MIN_LIMIT} to ${MAX_LIMIT}.` : undefined}><div className="input-with-suffix"><input id="time-limit" className="tabular" type="number" min={MIN_LIMIT} max={MAX_LIMIT} value={config.time_limit} aria-invalid={limitInvalid} onChange={(event) => setConfig((current) => ({ ...current, time_limit: Number(event.target.value) }))} /><span>seconds</span></div></Field>
+          <Field label="Time limit" htmlFor="time-limit" hint={`Allowed range: ${MIN_LIMIT}–${MAX_LIMIT} seconds. Default is 120 seconds.`} error={limitInvalid ? `Enter a whole number from ${MIN_LIMIT} to ${MAX_LIMIT}.` : undefined}><div className="input-with-suffix"><input id="time-limit" className="tabular" type="number" min={MIN_LIMIT} max={MAX_LIMIT} value={config.time_limit} aria-invalid={limitInvalid} aria-describedby={limitInvalid ? "time-limit-error" : "time-limit-hint"} onChange={(event) => setConfig((current) => ({ ...current, time_limit: Number(event.target.value) }))} /><span>seconds</span></div></Field>
         </div>
         <div className="form-actions"><Button variant="secondary" icon={RotateCcw} onClick={reset}>Reset</Button><Button variant="secondary" icon={XCircle} onClick={cancel} disabled={!generating}>Cancel</Button><Button icon={Play} onClick={start} disabled={generating}>{generating ? 'Generating…' : 'Generate schedule'}</Button></div></Card>
         <div className="generation-side">
@@ -84,11 +85,11 @@ export function GeneratePage({ onNavigate, onStatus }: { onNavigate: (path: stri
             <div><span className="guidance-number">03</span><span><strong>Review before publish</strong><small>Generated versions stay separate from the published version until an Approver publishes them.</small></span></div>
           </div><div className="helper-callout"><Info size={16} /><span>A run creates a new version. The published schedule is never changed by generation.</span></div></Card>
           {pollError && <Notice tone="warning" title="Status check failed">{pollError} The page will keep trying every 2 seconds.</Notice>}
-          {run && <Card title="Generation status" className="generation-status-card"><div className="run-status-header"><div><StatusBadge status={run.status} /><h3>{run.message}</h3></div><span className="run-time tabular">{run.elapsed_seconds}s</span></div>
+          {run && <Card title="Generation status" className="generation-status-card"><div className="run-status-header"><div><StatusBadge status={run.status} label={run.status === 'Infeasible' ? run.solver_status : undefined} /><h3>{run.message}</h3></div><span className="run-time tabular">{run.elapsed_seconds}s</span></div>
             <div className="progress-track" aria-label={`Share of time limit used ${run.progress}%`} role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={run.progress}><span style={{ width: `${run.progress}%` }} /></div>
-            <div className="progress-meta"><span>{run.progress}% {generating ? 'of time limit used' : 'complete'}</span><span>Solver: {run.solver_status}</span></div>
+            <div className="progress-meta"><span>{run.progress}% {generating ? 'of time limit used' : 'run ended'}</span><span>Solver: {run.solver_status}</span></div>
             {generating && <div className="polling-note"><Clock3 size={14} /> Polling every 2 seconds</div>}
-            {run.status === 'Draft' && <div className="cancelled-note"><XCircle size={15} /> You stopped following this run before a result was shown.</div>}
+            {run.solver_status === 'Cancelled' && <div className="cancelled-note"><XCircle size={15} /> The server confirmed cancellation. No generated result was saved.</div>}
           </Card>}
         </div>
       </section>

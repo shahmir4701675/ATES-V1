@@ -7,6 +7,7 @@ schedule against hard constraints E01–E05 without relying on any solver model 
 from __future__ import annotations
 
 from dataclasses import replace
+from engine.weekly_grid import validate_weekly_grid
 
 from engine.constraints import (
     BaseConstraint,
@@ -69,6 +70,41 @@ class TimetableValidator:
 
         rule_states = self._enabled_rule_map(dataset, config_id=config_id)
         violations: list[Violation] = []
+
+        grid_issues = validate_weekly_grid(dataset.time_slots)
+        violations.extend(
+            Violation(
+                rule_code="C-6", conflict_type="WeeklyGrid", severity="Hard",
+                description=issue.description, entity_ref=f"term_id={issue.term_id}, slot_ids={issue.slot_ids}",
+                affected_entities={"slot_ids": list(issue.slot_ids), "kind": issue.kind},
+            ) for issue in grid_issues
+        )
+        # Domain/interval errors make duration-based constraints undefined. Reject
+        # explicitly, rather than silently substituting a duration or crashing.
+        if any(i.kind not in {"overlap", "order", "duplicate_index"} for i in grid_issues):
+            return violations
+        for offering in dataset.course_offerings:
+            course = dataset.courses_by_id.get(offering.course_id)
+            if course is None or not course.is_active:
+                violations.append(Violation(
+                    rule_code="H08", conflict_type="SessionCount", severity="Hard",
+                    description=f"Required offering {offering.offering_id} has no active course to define its session counts.",
+                    entity_ref=f"offering_id={offering.offering_id}, course_id={offering.course_id}",
+                ))
+        for entry in active_entries:
+            if entry.slot_id not in dataset.slots_by_id:
+                violations.append(Violation(
+                    rule_code="C-6", conflict_type="WeeklyGrid", severity="Hard",
+                    description=f"Entry {entry.entry_id} references an unknown weekly slot.",
+                    entity_ref=f"entry_id={entry.entry_id}, slot_id={entry.slot_id}",
+                ))
+            offering = dataset.offerings_by_id.get(entry.offering_id)
+            if offering is None or offering.course_id not in dataset.courses_by_id:
+                violations.append(Violation(
+                    rule_code="H08", conflict_type="SessionCount", severity="Hard",
+                    description=f"Entry {entry.entry_id} references an unknown offering or course.",
+                    entity_ref=f"entry_id={entry.entry_id}, offering_id={entry.offering_id}",
+                ))
 
         for code in sorted(self._constraints.keys()):
             constraint = self._constraints[code]

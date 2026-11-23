@@ -1,0 +1,19 @@
+{
+  "/openapi.json": {
+    "http": 200,
+    "content_type": "application/json",
+    "path_count": 51,
+    "has_generation": true
+  },
+  "/docs": {
+    "http": 200,
+    "content_type": "text/html; charset=utf-8"
+  },
+  "historically_referenced_offering_reassignment": {
+    "http": 409,
+    "detail": {
+      "detail": "Offering update violated uniqueness or foreign-key constraints."
+    },
+    "note": "Safety guard preserves history; rejected reassignment is an adaptability limitation, not history corruption."
+  }
+}

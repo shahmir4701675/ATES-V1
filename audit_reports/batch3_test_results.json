@@ -1,0 +1,65 @@
+{
+  "project": {
+    "tests": 577,
+    "passed": 576,
+    "failed": 1,
+    "errors": 0,
+    "skipped": 0,
+    "failures": [
+      "tests.test_schedule_integrity::test_new_generation_uses_current_inputs_and_preserves_versions[1-1-Timetable]"
+    ]
+  },
+  "final_worker_targeted": {
+    "tests": 74,
+    "passed": 72,
+    "failed": 2,
+    "errors": 0,
+    "skipped": 0,
+    "failures": [
+      "tests.test_schedule_integrity::test_new_generation_uses_current_inputs_and_preserves_versions[1-1-Timetable]",
+      "tests.test_schedule_integrity::test_new_generation_uses_current_inputs_and_preserves_versions[2-2-Exam]"
+    ]
+  },
+  "original_audit": {
+    "tests": 28,
+    "passed": 28,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "failures": []
+  },
+  "isolated_deadline_run": {
+    "tests": 1,
+    "passed": 1,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "failures": []
+  },
+  "new_tests_unique": 49,
+  "new_tests_by_module": {
+    "adjustments": 21,
+    "integrity": 10,
+    "validation_concurrency": 18
+  },
+  "frontend": {
+    "application_typescript": "Passed",
+    "tooling_typescript": "Passed",
+    "production_build": "Passed"
+  },
+  "sqlite_migration_cases": {
+    "passed": 7,
+    "failed": 0,
+    "new_005_cases": 2
+  },
+  "postgresql": "Not Verified",
+  "browser": "Not Verified",
+  "distributed_reference_load": "Not Verified",
+  "status": {
+    "B015": "Implemented; isolated SQLite/API tests passed",
+    "B016": "Implemented; SQLite verified; PostgreSQL Not Verified",
+    "B017": "Implemented; regression tests passed",
+    "B018": "Implemented; concurrency/cancellation tests passed; short-deadline generation verification incomplete"
+  },
+  "counting": "Targeted reruns overlap project cases and are not added as distinct tests. One full project run and one original audit run only."
+}

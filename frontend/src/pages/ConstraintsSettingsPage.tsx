@@ -5,7 +5,7 @@ import { ConfirmDialog, DataTable, Modal } from '../components/Modal'
 import { useAsync } from '../hooks/useAsync'
 import { CONSTRAINT_CATALOGUE, MANDATORY_CODES, defaultRules, type ConstraintMeta } from '../data/reference'
 import {
-  cloneConfig, createConfig, createExamSlot, deleteConfigMock, errorMessage, getConfigs, getExamSlots, getSchedules, getTerms, saveConfigRules, updateConfig,
+  cloneConfig, createConfig, createExamSlot, deleteConfig, errorMessage, getConfigs, getExamSlots, getSchedules, getTerms, saveConfiguration,
 } from '../services/api'
 import type { ConstraintRule, ScheduleType, SchedulingConfig } from '../types'
 
@@ -81,7 +81,7 @@ export function ConstraintsSettingsPage({ onStatus }: { onStatus: (message: stri
     const limitNum = Number(timeLimit)
     const seedNum = Number(seed)
     if (!Number.isInteger(limitNum) || limitNum < 10 || limitNum > 600) found.push('Solver time limit must be a whole number from 10 to 600 seconds.')
-    if (!Number.isInteger(seedNum)) found.push('Random seed must be a whole number.')
+    if (!Number.isInteger(seedNum) || seedNum < 0 || seedNum > 2147483647) found.push('Random seed must be a whole number from 0 to 2147483647.')
     merged.forEach(({ meta, rule }) => {
       if (meta.param) {
         const val = rule.param_value
@@ -95,8 +95,7 @@ export function ConstraintsSettingsPage({ onStatus }: { onStatus: (message: stri
     setBusy(true)
     try {
       if (selected) {
-        await updateConfig(selected.config_id, { solver_time_limit_s: limitNum, random_seed: seedNum })
-        await saveConfigRules(selected.config_id, rules)
+        await saveConfiguration(selected.config_id, limitNum, seedNum, rules)
         onStatus(`Saved configuration '${selected.name}'.`)
       } else {
         const created = await createConfig({
@@ -142,7 +141,7 @@ export function ConstraintsSettingsPage({ onStatus }: { onStatus: (message: stri
     if (!deleting) return
     setBusy(true)
     try {
-      await deleteConfigMock(deleting.config_id)
+      await deleteConfig(deleting.config_id)
       onStatus(`Deleted configuration '${deleting.name}'.`)
       setDeleting(null)
       setConfigId('')

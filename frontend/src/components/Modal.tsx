@@ -1,6 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, Search, X } from 'lucide-react'
 import { Button } from './ui'
+import { useDebouncedValue } from '../hooks/useDebouncedValue'
 
 const focusable = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
@@ -10,15 +11,17 @@ export function Modal({ title, onClose, children, footer, wide }: { title: strin
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null
-    ref.current?.querySelector<HTMLElement>('input:not([disabled]), select:not([disabled]), textarea, button.button-primary')?.focus()
+    const dialog = ref.current
+    ;(dialog?.querySelector<HTMLElement>(focusable) ?? dialog)?.focus()
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') { event.stopPropagation(); onClose() }
       if (event.key === 'Tab' && ref.current) {
         const items = [...ref.current.querySelectorAll<HTMLElement>(focusable)]
-        if (!items.length) return
+        if (!items.length) { event.preventDefault(); ref.current.focus(); return }
         const first = items[0]
         const last = items[items.length - 1]
-        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus() }
+        if (!ref.current.contains(document.activeElement)) { event.preventDefault(); first.focus() }
+        else if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus() }
         else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus() }
       }
     }
@@ -27,7 +30,7 @@ export function Modal({ title, onClose, children, footer, wide }: { title: strin
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   return <div className="modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose() }}>
-    <div className={`modal ${wide ? 'modal-wide' : ''}`} role="dialog" aria-modal="true" aria-labelledby={titleId} ref={ref}>
+    <div className={`modal ${wide ? 'modal-wide' : ''}`} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} ref={ref}>
       <div className="modal-header"><h2 id={titleId}>{title}</h2><button type="button" className="icon-button modal-close" aria-label="Close dialog" onClick={onClose}><X size={18} /></button></div>
       <div className="modal-body">{children}</div>
       {footer && <div className="modal-footer">{footer}</div>}
@@ -50,17 +53,24 @@ export interface Column<T> {
   sortable?: boolean
 }
 
+export interface RemoteTable {
+  page: number; total: number; query: string; sort: { key: string; dir: 1 | -1 }
+  onPage: (page: number) => void; onQuery: (query: string) => void; onSort: (key: string) => void
+}
+
 /** Searchable, sortable table with paging (25 rows by default, SRS GUI standard 5). */
-export function DataTable<T>({ rows, columns, rowKey, searchText, caption, actions, toolbar, pageSize = 25, emptyText = 'No records match the current search.' }: {
+export function DataTable<T>({ rows, columns, rowKey, searchText, caption, actions, toolbar, pageSize = 25, emptyText = 'No records match the current search.', remote }: {
   rows: T[]; columns: Column<T>[]; rowKey: (row: T) => string; searchText: (row: T) => string; caption: string
-  actions?: (row: T) => React.ReactNode; toolbar?: React.ReactNode; pageSize?: number; emptyText?: string
+  actions?: (row: T) => React.ReactNode; toolbar?: React.ReactNode; pageSize?: number; emptyText?: string; remote?: RemoteTable
 }) {
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<{ key: string; dir: 1 | -1 } | null>(null)
   const [page, setPage] = useState(1)
+  const debouncedQuery = useDebouncedValue(query)
   const searchId = useId()
   const filtered = useMemo(() => {
-    const needle = query.trim().toLowerCase()
+    if (remote) return rows
+    const needle = debouncedQuery.trim().toLowerCase()
     const list = needle ? rows.filter((row) => searchText(row).toLowerCase().includes(needle)) : rows
     const column = columns.find((item) => item.key === sort?.key)
     if (!sort || !column) return list
@@ -70,24 +80,30 @@ export function DataTable<T>({ rows, columns, rowKey, searchText, caption, actio
       return (typeof left === 'number' && typeof right === 'number' ? left - right : String(left).localeCompare(String(right), undefined, { numeric: true, sensitivity: 'base' })) * sort.dir
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rows, query, sort])
-  const pages = Math.max(1, Math.ceil(filtered.length / pageSize))
-  const current = Math.min(page, pages)
-  const visible = filtered.slice((current - 1) * pageSize, current * pageSize)
-  const toggleSort = (key: string) => { setSort((value) => (value?.key === key ? (value.dir === 1 ? { key, dir: -1 } : null) : { key, dir: 1 })); setPage(1) }
+  }, [rows, debouncedQuery, sort, remote, searchText, columns])
+  const count = remote?.total ?? filtered.length
+  const pages = Math.max(1, Math.ceil(count / pageSize))
+  const current = Math.min(remote?.page ?? page, pages)
+  useEffect(() => {
+    if (remote && remote.page > pages) remote.onPage(pages)
+  }, [remote?.page, remote?.onPage, pages])
+  const visible = remote ? filtered : filtered.slice((current - 1) * pageSize, current * pageSize)
+  const activeSort = remote?.sort ?? sort
+  const changePage = remote?.onPage ?? setPage
+  const toggleSort = (key: string) => { if (remote) { remote.onSort(key); return }; setSort((value) => (value?.key === key ? (value.dir === 1 ? { key, dir: -1 } : null) : { key, dir: 1 })); setPage(1) }
   return <div className="data-panel">
     <div className="table-toolbar no-print">
-      <div className="search-box"><Search size={15} aria-hidden="true" /><label htmlFor={searchId} className="sr-only">Search {caption}</label><input id={searchId} type="search" value={query} placeholder="Search" title="Search all visible columns" onChange={(event) => { setQuery(event.target.value); setPage(1) }} /></div>
-      <span className="muted tabular">{filtered.length} {filtered.length === 1 ? 'record' : 'records'}</span>
+      <div className="search-box"><Search size={15} aria-hidden="true" /><label htmlFor={searchId} className="sr-only">Search {caption}</label><input id={searchId} type="search" value={remote?.query ?? query} placeholder="Search" title="Search all visible columns" onChange={(event) => { if (remote) remote.onQuery(event.target.value); else { setQuery(event.target.value); setPage(1) } }} /></div>
+      <span className="muted tabular">{count} {count === 1 ? 'record' : 'records'}</span>
       {toolbar && <div className="toolbar-actions">{toolbar}</div>}
     </div>
     <div className="table-wrap">
       <table className="data-table">
         <caption className="sr-only">{caption}</caption>
         <thead><tr>{columns.map((column) => {
-          const sorted = sort?.key === column.key
-          const Icon = !sorted ? ArrowUpDown : sort!.dir === 1 ? ArrowUp : ArrowDown
-          return <th key={column.key} scope="col" aria-sort={sorted ? (sort!.dir === 1 ? 'ascending' : 'descending') : undefined}>
+          const sorted = activeSort?.key === column.key
+          const Icon = !sorted ? ArrowUpDown : activeSort!.dir === 1 ? ArrowUp : ArrowDown
+          return <th key={column.key} scope="col" aria-sort={sorted ? (activeSort!.dir === 1 ? 'ascending' : 'descending') : undefined}>
             {column.sortable === false ? column.label : <button type="button" className="sort-button" onClick={() => toggleSort(column.key)}>{column.label}<Icon size={12} aria-hidden="true" /></button>}
           </th>
         })}{actions && <th scope="col">Actions</th>}</tr></thead>
@@ -97,7 +113,7 @@ export function DataTable<T>({ rows, columns, rowKey, searchText, caption, actio
     </div>
     <div className="pager no-print">
       <span className="muted tabular">Page {current} of {pages}</span>
-      <div><button type="button" className="button button-secondary" disabled={current <= 1} onClick={() => setPage(current - 1)} aria-label="Previous page"><ChevronLeft size={15} aria-hidden="true" />Previous</button><button type="button" className="button button-secondary" disabled={current >= pages} onClick={() => setPage(current + 1)} aria-label="Next page">Next<ChevronRight size={15} aria-hidden="true" /></button></div>
+      <div><button type="button" className="button button-secondary" disabled={current <= 1} onClick={() => changePage(current - 1)} aria-label="Previous page"><ChevronLeft size={15} aria-hidden="true" />Previous</button><button type="button" className="button button-secondary" disabled={current >= pages} onClick={() => changePage(current + 1)} aria-label="Next page">Next<ChevronRight size={15} aria-hidden="true" /></button></div>
     </div>
   </div>
 }

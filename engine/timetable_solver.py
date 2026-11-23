@@ -39,6 +39,8 @@ from engine.models import (
     format_score_summary,
 )
 from engine.validator import TimetableValidator
+from engine.weekly_grid import validate_weekly_grid, slot_interval
+from engine.execution import bounded, check_deadline, remaining_seconds, search_seconds
 
 SOLVER_LIMIT_DEFAULT: float = 120.0
 DEFAULT_RANDOM_SEED: int = 1
@@ -342,6 +344,10 @@ class TimetableSolver:
         active_rooms = [r for r in dataset.rooms if r.is_active]
         term_offerings = [o for o in dataset.course_offerings if o.term_id == term_id]
 
+        grid_issues = validate_weekly_grid(dataset.time_slots)
+        if grid_issues:
+            return True, [f"FR-6.1 / C-6 Weekly grid: {issue.description}" for issue in grid_issues]
+
         if not term_offerings:
             reasons.append(f"FR-6.1 Input Defect: No course offerings found for term_id={term_id}.")
             return True, reasons
@@ -480,6 +486,10 @@ class TimetableSolver:
                     for offset in range(lab_slots):
                         cand = slot_by_day_idx.get((s.day_of_week, s.slot_index + offset))
                         if cand is None:
+                            break
+                        if cand.term_id != off.term_id:
+                            break
+                        if chain and slot_interval(chain[-1])[1] != slot_interval(cand)[0]:
                             break
                         if is_on("H07") and cand.is_blocked:
                             break
@@ -717,6 +727,7 @@ class TimetableSolver:
 
         for u in sessions:
             if num_pairs > 0:
+                check_deadline()
                 session_vars[u.session_idx] = model.NewIntVar(
                     0, num_pairs - 1, f"session_{u.session_idx}_slot_room"
                 )
@@ -908,7 +919,7 @@ class TimetableSolver:
                 rule_states=relaxed_states,
             )
             probe_solver = cp_model.CpSolver()
-            probe_solver.parameters.max_time_in_seconds = 2.0
+            probe_solver.parameters.max_time_in_seconds = remaining_seconds(2.0)
             probe_solver.parameters.random_seed = seed
             probe_solver.parameters.num_search_workers = 1
             status = probe_solver.Solve(probe_model)
@@ -935,6 +946,7 @@ class TimetableSolver:
             )
         return found_reasons
 
+    @bounded("timetable")
     def solve(
         self,
         dataset: TimetableDataset,
@@ -1042,7 +1054,7 @@ class TimetableSolver:
         )
 
         solver = cp_model.CpSolver()
-        solver.parameters.max_time_in_seconds = effective_time_limit
+        solver.parameters.max_time_in_seconds = search_seconds(effective_time_limit)
         solver.parameters.random_seed = effective_seed
         solver.parameters.num_search_workers = 1
 
@@ -1218,7 +1230,7 @@ class TimetableSolver:
 
 def solve_timetable(
     dataset: TimetableDataset,
-    time_limit: float = SOLVER_LIMIT_DEFAULT,
+    time_limit: float | None = None,
     random_seed: int | None = None,
     *,
     time_limit_s: float | None = None,

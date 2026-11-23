@@ -10,6 +10,7 @@ import math
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
+from engine.weekly_grid import slot_interval
 
 DEFAULT_SLOT_MIN: int = 60
 MAX_EXAMS_PER_DAY_DEFAULT: int = 2
@@ -95,8 +96,8 @@ class TimeSlot:
     @property
     def duration_minutes(self) -> int:
         """Duration of the slot in minutes."""
-        diff = _parse_time_to_minutes(self.end_time) - _parse_time_to_minutes(self.start_time)
-        return diff if diff > 0 else DEFAULT_SLOT_MIN
+        start, end = slot_interval(self)
+        return end - start
 
     @property
     def duration_hours(self) -> float:
@@ -523,29 +524,36 @@ class TimetableDataset:
     def course_students(self, term_id: int | None = None) -> dict[int, set[str]]:
         """Derive enrolled student/cohort identifiers per course (FR-7.1, Assumption A-4).
 
-        - Every explicit `Enrollment(offering_id, student_id)` adds `f"student:{student_id}"`.
-        - Under Assumption A-4, when an offering has no explicit enrollment records (or when
-          explicit enrollments represent only partial repeater/elective links with
-          `len(enrollments_for_offering) < offering.enrolled_count`), the batch cohort
-          `f"batch:{offering.batch_id}"` is also included.
+        Completeness is measured using distinct students against enrolled_count.
+        Complete offerings retain exactly their explicit students (including electives
+        and repeaters). Missing/partial offerings include all students observed in
+        their term/batch's offerings, plus an anonymous cohort for unknown students.
+        This is a conservative A-4 fallback, not an assertion of home-batch identity.
+        Raw membership evidence is never propagated transitively between batches.
         """
         courses_map = self.courses_by_id
-        enrollments_by_offering: dict[int, list[Enrollment]] = {}
+        enrollments_by_offering: dict[int, set[int]] = {}
         for enr in self.enrollments:
-            enrollments_by_offering.setdefault(enr.offering_id, []).append(enr)
+            enrollments_by_offering.setdefault(enr.offering_id, set()).add(enr.student_id)
+
+        term_offerings = [off for off in self.course_offerings
+                          if term_id is None or off.term_id == term_id]
+        offerings = [off for off in term_offerings
+                     if off.course_id in courses_map and courses_map[off.course_id].is_active]
+        batch_students: dict[tuple[int, int], set[int]] = {}
+        # Even an inactive course can supply real enrollment evidence about a batch.
+        for off in term_offerings:
+            batch_students.setdefault((off.term_id, off.batch_id), set()).update(
+                enrollments_by_offering.get(off.offering_id, set())
+            )
 
         result: dict[int, set[str]] = {}
-        for off in self.course_offerings:
-            if term_id is not None and off.term_id != term_id:
-                continue
-            course = courses_map.get(off.course_id)
-            if course is None or not course.is_active:
-                continue
+        for off in offerings:
             student_set = result.setdefault(off.course_id, set())
-            off_enrs = enrollments_by_offering.get(off.offering_id, [])
-            for enr in off_enrs:
-                student_set.add(f"student:{enr.student_id}")
-            if not off_enrs or len(off_enrs) < off.enrolled_count:
+            explicit = enrollments_by_offering.get(off.offering_id, set())
+            student_set.update(f"student:{student}" for student in explicit)
+            if len(explicit) < off.enrolled_count:
+                student_set.update(f"student:{student}" for student in batch_students[(off.term_id, off.batch_id)])
                 student_set.add(f"batch:{off.batch_id}")
         return result
 

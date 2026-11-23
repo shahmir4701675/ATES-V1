@@ -103,6 +103,23 @@ def create_db_engine(
     kwargs: dict[str, Any] = dict(engine_kwargs)
     if resolved_url.startswith("postgresql"):
         kwargs.setdefault("pool_pre_ping", True)
+        # SQLAlchemy already pools connections; bound per-process capacity and
+        # allow reviewed deployments to tune it without changing application code.
+        for option, variable, default, minimum, maximum in (
+            ("pool_size", "ATES_DB_POOL_SIZE", 5, 1, 100),
+            ("max_overflow", "ATES_DB_MAX_OVERFLOW", 5, 0, 100),
+            ("pool_timeout", "ATES_DB_POOL_TIMEOUT", 30, 1, 120),
+            ("pool_recycle", "ATES_DB_POOL_RECYCLE", 1800, 60, 86400),
+        ):
+            if option not in kwargs and 'poolclass' not in kwargs:
+                raw = os.environ.get(variable, str(default))
+                try:
+                    value = int(raw)
+                except ValueError:
+                    raise ValueError(f"{variable} must be an integer.") from None
+                if not minimum <= value <= maximum:
+                    raise ValueError(f"{variable} must be between {minimum} and {maximum}.")
+                kwargs[option] = value
     elif resolved_url.startswith("sqlite"):
         connect_args = dict(kwargs.get("connect_args") or {})
         connect_args.setdefault("check_same_thread", False)
@@ -162,7 +179,16 @@ def session_scope(
 
 
 def init_db(engine: Engine) -> None:
-    """Create all 21 ATES schema tables on the target engine (`Base.metadata.create_all`)."""
+    """Create business and supplemental auth/version-integrity objects on a new/test database.
+
+    Existing deployments must apply reviewed migrations 001 through 005 explicitly.
+    """
     from backend.models import Base
 
     Base.metadata.create_all(bind=engine)
+    from backend.snapshot_schema import install_snapshot_schema
+    install_snapshot_schema(engine)
+    from backend.batch3_schema import install
+    install(engine)
+    import backend.mutation_audit
+    import backend.schedule_integrity  # Register independent publication review guard.

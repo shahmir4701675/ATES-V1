@@ -1,0 +1,15 @@
+{
+  "baseline_build": "weekly_grid_frontend_build (before this performance task)",
+  "baseline_initial_js_bytes": 348890,
+  "baseline_initial_js_gzip_bytes": 102280,
+  "new_initial_files": [
+    "assets/index-D6BAjJId.js",
+    "assets/react-C8w-UNLI.js"
+  ],
+  "new_initial_js_bytes": 219570,
+  "new_initial_js_gzip_bytes": 68519,
+  "initial_js_gzip_reduction_percent": 33.008408290965974,
+  "lazy_page_count": 14,
+  "compressed_files_roundtrip_verified": 56,
+  "scope": "Static import graph before opening a lazy page; not browser LCP/TTI or all-page total-download claim."
+}

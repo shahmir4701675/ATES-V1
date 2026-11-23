@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="9" time="12.115" timestamp="2026-11-21T19:38:43.099081+05:00" hostname="shahmir"><testcase classname="tests.test_batch3_adjustments" name="test_malformed_manual_identity_cannot_be_silently_ignored[payload0]" time="2.448" /><testcase classname="tests.test_batch3_adjustments" name="test_malformed_manual_identity_cannot_be_silently_ignored[payload1]" time="0.911" /><testcase classname="tests.test_batch3_adjustments" name="test_malformed_manual_identity_cannot_be_silently_ignored[payload2]" time="0.879" /><testcase classname="tests.test_batch3_adjustments" name="test_malformed_manual_identity_cannot_be_silently_ignored[payload3]" time="0.903" /><testcase classname="tests.test_batch3_validation_concurrency" name="test_solver_seed_domain_is_checked_before_queueing[-1]" time="1.401" /><testcase classname="tests.test_batch3_validation_concurrency" name="test_solver_seed_domain_is_checked_before_queueing[2147483648]" time="0.676" /><testcase classname="tests.test_batch3_validation_concurrency" name="test_solver_seed_domain_is_checked_before_queueing[bad]" time="0.652" /><testcase classname="tests.test_batch3_integrity" name="test_migration_005_failure_rolls_back_additive_schema" time="1.294" /><testcase classname="tests.test_backend_api" name="test_master_data_terms_slots_exam_slots_offerings_and_configs" time="1.468"><failure message="AssertionError: assert 'H01' in 'Mandatory constraints cannot be disabled.'">sqlite_app_env = (&lt;starlette.testclient.TestClient object at 0x00000242123EB850&gt;, Engine(sqlite:///C%3A/Users/DELL/AppData/Local/Temp/p...test-of-DELL/pytest-50/test_master_data_terms_slots_e0/test_ates_api.sqlite), autoflush=False, expire_on_commit=False))
+
+    def test_master_data_terms_slots_exam_slots_offerings_and_configs(
+        sqlite_app_env: Tuple[TestClient, Engine, sessionmaker[Session]],
+    ) -&gt; None:
+        """Verify CRUD for terms, time slots, exam slots (with overlap validation), offerings, and configs."""
+        client, _, _ = sqlite_app_env
+    
+        # Create a new academic term
+        term_res = client.post(
+            "/terms",
+            json={
+                "name": "Spring 2027",
+                "start_date": "2027-01-15",
+                "end_date": "2027-05-30",
+                "status": "Planned",
+            },
+        )
+        assert term_res.status_code == 201
+        new_term_id = term_res.json()["term_id"]
+    
+        # Generate working days &amp; slots grid (FR-2.7)
+        gen_slots_res = client.post(
+            f"/terms/{new_term_id}/slots/generate",
+            json={
+                "working_days": [1, 2, 3],
+                "first_start_time": "09:00",
+                "slot_length_min": 60,
+                "slots_per_day": 3,
+                "blocked_slot_indices": [2],
+                "block_reason": "Morning Break",
+            },
+        )
+        assert gen_slots_res.status_code == 201
+        generated_slots = gen_slots_res.json()
+        assert len(generated_slots) == 9
+        blocked_slots = [s for s in generated_slots if s["is_blocked"]]
+        assert len(blocked_slots) == 3
+    
+        # Create an exam slot on 2027-05-17
+        exam_slot_1 = client.post(
+            f"/terms/{new_term_id}/exam-slots",
+            json={
+                "exam_date": "2027-05-17",
+                "start_time": "09:00",
+                "end_time": "12:00",
+                "label": "MORNING",
+            },
+        )
+        assert exam_slot_1.status_code == 201
+    
+        # Overlapping exam slot on the same date must be rejected with 409 (FR-5.7)
+        exam_slot_overlap = client.post(
+            f"/terms/{new_term_id}/exam-slots",
+            json={
+                "exam_date": "2027-05-17",
+                "start_time": "11:00",
+                "end_time": "14:00",
+                "label": "MIDDAY_OVERLAP",
+            },
+        )
+        assert exam_slot_overlap.status_code == 409
+    
+        # Offerings CRUD on term 1
+        offerings_get = client.get("/offerings?term_id=1")
+        assert offerings_get.status_code == 200
+        assert len(offerings_get.json()) == 6
+    
+        # Configs &amp; mandatory rule protection (FR-5.2)
+        configs_get = client.get("/configs")
+        assert configs_get.status_code == 200
+        assert len(configs_get.json()) &gt;= 2
+    
+        # Attempt to disable mandatory rule H01 -&gt; 422 Unprocessable Entity (FR-5.2)
+        disable_h01 = client.put(
+            "/configs/1/rules",
+            json={
+                "rules": [
+                    {"rule_code": "H01", "is_enabled": False, "weight": 0},
+                ]
+            },
+        )
+        assert disable_h01.status_code == 422
+&gt;       assert "H01" in disable_h01.json()["detail"]
+E       AssertionError: assert 'H01' in 'Mandatory constraints cannot be disabled.'
+
+tests\test_backend_api.py:366: AssertionError</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,11 @@
+import { useEffect, useState } from 'react'
+
+/** Keep typing immediate while delaying filters/requests until input settles. */
+export function useDebouncedValue<T>(value: T, delay = 250): T {
+  const [debounced, setDebounced] = useState(value)
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebounced(value), delay)
+    return () => window.clearTimeout(timer)
+  }, [value, delay])
+  return debounced
+}

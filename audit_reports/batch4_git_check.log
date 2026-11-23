@@ -1,0 +1,6 @@
+warning: in the working copy of 'backend/__init__.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backend/schemas.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/src/components/Modal.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/src/components/ui.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/src/pages/LoginPage.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'frontend/src/services/mockApi.ts', LF will be replaced by CRLF the next time Git touches it

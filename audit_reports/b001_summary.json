@@ -1,0 +1,28 @@
+{
+  "bug": "B001",
+  "date": "2026-11-21",
+  "status": "Resolved in code and isolated regression verification; deployment prerequisites not applied",
+  "project": {
+    "existingPassed": 79,
+    "newAuthPassed": 37,
+    "total": 116,
+    "failed": 0
+  },
+  "audit": {
+    "executed": 28,
+    "passed": 8,
+    "failed": 20,
+    "relevantAuthSubsetPassed": 5,
+    "relevantAuthSubsetFailed": 0
+  },
+  "frontend": {
+    "typescriptApp": "passed",
+    "typescriptTooling": "passed",
+    "productionBuild": "passed"
+  },
+  "operatorSmoke": "passed",
+  "productionDatabaseModified": false,
+  "algorithmsModified": false,
+  "b002Started": false,
+  "committed": false
+}

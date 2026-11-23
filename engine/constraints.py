@@ -11,6 +11,8 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from typing import Any
+from engine.weekly_grid import overlap_windows, slot_interval
+from engine.exam_membership_validation import validation_course_students
 
 from engine.models import (
     ExamEntry,
@@ -114,6 +116,41 @@ def _resolve_schedule_id(entries: list[TimetableEntry], dataset: TimetableDatase
     return None
 
 
+def _temporal_groups(dataset, entries, resource):
+    """Independent interval comparisons; never use solver occupancy windows.
+
+    Connected conflict components retain the existing one-report-per-clash format.
+    Adjacent intervals do not intersect.
+    """
+    groups = defaultdict(list)
+    slots_by_id = dataset.slots_by_id
+    for entry in entries:
+        slot = slots_by_id.get(entry.slot_id)
+        if slot is None:
+            continue
+        try:
+            start, end = slot_interval(slot)
+        except (ValueError, TypeError):
+            continue
+        groups[(getattr(entry, resource), slot.term_id, slot.day_of_week)].append((entry, start, end))
+    result = []
+    for (resource_id, _term, _day), rows in groups.items():
+        pending = set(range(len(rows)))
+        while pending:
+            component = {pending.pop()}
+            frontier = list(component)
+            while frontier:
+                i = frontier.pop()
+                neighbors = {j for j in pending if rows[i][1] < rows[j][2] and rows[j][1] < rows[i][2]}
+                pending -= neighbors
+                component |= neighbors
+                frontier.extend(neighbors)
+            if len(component) > 1:
+                clash = [rows[i][0] for i in sorted(component)]
+                result.append(((resource_id, min(e.slot_id for e in clash)), clash))
+    return sorted(result, key=lambda pair: pair[0])
+
+
 class H01InstructorClash(BaseConstraint):
     """H01: An instructor teaches at most one session in a slot (Hard, mandatory)."""
 
@@ -125,9 +162,10 @@ class H01InstructorClash(BaseConstraint):
 
     def add_to_model(self, model: Any, context: Any, param_value: int | None = None) -> None:
         for _instructor_id, inst_sessions in sorted(context.sessions_by_instructor.items()):
-            for slot in context.slots:
+            for window in overlap_windows(context.slots):
                 slot_vars = [
                     context.x[(u.session_idx, slot.slot_id, room.room_id)]
+                    for slot in window
                     for u in inst_sessions
                     for room in context.rooms
                     if (u.session_idx, slot.slot_id, room.room_id) in context.x
@@ -147,12 +185,8 @@ class H01InstructorClash(BaseConstraint):
         offerings_by_id = dataset.offerings_by_id
         courses_by_id = dataset.courses_by_id
 
-        grouped: dict[tuple[int, int], list[TimetableEntry]] = defaultdict(list)
-        for entry in active_entries:
-            grouped[(entry.instructor_id, entry.slot_id)].append(entry)
-
         violations: list[Violation] = []
-        for (instructor_id, slot_id), slot_entries in sorted(grouped.items()):
+        for (instructor_id, slot_id), slot_entries in _temporal_groups(dataset, active_entries, "instructor_id"):
             if len(slot_entries) > 1:
                 inst = instructors_by_id.get(instructor_id)
                 inst_name = inst.full_name if inst else f"Instructor #{instructor_id}"
@@ -175,12 +209,13 @@ class H01InstructorClash(BaseConstraint):
                         severity="Hard",
                         description=(
                             f"H01 Violation: Instructor {inst_name} (instructor_id={instructor_id}) "
-                            f"is scheduled for {len(slot_entries)} sessions in slot_id={slot_id} "
+                            f"has overlapping clock-time sessions in slots {sorted({e.slot_id for e in slot_entries})} "
                             f"(entries {entry_ids})."
                         ),
                         entity_ref=entity_ref,
                         affected_entities={
                             "instructor_id": instructor_id,
+                            "slot_ids": sorted({e.slot_id for e in slot_entries}),
                             "instructor_name": inst_name,
                             "slot_id": slot_id,
                             "entry_ids": entry_ids,
@@ -204,9 +239,10 @@ class H02RoomClash(BaseConstraint):
 
     def add_to_model(self, model: Any, context: Any, param_value: int | None = None) -> None:
         for room in context.rooms:
-            for slot in context.slots:
+            for window in overlap_windows(context.slots):
                 room_slot_vars = [
                     context.x[(u.session_idx, slot.slot_id, room.room_id)]
+                    for slot in window
                     for u in context.sessions
                     if (u.session_idx, slot.slot_id, room.room_id) in context.x
                 ]
@@ -225,12 +261,8 @@ class H02RoomClash(BaseConstraint):
         offerings_by_id = dataset.offerings_by_id
         courses_by_id = dataset.courses_by_id
 
-        grouped: dict[tuple[int, int], list[TimetableEntry]] = defaultdict(list)
-        for entry in active_entries:
-            grouped[(entry.room_id, entry.slot_id)].append(entry)
-
         violations: list[Violation] = []
-        for (room_id, slot_id), slot_entries in sorted(grouped.items()):
+        for (room_id, slot_id), slot_entries in _temporal_groups(dataset, active_entries, "room_id"):
             if len(slot_entries) > 1:
                 room = rooms_by_id.get(room_id)
                 room_code = room.room_code if room else f"Room #{room_id}"
@@ -253,12 +285,13 @@ class H02RoomClash(BaseConstraint):
                         severity="Hard",
                         description=(
                             f"H02 Violation: Room {room_code} (room_id={room_id}) "
-                            f"hosts {len(slot_entries)} sessions in slot_id={slot_id} "
+                            f"hosts overlapping clock-time sessions in slots {sorted({e.slot_id for e in slot_entries})} "
                             f"(entries {entry_ids})."
                         ),
                         entity_ref=entity_ref,
                         affected_entities={
                             "room_id": room_id,
+                            "slot_ids": sorted({e.slot_id for e in slot_entries}),
                             "room_code": room_code,
                             "slot_id": slot_id,
                             "entry_ids": entry_ids,
@@ -282,9 +315,10 @@ class H03BatchClash(BaseConstraint):
 
     def add_to_model(self, model: Any, context: Any, param_value: int | None = None) -> None:
         for _batch_id, batch_sessions in sorted(context.sessions_by_batch.items()):
-            for slot in context.slots:
+            for window in overlap_windows(context.slots):
                 slot_vars = [
                     context.x[(u.session_idx, slot.slot_id, room.room_id)]
+                    for slot in window
                     for u in batch_sessions
                     for room in context.rooms
                     if (u.session_idx, slot.slot_id, room.room_id) in context.x
@@ -304,12 +338,8 @@ class H03BatchClash(BaseConstraint):
         offerings_by_id = dataset.offerings_by_id
         courses_by_id = dataset.courses_by_id
 
-        grouped: dict[tuple[int, int], list[TimetableEntry]] = defaultdict(list)
-        for entry in active_entries:
-            grouped[(entry.batch_id, entry.slot_id)].append(entry)
-
         violations: list[Violation] = []
-        for (batch_id, slot_id), slot_entries in sorted(grouped.items()):
+        for (batch_id, slot_id), slot_entries in _temporal_groups(dataset, active_entries, "batch_id"):
             if len(slot_entries) > 1:
                 batch = batches_by_id.get(batch_id)
                 batch_label = batch.label if batch else f"Batch #{batch_id}"
@@ -332,12 +362,13 @@ class H03BatchClash(BaseConstraint):
                         severity="Hard",
                         description=(
                             f"H03 Violation: Batch {batch_label} (batch_id={batch_id}) "
-                            f"attends {len(slot_entries)} sessions in slot_id={slot_id} "
+                            f"attends overlapping clock-time sessions in slots {sorted({e.slot_id for e in slot_entries})} "
                             f"(entries {entry_ids})."
                         ),
                         entity_ref=entity_ref,
                         affected_entities={
                             "batch_id": batch_id,
+                            "slot_ids": sorted({e.slot_id for e in slot_entries}),
                             "batch_label": batch_label,
                             "slot_id": slot_id,
                             "entry_ids": entry_ids,
@@ -736,7 +767,9 @@ class H09LabBlockContiguity(BaseConstraint):
                 chain = []
                 for offset in range(k):
                     candidate = slot_by_day_idx.get((slot.day_of_week, slot.slot_index + offset))
-                    if candidate is None:
+                    if candidate is None or candidate.term_id != context.term_id:
+                        break
+                    if chain and slot_interval(chain[-1])[1] != slot_interval(candidate)[0]:
                         break
                     chain.append(candidate)
                 if len(chain) == k:
@@ -783,12 +816,15 @@ class H09LabBlockContiguity(BaseConstraint):
         for entry in active_entries:
             if entry.session_type == "Lab":
                 lab_entries_by_offering[entry.offering_id].append(entry)
+        # H09 also accounts for an entirely absent required block. H08 remains
+        # mandatory and separately verifies all lecture/lab session counts.
+        for offering in dataset.course_offerings:
+            course = courses_by_id.get(offering.course_id)
+            if course is not None and course.lab_hours > 0:
+                lab_entries_by_offering.setdefault(offering.offering_id, [])
 
         violations: list[Violation] = []
         for offering_id, lab_entries in sorted(lab_entries_by_offering.items()):
-            if not lab_entries:
-                continue
-
             offering = offerings_by_id.get(offering_id)
             course = courses_by_id.get(offering.course_id) if offering else None
             course_code = course.course_code if course else f"offering_id={offering_id}"
@@ -809,8 +845,21 @@ class H09LabBlockContiguity(BaseConstraint):
                 else []
             )
             is_consecutive = slot_indices == expected_consecutive
+            known_slots = [slots_by_id[e.slot_id] for e in lab_entries if e.slot_id in slots_by_id]
+            complete_references = len(known_slots) == len(lab_entries)
+            unique_slots = len({e.slot_id for e in lab_entries}) == len(lab_entries)
+            correct_term = offering is not None and all(s.term_id == offering.term_id for s in known_slots)
+            ordered_slots = sorted(known_slots, key=lambda s: (s.slot_index, s.slot_id))
+            # Independently compare every boundary; do not reuse solver chains.
+            try:
+                intervals = [slot_interval(s) for s in ordered_slots]
+                clock_adjacent = all(left[1] == right[0] for left, right in zip(intervals, intervals[1:]))
+                expected_size = course.required_lab_slots(dataset.term_slot_length_minutes(offering.term_id)) if course and offering else None
+            except (ValueError, TypeError):
+                clock_adjacent, expected_size = False, None
+            correct_size = expected_size is not None and len(lab_entries) == expected_size
 
-            if not (same_room and same_day and is_consecutive):
+            if not (same_room and same_day and is_consecutive and complete_references and unique_slots and correct_term and clock_adjacent and correct_size):
                 entry_ids = [e.entry_id for e in lab_entries]
                 slot_ids = [e.slot_id for e in lab_entries]
                 reasons: list[str] = []
@@ -820,6 +869,16 @@ class H09LabBlockContiguity(BaseConstraint):
                     reasons.append(f"split across multiple days {days}")
                 if not is_consecutive:
                     reasons.append(f"non-consecutive slot_index values {slot_indices}")
+                if not complete_references:
+                    reasons.append("missing time-slot references")
+                if not unique_slots:
+                    reasons.append("duplicate time-slot references")
+                if not correct_term:
+                    reasons.append("time slots do not belong to the offering's academic term")
+                if not clock_adjacent:
+                    reasons.append("clock-time intervals are not physically adjacent (each end must equal the next start)")
+                if not correct_size:
+                    reasons.append(f"requires {expected_size} lab slots but has {len(lab_entries)}")
 
                 entity_ref = (
                     f"offering_id={offering_id} ({course_code}), "
@@ -845,6 +904,8 @@ class H09LabBlockContiguity(BaseConstraint):
                             "slot_ids": slot_ids,
                             "days_of_week": days,
                             "slot_indices": slot_indices,
+                            "expected_lab_slots": expected_size,
+                            "actual_lab_slots": len(lab_entries),
                         },
                         schedule_id=schedule_id,
                     )
@@ -1847,7 +1908,10 @@ class E01StudentExamClash(BaseConstraint):
         active_entries = _resolve_exam_entries(dataset, entries)
         schedule_id = _resolve_exam_schedule_id(active_entries, dataset)
         courses_by_id = dataset.courses_by_id
-        course_students = dataset.course_students()
+        membership_by_term = {
+            term: validation_course_students(dataset, term_id=term)
+            for term in sorted({slot.term_id for slot in dataset.exam_slots})
+        }
 
         by_slot: dict[int, list[ExamEntry]] = defaultdict(list)
         for entry in active_entries:
@@ -1855,6 +1919,8 @@ class E01StudentExamClash(BaseConstraint):
 
         violations: list[Violation] = []
         for exam_slot_id, slot_entries in sorted(by_slot.items()):
+            slot = dataset.exam_slots_by_id.get(exam_slot_id)
+            course_students = membership_by_term.get(slot.term_id, {}) if slot else {}
             n = len(slot_entries)
             for i in range(n):
                 for j in range(i + 1, n):
@@ -1929,7 +1995,10 @@ class E02DailyExamLimit(BaseConstraint):
         schedule_id = _resolve_exam_schedule_id(active_entries, dataset)
         exam_slots_by_id = dataset.exam_slots_by_id
         courses_by_id = dataset.courses_by_id
-        course_students = dataset.course_students()
+        membership_by_term = {
+            term: validation_course_students(dataset, term_id=term)
+            for term in sorted({slot.term_id for slot in dataset.exam_slots})
+        }
 
         max_per_day = param_value
         if max_per_day is None:
@@ -1945,6 +2014,7 @@ class E02DailyExamLimit(BaseConstraint):
             exam_slot = exam_slots_by_id.get(entry.exam_slot_id)
             if exam_slot is None:
                 continue
+            course_students = membership_by_term.get(exam_slot.term_id, {})
             for student_ref in sorted(course_students.get(entry.course_id, set())):
                 student_day_entries[(student_ref, exam_slot.exam_date)].append(entry)
 

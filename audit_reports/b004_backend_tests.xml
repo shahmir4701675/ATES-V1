@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="105" time="403.794" timestamp="2026-11-21T16:08:23.894412+05:00" hostname="shahmir"><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[1-room_capacity-generated]" time="2.078" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[1-room_capacity-published]" time="1.423" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[1-room_type-generated]" time="1.397" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[1-room_type-published]" time="1.462" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[1-room_inactive-generated]" time="1.401" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[1-room_inactive-published]" time="1.550" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[1-room_label-generated]" time="1.383" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[1-room_label-published]" time="1.418" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[1-availability-generated]" time="1.421" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[1-availability-published]" time="1.377" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[1-offering_batch-generated]" time="1.330" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[1-offering_batch-published]" time="1.370" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[1-offering_instructor-generated]" time="1.401" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[1-offering_instructor-published]" time="1.449" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[1-enrollment_count-generated]" time="1.546" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[1-enrollment_count-published]" time="1.513" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[1-course_inactive-generated]" time="1.692" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[1-course_inactive-published]" time="1.433" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[1-course_requirements-generated]" time="1.385" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[1-course_requirements-published]" time="1.491" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[1-course_title-generated]" time="1.495" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[1-course_title-published]" time="1.476" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[1-slot_clock-generated]" time="1.538" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[1-slot_clock-published]" time="1.771" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[1-blocked_slot-generated]" time="1.847" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[1-blocked_slot-published]" time="5.618" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[1-configuration-generated]" time="5.808" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[1-configuration-published]" time="4.989" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[1-instructor_load-generated]" time="2.889" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[1-instructor_load-published]" time="2.249" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[1-batch_strength-generated]" time="2.311" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[1-batch_strength-published]" time="2.117" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[2-room_capacity-generated]" time="1.508" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[2-room_capacity-published]" time="1.362" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[2-room_type-generated]" time="1.291" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[2-room_type-published]" time="1.288" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[2-room_inactive-generated]" time="1.500" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[2-room_inactive-published]" time="1.282" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[2-room_label-generated]" time="1.280" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[2-room_label-published]" time="1.290" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[2-offering_batch-generated]" time="1.575" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[2-offering_batch-published]" time="3.042" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[2-offering_instructor-generated]" time="3.903" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[2-offering_instructor-published]" time="1.992" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[2-enrollment_count-generated]" time="1.551" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[2-enrollment_count-published]" time="1.576" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[2-course_inactive-generated]" time="1.627" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[2-course_inactive-published]" time="2.857" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[2-course_title-generated]" time="1.600" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[2-course_title-published]" time="3.493" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[2-exam_enrollments-generated]" time="5.161" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[2-exam_enrollments-published]" time="5.743" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[2-exam_clock-generated]" time="3.311" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[2-exam_clock-published]" time="2.822" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[2-exam_configuration-generated]" time="2.759" /><testcase classname="tests.test_schedule_integrity" name="test_master_mutations_preserve_authoritative_context[2-exam_configuration-published]" time="3.044" /><testcase classname="tests.test_schedule_integrity" name="test_snapshot_survives_restart_and_unrelated_edits[1]" time="8.233" /><testcase classname="tests.test_schedule_integrity" name="test_snapshot_survives_restart_and_unrelated_edits[2]" time="7.206" /><testcase classname="tests.test_schedule_integrity" name="test_new_generation_uses_current_inputs_and_preserves_versions[1-1-Timetable]" time="14.886" /><testcase classname="tests.test_schedule_integrity" name="test_new_generation_uses_current_inputs_and_preserves_versions[2-2-Exam]" time="2.563" /><testcase classname="tests.test_schedule_integrity" name="test_database_guards_prevent_official_rewrites[UPDATE timetable_entries SET is_locked=1 WHERE schedule_id=1]" time="2.619" /><testcase classname="tests.test_schedule_integrity" name="test_database_guards_prevent_official_rewrites[DELETE FROM timetable_entries WHERE schedule_id=1]" time="4.288" /><testcase classname="tests.test_schedule_integrity" name="test_database_guards_prevent_official_rewrites[UPDATE exam_entries SET is_locked=1 WHERE schedule_id=2]" time="3.646" /><testcase classname="tests.test_schedule_integrity" name="test_database_guards_prevent_official_rewrites[DELETE FROM exam_room_allocations WHERE exam_entry_id=1]" time="5.805" /><testcase classname="tests.test_schedule_integrity" name="test_database_guards_prevent_official_rewrites[statement4]" time="4.426" /><testcase classname="tests.test_schedule_integrity" name="test_database_guards_prevent_official_rewrites[DELETE FROM schedule_snapshots WHERE schedule_id=2]" time="4.551" /><testcase classname="tests.test_schedule_integrity" name="test_database_guards_prevent_official_rewrites[UPDATE schedules SET status='Generated' WHERE schedule_id=1]" time="3.770" /><testcase classname="tests.test_schedule_integrity" name="test_database_guards_prevent_official_rewrites[UPDATE schedules SET approved_by=NULL WHERE schedule_id=1]" time="3.709" /><testcase classname="tests.test_schedule_integrity" name="test_database_guards_prevent_official_rewrites[DELETE FROM schedules WHERE schedule_id=2]" time="3.096" /><testcase classname="tests.test_schedule_integrity" name="test_unauthorized_snapshot_and_official_entry_changes_are_rejected[1]" time="4.451" /><testcase classname="tests.test_schedule_integrity" name="test_unauthorized_snapshot_and_official_entry_changes_are_rejected[2]" time="7.173" /><testcase classname="tests.test_schedule_integrity" name="test_invalid_snapshot_data_is_rejected[bad_json]" time="4.446" /><testcase classname="tests.test_schedule_integrity" name="test_invalid_snapshot_data_is_rejected[bad_hash]" time="3.126" /><testcase classname="tests.test_schedule_integrity" name="test_invalid_snapshot_data_is_rejected[wrong_scope]" time="3.078" /><testcase classname="tests.test_schedule_integrity" name="test_invalid_snapshot_data_is_rejected[wrong_policy]" time="3.531" /><testcase classname="tests.test_schedule_integrity" name="test_invalid_snapshot_data_is_rejected[missing_dataset]" time="2.084" /><testcase classname="tests.test_schedule_integrity" name="test_invalid_snapshot_data_is_rejected[bad_config]" time="2.955" /><testcase classname="tests.test_schedule_integrity" name="test_invalid_publication_rolls_back_context_and_status" time="1.597" /><testcase classname="tests.test_schedule_integrity" name="test_relevant_change_during_solving_is_rejected_and_rolled_back" time="12.078" /><testcase classname="tests.test_schedule_integrity" name="test_source_write_is_serialized_with_input_capture" time="5.496" /><testcase classname="tests.test_schedule_integrity" name="test_database_failure_during_snapshot_save_rolls_back_all_rows" time="15.150" /><testcase classname="tests.test_schedule_integrity" name="test_sqlite_additive_migration_and_legacy_fail_closed" time="3.432" /><testcase classname="tests.test_schedule_integrity" name="test_review_does_not_create_a_publish_endpoint" time="9.936" /><testcase classname="tests.test_backend_db" name="test_env_example_and_gitignore_security_compliance" time="0.017" /><testcase classname="tests.test_backend_db" name="test_database_url_loading_and_normalization" time="0.116" /><testcase classname="tests.test_backend_db" name="test_all_21_models_match_schema_sql" time="0.021" /><testcase classname="tests.test_backend_db" name="test_seed_database_loads_master_data_students_and_enrollments" time="3.167" /><testcase classname="tests.test_backend_db" name="test_seed_cli_entrypoint_with_local_sqlite" time="3.252" /><testcase classname="tests.test_backend_db" name="test_db2_composite_foreign_key_and_db4_clash_constraints" time="2.354" /><testcase classname="tests.test_backend_db" name="test_db3_restrict_master_delete_and_cascade_schedule_delete" time="1.821" /><testcase classname="tests.test_backend_db" name="test_partial_unique_indexes_and_check_constraints" time="2.053" /><testcase classname="tests.test_backend_db" name="test_adapter_loads_term_and_validates_seeded_schedules" time="2.153" /><testcase classname="tests.test_backend_db" name="test_adapter_solves_and_saves_timetable_and_exam_results_in_one_transaction" time="35.481" /><testcase classname="tests.test_backend_db" name="test_adapter_saves_infeasible_results_and_logs_conflicts_without_harming_existing_schedules" time="0.448" /><testcase classname="tests.test_backend_db" name="test_saf2_and_db6_atomic_rollback_on_save_failure" time="0.593" /><testcase classname="tests.test_backend_api" name="test_cors_allows_react_dev_server_only" time="2.624" /><testcase classname="tests.test_backend_api" name="test_role_check_readiness_enforces_roles_when_header_present" time="4.374" /><testcase classname="tests.test_backend_api" name="test_master_data_crud_courses_instructors_rooms_batches" time="2.928" /><testcase classname="tests.test_backend_api" name="test_master_data_terms_slots_exam_slots_offerings_and_configs" time="4.522" /><testcase classname="tests.test_backend_api" name="test_post_schedules_generate_creates_generating_row_and_runs_worker" time="21.800" /><testcase classname="tests.test_backend_api" name="test_post_schedules_generate_exam_schedule_end_to_end" time="2.465" /><testcase classname="tests.test_backend_api" name="test_post_schedules_generate_infeasible_persists_conflicts" time="2.845" /><testcase classname="tests.test_backend_api" name="test_put_schedule_entry_valid_move_and_409_on_violated_timetable_constraints" time="31.777"><failure message="assert 409 == 200&#10; +  where 409 = &lt;Response [409 Conflict]&gt;.status_code">sqlite_app_env = (&lt;starlette.testclient.TestClient object at 0x0000020BDF7D0270&gt;, Engine(sqlite:///C%3A/Users/DELL/AppData/Local/Temp/p...ytest-of-DELL/pytest-9/test_put_schedule_entry_valid_0/test_ates_api.sqlite), autoflush=False, expire_on_commit=False))
+
+    def test_put_schedule_entry_valid_move_and_409_on_violated_timetable_constraints(
+        sqlite_app_env: Tuple[TestClient, Engine, sessionmaker[Session]],
+    ) -&gt; None:
+        """Verify `PUT /schedules/{id}/entries/{entry_id}` updates valid moves and returns 409 naming violated H-codes."""
+        client, _, session_factory = sqlite_app_env
+    
+        # Include the capacity-test room in the immutable generation context (B004).
+        tiny_room_res = client.post(
+            "/rooms",
+            json={"room_code": "TINY-10", "building": "Block A", "capacity": 10, "room_type": "Lecture"},
+        )
+        assert tiny_room_res.status_code == 201
+        tiny_room_id = tiny_room_res.json()["room_id"]
+    
+        # Generate a valid timetable first
+        gen_res = client.post(
+            "/schedules/generate",
+            json={
+                "term_id": 1,
+                "config_id": 1,
+                "schedule_type": "Timetable",
+                "solver_time_limit_s": 30,
+                "random_seed": 42,
+            },
+        )
+        assert gen_res.status_code == 202
+        schedule_id = gen_res.json()["schedule_id"]
+    
+        entries = client.get(f"/schedules/{schedule_id}/entries").json()["timetable_entries"]
+        assert len(entries) == 26
+    
+        # Pick a lecture entry (`session_type == 'Lecture'`)
+        lecture_entries = [e for e in entries if e["session_type"] == "Lecture"]
+        target_entry = lecture_entries[0]
+        target_entry_id = target_entry["entry_id"]
+    
+        # --- Case 1: H01 / H02 / H03 Clash (move target_entry into the exact same slot &amp; room as another entry) ---
+        other_entry = next(
+            e
+            for e in lecture_entries
+            if e["entry_id"] != target_entry_id and e["slot_id"] != target_entry["slot_id"]
+        )
+        clash_res = client.put(
+            f"/schedules/{schedule_id}/entries/{target_entry_id}",
+            json={
+                "slot_id": other_entry["slot_id"],
+                "room_id": other_entry["room_id"],
+            },
+        )
+        assert clash_res.status_code == 409
+        clash_body = clash_res.json()
+        assert "H02" in clash_body["violated_constraints"] or clash_body["rule_code"] in {
+            "H01",
+            "H02",
+            "H03",
+        }
+        assert any(code in clash_body["detail"] for code in ("H01", "H02", "H03"))
+    
+        # --- Case 2: H05 Room Type Mismatch (move a Lab entry into a Lecture room) ---
+        lab_entry = next(e for e in entries if e["session_type"] == "Lab")
+        lecture_room_id = target_entry["room_id"]  # A Lecture room
+        h05_res = client.put(
+            f"/schedules/{schedule_id}/entries/{lab_entry['entry_id']}",
+            json={
+                "slot_id": lab_entry["slot_id"],
+                "room_id": lecture_room_id,
+            },
+        )
+        assert h05_res.status_code == 409
+        h05_body = h05_res.json()
+        assert "H05" in h05_body["violated_constraints"]
+        assert "H05" in h05_body["detail"]
+    
+        # --- Case 3: H07 Blocked Slot (move an entry into a recess/blocked slot) ---
+        with session_factory() as session:
+            blocked_slot = session.scalars(
+                select(TimeSlot).where(TimeSlot.term_id == 1, TimeSlot.is_blocked.is_(True))
+            ).first()
+            assert blocked_slot is not None
+            blocked_slot_id = blocked_slot.slot_id
+    
+        h07_res = client.put(
+            f"/schedules/{schedule_id}/entries/{target_entry_id}",
+            json={
+                "slot_id": blocked_slot_id,
+                "room_id": target_entry["room_id"],
+            },
+        )
+        assert h07_res.status_code == 409
+        h07_body = h07_res.json()
+        assert "H07" in h07_body["violated_constraints"]
+        assert "H07" in h07_body["detail"]
+    
+        # --- Case 4: H06 Instructor Availability (move an entry into an UNAVAILABLE slot for its instructor) ---
+        with session_factory() as session:
+            unavail = session.scalars(
+                select(InstructorAvailability).where(
+                    InstructorAvailability.is_available.is_(False)
+                )
+            ).first()
+            assert unavail is not None
+            unavail_inst_id = unavail.instructor_id
+            unavail_slot_id = unavail.slot_id
+    
+        inst_entry = next(e for e in entries if e["instructor_id"] == unavail_inst_id)
+        h06_res = client.put(
+            f"/schedules/{schedule_id}/entries/{inst_entry['entry_id']}",
+            json={
+                "slot_id": unavail_slot_id,
+                "room_id": inst_entry["room_id"],
+            },
+        )
+        assert h06_res.status_code == 409
+        h06_body = h06_res.json()
+        assert "H06" in h06_body["violated_constraints"]
+        assert "H06" in h06_body["detail"]
+    
+        # --- Case 5: H04 Room Capacity (move target_entry into the captured capacity-10 room) ---
+    
+        h04_res = client.put(
+            f"/schedules/{schedule_id}/entries/{target_entry_id}",
+            json={
+                "slot_id": target_entry["slot_id"],
+                "room_id": tiny_room_id,
+            },
+        )
+        assert h04_res.status_code == 409
+        h04_body = h04_res.json()
+        assert "H04" in h04_body["violated_constraints"]
+        assert "H04" in h04_body["detail"]
+    
+        # Verify failed moves did NOT alter target_entry in the database
+        entries_after_failures = client.get(
+            f"/schedules/{schedule_id}/entries"
+        ).json()["timetable_entries"]
+        unchanged_target = next(e for e in entries_after_failures if e["entry_id"] == target_entry_id)
+        assert unchanged_target["slot_id"] == target_entry["slot_id"]
+        assert unchanged_target["room_id"] == target_entry["room_id"]
+        assert unchanged_target["is_manual_override"] is False
+    
+        # --- Case 6: Valid Move &amp; Lock (`200 OK`, marks `is_manual_override = True` and `is_locked = True`) ---
+        # Add a spacious new Lecture room so moving `target_entry` to that room at its current slot is guaranteed clash-free
+        spacious_room_res = client.post(
+            "/rooms",
+            json={
+                "room_code": "R-SPACIOUS-100",
+                "building": "Block A",
+                "capacity": 100,
+                "room_type": "Lecture",
+            },
+        )
+        assert spacious_room_res.status_code == 201
+        spacious_room_id = spacious_room_res.json()["room_id"]
+    
+        valid_move_res = client.put(
+            f"/schedules/{schedule_id}/entries/{target_entry_id}",
+            json={
+                "slot_id": target_entry["slot_id"],
+                "room_id": spacious_room_id,
+                "is_locked": True,
+            },
+        )
+&gt;       assert valid_move_res.status_code == 200
+E       assert 409 == 200
+E        +  where 409 = &lt;Response [409 Conflict]&gt;.status_code
+
+tests\test_backend_api.py:717: AssertionError</failure></testcase><testcase classname="tests.test_backend_api" name="test_put_schedule_entry_exam_validation_409_and_valid_move" time="4.097" /><testcase classname="tests.test_backend_api" name="test_startup_recovery_marks_interrupted_generations_as_infeasible" time="4.355" /></testsuite></testsuites>

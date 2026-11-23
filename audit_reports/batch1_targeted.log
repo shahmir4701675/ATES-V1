@@ -1,0 +1,27 @@
+.....................F.                                                  [100%]
+================================== FAILURES ===================================
+_ test_api_s05_preserves_locks_hard_constraints_and_absent_history[False-False-True] _
+
+env = (<starlette.testclient.TestClient object at 0x0000023AA2540670>, sessionmaker(class_='Session', bind=Engine(sqlite:///...ne(sqlite:///C%3A/Users/DELL/AppData/Local/Temp/pytest-of-DELL/pytest-22/test_api_s05_preserves_locks_h2/batch.sqlite))
+locked = False, invalid = False, no_previous = True
+
+    @pytest.mark.parametrize("locked,invalid,no_previous",[(True,False,False),(False,True,False),(False,False,True)])
+    def test_api_s05_preserves_locks_hard_constraints_and_absent_history(env,locked,invalid,no_previous):
+        client,factory,_=env;small_timetable(factory,locked=locked,invalid=invalid,no_previous=no_previous)
+        res=client.post("/schedules/generate",json=dict(term_id=1,config_id=1,solver_time_limit_s=10))
+        sid=res.json()["schedule_id"]
+        entries=client.get(f"/schedules/{sid}/entries").json()["timetable_entries"]
+>       assert len(entries)==1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests\test_batch1_generation.py:283: AssertionError
+============================== warnings summary ===============================
+.venv\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\DELL\OneDrive\Desktop\ATES-V1\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_batch1_generation.py::test_api_s05_preserves_locks_hard_constraints_and_absent_history[False-False-True]
+1 failed, 22 passed, 1 warning in 76.00s (0:01:15)

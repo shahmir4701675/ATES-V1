@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="13" time="30.488" timestamp="2026-11-21T19:24:37.122526+05:00" hostname="shahmir"><testcase classname="tests.test_batch3_adjustments" name="test_lab_shift_over_its_own_slots_is_atomic_and_locks_survive_real_generation" time="9.715" /><testcase classname="tests.test_batch3_adjustments" name="test_exam_locks_preserve_exact_seat_allocations_on_regeneration" time="7.046" /><testcase classname="tests.test_batch3_adjustments" name="test_concurrent_manual_edits_use_revision_preconditions" time="0.912" /><testcase classname="tests.test_schedule_integrity" name="test_unauthorized_snapshot_and_official_entry_changes_are_rejected[1]" time="2.189" /><testcase classname="tests.test_schedule_integrity" name="test_unauthorized_snapshot_and_official_entry_changes_are_rejected[2]" time="1.439" /><testcase classname="tests.test_schedule_integrity" name="test_sqlite_additive_migration_and_legacy_fail_closed" time="1.233" /><testcase classname="tests.test_schedule_integrity" name="test_entry_changes_invalidate_publication_review[1-timetable_entries-entry_id]" time="1.265" /><testcase classname="tests.test_schedule_integrity" name="test_entry_changes_invalidate_publication_review[2-exam_entries-exam_entry_id]" time="1.081" /><testcase classname="tests.test_schedule_integrity" name="test_failed_migration_is_atomic_in_disposable_sqlite" time="0.363" /><testcase classname="tests.test_schedule_integrity" name="test_manual_move_cannot_add_resources_to_frozen_context[1]" time="0.894"><failure message="assert 422 == 409&#10; +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code">env = (&lt;starlette.testclient.TestClient object at 0x00000178B9FCAF10&gt;, sessionmaker(class_='Session', bind=Engine(sqlite:///...te), 'sqlite:///C:/Users/DELL/AppData/Local/Temp/pytest-of-DELL/pytest-47/test_manual_move_cannot_add_re0/b004.sqlite')
+schedule_id = 1
+
+    @pytest.mark.parametrize("schedule_id", [1,2])
+    def test_manual_move_cannot_add_resources_to_frozen_context(env,schedule_id):
+        client,factory,_,_ = env
+        freeze(factory,schedule_id)
+        new_room = client.post("/rooms",json=dict(room_code="NEW-B004",building="A",capacity=100,room_type="Lecture"))
+        assert new_room.status_code == 201
+        room_id = new_room.json()["room_id"]
+        response = client.put(f"/schedules/{schedule_id}/entries/1",json=dict(room_id=room_id))
+&gt;       assert response.status_code == 409
+E       assert 422 == 409
+E        +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code
+
+tests\test_schedule_integrity.py:433: AssertionError</failure></testcase><testcase classname="tests.test_schedule_integrity" name="test_manual_move_cannot_add_resources_to_frozen_context[2]" time="0.774"><failure message="assert 422 == 409&#10; +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code">env = (&lt;starlette.testclient.TestClient object at 0x00000178BA1BDAE0&gt;, sessionmaker(class_='Session', bind=Engine(sqlite:///...te), 'sqlite:///C:/Users/DELL/AppData/Local/Temp/pytest-of-DELL/pytest-47/test_manual_move_cannot_add_re1/b004.sqlite')
+schedule_id = 2
+
+    @pytest.mark.parametrize("schedule_id", [1,2])
+    def test_manual_move_cannot_add_resources_to_frozen_context(env,schedule_id):
+        client,factory,_,_ = env
+        freeze(factory,schedule_id)
+        new_room = client.post("/rooms",json=dict(room_code="NEW-B004",building="A",capacity=100,room_type="Lecture"))
+        assert new_room.status_code == 201
+        room_id = new_room.json()["room_id"]
+        response = client.put(f"/schedules/{schedule_id}/entries/1",json=dict(room_id=room_id))
+&gt;       assert response.status_code == 409
+E       assert 422 == 409
+E        +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code
+
+tests\test_schedule_integrity.py:433: AssertionError</failure></testcase><testcase classname="tests.test_lab_contiguity" name="test_manual_move_rejects_index_adjacent_but_clock_gapped_lab" time="1.482" /><testcase classname="tests.test_backend_db" name="test_all_21_models_match_schema_sql" time="0.004" /></testsuite></testsuites>

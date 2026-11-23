@@ -1,0 +1,16 @@
+Application TypeScript: PASS
+Tooling TypeScript: PASS
+vite v6.4.5 building for production...
+
+(!) outDir C:\Users\DELL\OneDrive\Desktop\ATES-V1\audit_reports\b004_frontend_build is not inside project root and will not be emptied.
+Use --emptyOutDir to override.
+
+transforming...
+✓ 1602 modules transformed.
+rendering chunks...
+computing gzip size...
+../audit_reports/b004_frontend_build/index.html                   0.56 kB │ gzip:  0.33 kB
+../audit_reports/b004_frontend_build/assets/index-BF6pijhW.css   33.33 kB │ gzip:  6.94 kB
+../audit_reports/b004_frontend_build/assets/index-DsQ2u_rK.js   337.58 kB │ gzip: 98.11 kB
+✓ built in 19.75s
+Production build: PASS

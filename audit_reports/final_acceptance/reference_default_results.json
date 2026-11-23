@@ -1,0 +1,83 @@
+{
+  "environment": {
+    "folder": "C:\\Users\\DELL\\AppData\\Local\\Temp\\ates_acceptance_m3ouvmkm",
+    "database_url": "sqlite:///C:/Users/DELL/AppData/Local/Temp/ates_acceptance_m3ouvmkm/reference.sqlite",
+    "port": 8769,
+    "pid": 11448,
+    "dataset": {
+      "offerings": 150,
+      "rooms": 60,
+      "weekly_slots": 48,
+      "courses": 80,
+      "exam_courses": 80,
+      "students": 3000,
+      "instructors": 40,
+      "batches": 30,
+      "enrollments": 15010,
+      "exam_sessions": 10
+    },
+    "logical_cpus": 8,
+    "notes": "Deterministic synthetic reference data; random disposable credentials never logged. SQLite/local loopback; not a production benchmark."
+  },
+  "measurements": {
+    "generation_Timetable": {
+      "seconds": 120.34827109999605,
+      "enqueue_http_s": 0.10200199999962933,
+      "limit_s": 120,
+      "schedule_id": 1,
+      "status": "Infeasible",
+      "solver_status": "interrupted",
+      "generation_state": "TimedOut",
+      "reported_run_s": 120.21
+    },
+    "generation_Exam": {
+      "seconds": 30.224507299994002,
+      "enqueue_http_s": 0.06652010000834707,
+      "limit_s": 30,
+      "schedule_id": 2,
+      "status": "Infeasible",
+      "solver_status": "interrupted",
+      "generation_state": "TimedOut",
+      "reported_run_s": 30.05
+    },
+    "csv_5000_rows": {
+      "preview_http": 200,
+      "confirm_http": 200,
+      "preview_s": 0.8137055999977747,
+      "confirm_s": 14.98944050000864,
+      "total_s": 15.803458900001715,
+      "accepted": 5000,
+      "rejected": 0,
+      "persisted": {
+        "rows_imported": 5000,
+        "rows_rejected": 0
+      },
+      "threshold_s": 15,
+      "kind": "courses"
+    }
+  },
+  "checks": {
+    "independent_feasibility_witness": {
+      "timetable_violations": [],
+      "exam_violations": [],
+      "construction_s": 31.885227799997665,
+      "notes": "External first-fit/modular witness only, never used as an application result."
+    },
+    "archive_Timetable": {
+      "http": 409
+    },
+    "archive_Exam": {
+      "http": 409
+    },
+    "anonymous_rooms": {
+      "http": 401
+    },
+    "malformed_instructor_email": {
+      "http": 201,
+      "accepted": true
+    }
+  },
+  "notes": [
+    "Local Windows/SQLite instrumented API; no browser interaction or PostgreSQL claims. Times are measured, not inferred from baseline tests."
+  ]
+}

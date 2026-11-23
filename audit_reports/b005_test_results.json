@@ -1,0 +1,50 @@
+{
+  "project": {
+    "passed": 407,
+    "failed": 0
+  },
+  "regressions": {
+    "B003": {
+      "failed": 0,
+      "included_in_project": true,
+      "passed": 60
+    },
+    "B002": {
+      "failed": 0,
+      "included_in_project": true,
+      "passed": 87
+    },
+    "B005": {
+      "failed": 0,
+      "included_in_project": true,
+      "passed": 45
+    },
+    "B001": {
+      "failed": 0,
+      "included_in_project": true,
+      "passed": 37
+    },
+    "B004": {
+      "failed": 0,
+      "included_in_project": true,
+      "passed": 99
+    }
+  },
+  "original_B005_audit": {
+    "failed": 0,
+    "included_in_full_audit": true,
+    "passed": 1
+  },
+  "full_audit": {
+    "passed": 17,
+    "failed": 11
+  },
+  "frontend": {
+    "application_typescript": "PASS",
+    "production_build": "PASS",
+    "tooling_typescript": "PASS"
+  },
+  "B005_status": "Resolved and verified in isolated regression suites",
+  "B004_status": "Partially resolved, unchanged",
+  "production_data_modified": false
+}

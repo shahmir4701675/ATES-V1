@@ -1,0 +1,28 @@
+..F                                                                      [100%]
+================================== FAILURES ===================================
+________ test_help_roles_and_csv_examples_match_real_server_templates _________
+
+    def test_help_roles_and_csv_examples_match_real_server_templates():
+        helpdata=json.loads((ROOT/'src/locales/help.en.json').read_text(encoding='utf-8'))
+        assert set(helpdata['roles'])=={'Coordinator','Approver','Faculty','Student','Administrator'}
+        assert len(helpdata['screens'])>=10
+        reference=(ROOT/'public/help/csv-fields.md').read_text(encoding='utf-8')
+        for kind,header in HEADERS.items():
+            rows=list(csv.reader((ROOT/f'public/help/{kind}-example.csv').read_text(encoding='utf-8').splitlines()))
+>           assert rows[0]==header.split(',') and len(rows[1])==len(rows[0])
+E           AssertionError: assert (['course_code..., 'lab_hours'] == ['course_code..., 'lab_hours']
+E             
+E             Use -v to get more diff and 0 == 6)
+E            +  where 0 = len([])
+E            +  and   6 = len(['course_code', 'title', 'department_code', 'credit_hours', 'lecture_hours', 'lab_hours'])
+
+tests\test_batch4_documentation.py:28: AssertionError
+============================== warnings summary ===============================
+.venv\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\DELL\OneDrive\Desktop\ATES-V1\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_batch4_documentation.py::test_help_roles_and_csv_examples_match_real_server_templates
+1 failed, 2 passed, 1 warning in 3.90s

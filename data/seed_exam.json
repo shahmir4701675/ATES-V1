@@ -349,7 +349,7 @@
       "exam_entry_id": 4,
       "schedule_id": 2,
       "course_id": 4,
-      "exam_slot_id": 5,
+      "exam_slot_id": 4,
       "student_count": 40,
       "is_locked": false,
       "is_manual_override": false
@@ -358,7 +358,7 @@
       "exam_entry_id": 5,
       "schedule_id": 2,
       "course_id": 5,
-      "exam_slot_id": 3,
+      "exam_slot_id": 6,
       "student_count": 40,
       "is_locked": false,
       "is_manual_override": false

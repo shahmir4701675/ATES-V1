@@ -74,6 +74,7 @@ export const IMPORT_SPECS: Record<ImportType, { label: string; columns: ImportCo
     { name: 'capacity', kind: 'int', min: 1, example: '60' }, { name: 'room_type', kind: 'enum', enumValues: ['Lecture', 'Lab', 'Exam Hall'], example: 'Lecture' },
   ] },
   batches: { label: 'Batches', columns: [
+    { name: 'department_code', kind: 'text', example: 'CSE' },
     { name: 'program_code', kind: 'text', example: 'BSCS' }, { name: 'batch_year', kind: 'int', min: 2000, example: '2025' },
     { name: 'section', kind: 'text', example: 'A' }, { name: 'strength', kind: 'int', min: 1, example: '55' },
   ] },

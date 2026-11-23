@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="4" time="45.054" timestamp="2026-11-21T17:17:22.247545+05:00" hostname="shahmir"><testcase classname="tests.test_backend_api" name="test_post_schedules_generate_creates_generating_row_and_runs_worker" time="31.555"><failure message="AssertionError: assert 'Infeasible' == 'Generated'&#10;  &#10;  - Generated&#10;  + Infeasible">sqlite_app_env = (&lt;starlette.testclient.TestClient object at 0x0000017776EE6BA0&gt;, Engine(sqlite:///C%3A/Users/DELL/AppData/Local/Temp/p...test-of-DELL/pytest-19/test_post_schedules_generate_c0/test_ates_api.sqlite), autoflush=False, expire_on_commit=False))
+
+    def test_post_schedules_generate_creates_generating_row_and_runs_worker(
+        sqlite_app_env: Tuple[TestClient, Engine, sessionmaker[Session]],
+    ) -&gt; None:
+        """Verify `POST /schedules/generate` creates the schedule as `'Generating'` and the worker saves results."""
+        client, _, _ = sqlite_app_env
+    
+        # First verify that the route creates the row with status == 'Generating' before the worker runs
+        with patch("backend.routers.schedules.run_schedule_generation_worker") as mock_worker:
+            res_queued = client.post(
+                "/schedules/generate",
+                json={
+                    "term_id": 1,
+                    "config_id": 1,
+                    "schedule_type": "Timetable",
+                    "solver_time_limit_s": 30,
+                    "random_seed": 42,
+                },
+            )
+            assert res_queued.status_code == 202
+            queued_payload = res_queued.json()
+            assert queued_payload["status"] == "Generating"
+            queued_id = queued_payload["schedule_id"]
+            mock_worker.assert_called_once()
+    
+            # Status endpoint while still 'Generating'
+            status_queued = client.get(f"/schedules/{queued_id}/status")
+            assert status_queued.status_code == 200
+            assert status_queued.json()["status"] == "Generating"
+    
+        # Now run the full end-to-end Timetable generation with the real background worker
+        res_tt = client.post(
+            "/schedules/generate",
+            json={
+                "term_id": 1,
+                "config_id": 1,
+                "schedule_type": "Timetable",
+                "solver_time_limit_s": 30,
+                "random_seed": 42,
+            },
+        )
+        assert res_tt.status_code == 202
+        tt_schedule_id = res_tt.json()["schedule_id"]
+    
+        # After TestClient completes the request + BackgroundTasks, check status
+        status_tt = client.get(f"/schedules/{tt_schedule_id}/status")
+        assert status_tt.status_code == 200
+        status_data = status_tt.json()
+&gt;       assert status_data["status"] == "Generated"
+E       AssertionError: assert 'Infeasible' == 'Generated'
+E         
+E         - Generated
+E         + Infeasible
+
+tests\test_backend_api.py:447: AssertionError</failure></testcase><testcase classname="tests.test_backend_api" name="test_post_schedules_generate_exam_schedule_end_to_end" time="5.222"><failure message="AssertionError: assert 'Infeasible' == 'Generated'&#10;  &#10;  - Generated&#10;  + Infeasible">sqlite_app_env = (&lt;starlette.testclient.TestClient object at 0x000001777710A0D0&gt;, Engine(sqlite:///C%3A/Users/DELL/AppData/Local/Temp/p...test-of-DELL/pytest-19/test_post_schedules_generate_e0/test_ates_api.sqlite), autoflush=False, expire_on_commit=False))
+
+    def test_post_schedules_generate_exam_schedule_end_to_end(
+        sqlite_app_env: Tuple[TestClient, Engine, sessionmaker[Session]],
+    ) -&gt; None:
+        """Verify `POST /schedules/generate` for `schedule_type='Exam'` runs the exam engine and persists allocations."""
+        client, _, _ = sqlite_app_env
+    
+        res_exam = client.post(
+            "/schedules/generate",
+            json={
+                "term_id": 1,
+                "config_id": 2,
+                "schedule_type": "Exam",
+                "solver_time_limit_s": 30,
+                "random_seed": 42,
+            },
+        )
+        assert res_exam.status_code == 202
+        exam_schedule_id = res_exam.json()["schedule_id"]
+    
+        status_exam = client.get(f"/schedules/{exam_schedule_id}/status")
+        assert status_exam.status_code == 200
+        status_data = status_exam.json()
+&gt;       assert status_data["status"] == "Generated"
+E       AssertionError: assert 'Infeasible' == 'Generated'
+E         
+E         - Generated
+E         + Infeasible
+
+tests\test_backend_api.py:497: AssertionError</failure></testcase><testcase classname="tests.test_backend_api" name="test_post_schedules_generate_infeasible_persists_conflicts" time="6.325" /><testcase classname="tests.test_backend_api" name="test_startup_recovery_marks_interrupted_generations_as_infeasible" time="1.060" /></testsuite></testsuites>

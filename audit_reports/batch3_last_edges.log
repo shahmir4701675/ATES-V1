@@ -1,0 +1,100 @@
+........F                                                                [100%]
+================================== FAILURES ===================================
+________ test_master_data_terms_slots_exam_slots_offerings_and_configs ________
+
+sqlite_app_env = (<starlette.testclient.TestClient object at 0x00000242123EB850>, Engine(sqlite:///C%3A/Users/DELL/AppData/Local/Temp/p...test-of-DELL/pytest-50/test_master_data_terms_slots_e0/test_ates_api.sqlite), autoflush=False, expire_on_commit=False))
+
+    def test_master_data_terms_slots_exam_slots_offerings_and_configs(
+        sqlite_app_env: Tuple[TestClient, Engine, sessionmaker[Session]],
+    ) -> None:
+        """Verify CRUD for terms, time slots, exam slots (with overlap validation), offerings, and configs."""
+        client, _, _ = sqlite_app_env
+    
+        # Create a new academic term
+        term_res = client.post(
+            "/terms",
+            json={
+                "name": "Spring 2027",
+                "start_date": "2027-01-15",
+                "end_date": "2027-05-30",
+                "status": "Planned",
+            },
+        )
+        assert term_res.status_code == 201
+        new_term_id = term_res.json()["term_id"]
+    
+        # Generate working days & slots grid (FR-2.7)
+        gen_slots_res = client.post(
+            f"/terms/{new_term_id}/slots/generate",
+            json={
+                "working_days": [1, 2, 3],
+                "first_start_time": "09:00",
+                "slot_length_min": 60,
+                "slots_per_day": 3,
+                "blocked_slot_indices": [2],
+                "block_reason": "Morning Break",
+            },
+        )
+        assert gen_slots_res.status_code == 201
+        generated_slots = gen_slots_res.json()
+        assert len(generated_slots) == 9
+        blocked_slots = [s for s in generated_slots if s["is_blocked"]]
+        assert len(blocked_slots) == 3
+    
+        # Create an exam slot on 2027-05-17
+        exam_slot_1 = client.post(
+            f"/terms/{new_term_id}/exam-slots",
+            json={
+                "exam_date": "2027-05-17",
+                "start_time": "09:00",
+                "end_time": "12:00",
+                "label": "MORNING",
+            },
+        )
+        assert exam_slot_1.status_code == 201
+    
+        # Overlapping exam slot on the same date must be rejected with 409 (FR-5.7)
+        exam_slot_overlap = client.post(
+            f"/terms/{new_term_id}/exam-slots",
+            json={
+                "exam_date": "2027-05-17",
+                "start_time": "11:00",
+                "end_time": "14:00",
+                "label": "MIDDAY_OVERLAP",
+            },
+        )
+        assert exam_slot_overlap.status_code == 409
+    
+        # Offerings CRUD on term 1
+        offerings_get = client.get("/offerings?term_id=1")
+        assert offerings_get.status_code == 200
+        assert len(offerings_get.json()) == 6
+    
+        # Configs & mandatory rule protection (FR-5.2)
+        configs_get = client.get("/configs")
+        assert configs_get.status_code == 200
+        assert len(configs_get.json()) >= 2
+    
+        # Attempt to disable mandatory rule H01 -> 422 Unprocessable Entity (FR-5.2)
+        disable_h01 = client.put(
+            "/configs/1/rules",
+            json={
+                "rules": [
+                    {"rule_code": "H01", "is_enabled": False, "weight": 0},
+                ]
+            },
+        )
+        assert disable_h01.status_code == 422
+>       assert "H01" in disable_h01.json()["detail"]
+E       AssertionError: assert 'H01' in 'Mandatory constraints cannot be disabled.'
+
+tests\test_backend_api.py:366: AssertionError
+============================== warnings summary ===============================
+.venv\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\DELL\OneDrive\Desktop\ATES-V1\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_backend_api.py::test_master_data_terms_slots_exam_slots_offerings_and_configs
+1 failed, 8 passed, 50 deselected, 1 warning in 12.13s

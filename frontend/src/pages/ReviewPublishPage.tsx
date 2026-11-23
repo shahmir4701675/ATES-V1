@@ -3,13 +3,14 @@ import { AlertTriangle, ArrowRight, CheckCircle2, ShieldCheck } from 'lucide-rea
 import { Button, Card, LoadState, Notice, PageHeader, SelectField, StatusBadge } from '../components/ui'
 import { ConfirmDialog, DataTable } from '../components/Modal'
 import { useAsync } from '../hooks/useAsync'
-import { errorMessage, getConflicts, getSchedules, getTerms, publishScheduleMock } from '../services/api'
-import type { ConflictItem } from '../types'
+import { archiveSchedule, errorMessage, getConflicts, getSchedules, getTerms, publishSchedule } from '../services/api'
+import type { ConflictItem, Schedule } from '../types'
 
 export function ReviewPublishPage({ onNavigate, onStatus }: { onNavigate: (path: string) => void; onStatus: (message: string) => void }) {
   const base = useAsync(() => Promise.all([getSchedules(), getTerms()]), [])
   const [scheduleId, setScheduleId] = useState('')
   const [confirming, setConfirming] = useState(false)
+  const [archiving, setArchiving] = useState<Schedule | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
@@ -31,7 +32,7 @@ export function ReviewPublishPage({ onNavigate, onStatus }: { onNavigate: (path:
     setBusy(true)
     setError('')
     try {
-      await publishScheduleMock(selected.schedule_id)
+      await publishSchedule(selected.schedule_id)
       setConfirming(false)
       onStatus(`Published ${selected.schedule_type.toLowerCase()} version ${selected.version_no}.`)
       base.reload()
@@ -42,13 +43,21 @@ export function ReviewPublishPage({ onNavigate, onStatus }: { onNavigate: (path:
     }
   }
 
+  const archive = async () => {
+    if (!archiving) return
+    setBusy(true); setError('')
+    try { await archiveSchedule(archiving.schedule_id); setArchiving(null); base.reload(); onStatus('The server archived the published version.') }
+    catch (reason) { setError(errorMessage(reason)) }
+    finally { setBusy(false) }
+  }
+
   return <div className="page-stack">
     <PageHeader
       eyebrow="Approvals"
       title="Review and publish"
       description="Inspect generated timetable and examination versions, verify that there are zero hard-constraint violations, and publish."
     />
-    {error && <Notice tone="error" title="Could not publish version">{error}</Notice>}
+    {error && <Notice tone="error" title="Publication action could not be completed">{error}</Notice>}
     <LoadState loading={base.loading || conflicts.loading} error={base.error || conflicts.error} onRetry={() => { base.reload(); conflicts.reload() }}>
       {!selected ? (
         <Notice title="No generated versions are waiting for approval">When a Coordinator generates a new timetable or exam schedule, it will appear here for review.</Notice>
@@ -81,8 +90,8 @@ export function ReviewPublishPage({ onNavigate, onStatus }: { onNavigate: (path:
                 <AlertTriangle size={14} aria-hidden="true" /> Resolve all {hardCount} hard violation(s) before publishing.
               </Notice>
             ) : (
-              <Notice tone="success" title="Ready for publication">
-                <CheckCircle2 size={14} aria-hidden="true" /> Zero hard-constraint violations detected. Publishing this version will archive any earlier published {selected.schedule_type.toLowerCase()} for {termLabel(selected.term_id)}.
+              <Notice tone="success" title="No recorded hard-constraint violations">
+                <CheckCircle2 size={14} aria-hidden="true" /> The server will independently validate the original snapshot and check input freshness before publication. Publishing will archive any earlier published {selected.schedule_type.toLowerCase()} for {termLabel(selected.term_id)}.
               </Notice>
             )}
           </div>
@@ -94,6 +103,7 @@ export function ReviewPublishPage({ onNavigate, onStatus }: { onNavigate: (path:
           rows={history}
           rowKey={(row) => row.schedule_id}
           caption="Published and archived schedule versions"
+          actions={(row) => row.status === 'Published' ? <Button variant="secondary" onClick={() => setArchiving(row)}>Archive</Button> : null}
           emptyText="No published or archived versions yet."
           searchText={(row) => `${row.schedule_type} v${row.version_no} ${row.status} ${termLabel(row.term_id)}`}
           columns={[
@@ -107,6 +117,7 @@ export function ReviewPublishPage({ onNavigate, onStatus }: { onNavigate: (path:
       </Card>
     </LoadState>
 
+    {archiving && <ConfirmDialog title={`Archive version ${archiving.version_no}?`} confirmLabel="Archive" danger={false} busy={busy} onCancel={() => setArchiving(null)} onConfirm={() => void archive()} message={<p>Archive {archiving.schedule_type} version {archiving.version_no} for {termLabel(archiving.term_id)}? Faculty and Students will no longer see it. Its original entries and approval history remain unchanged.</p>} />}
     {confirming && selected && (
       <ConfirmDialog
         title={`Publish ${selected.schedule_type.toLowerCase()} version ${selected.version_no}?`}

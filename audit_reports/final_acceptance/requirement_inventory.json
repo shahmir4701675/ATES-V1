@@ -1,0 +1,919 @@
+{
+  "source": "docs/SRS.pdf",
+  "source_sha256": "6f6d9d36c98c772b5f8259fceb8e136a3c141f2c6cb1f1f3a68692dba905f500",
+  "items": [
+    {
+      "id": "FR-1.1",
+      "description_from_original_matrix": "Authenticate username/password; JWT expires after 30 minutes inactivity"
+    },
+    {
+      "id": "FR-1.2",
+      "description_from_original_matrix": "Salted bcrypt cost >=12; minimum password length 8"
+    },
+    {
+      "id": "FR-1.3",
+      "description_from_original_matrix": "Lock after five failed logins for 15 minutes and record event"
+    },
+    {
+      "id": "FR-1.4",
+      "description_from_original_matrix": "Logout ends session; user can change own password"
+    },
+    {
+      "id": "FR-1.5",
+      "description_from_original_matrix": "Authorize every API request; forbidden requests return 403"
+    },
+    {
+      "id": "FR-1.6",
+      "description_from_original_matrix": "Administrator manages accounts, resets passwords and links Faculty/Student"
+    },
+    {
+      "id": "FR-1.7",
+      "description_from_original_matrix": "Deactivate accounts with recorded actions rather than delete"
+    },
+    {
+      "id": "FR-1.8",
+      "description_from_original_matrix": "Show only permitted menus and buttons"
+    },
+    {
+      "id": "FR-2.1",
+      "description_from_original_matrix": "Create/view/edit/deactivate courses with unique code and required attributes"
+    },
+    {
+      "id": "FR-2.2",
+      "description_from_original_matrix": "Reject zero total contact hours and negative hour/credit values"
+    },
+    {
+      "id": "FR-2.3",
+      "description_from_original_matrix": "Instructor CRUD with unique email, department and workload limits"
+    },
+    {
+      "id": "FR-2.4",
+      "description_from_original_matrix": "Room CRUD with unique code, building, positive capacity and permitted type"
+    },
+    {
+      "id": "FR-2.5",
+      "description_from_original_matrix": "Batch CRUD with programme, admission year, section and positive strength"
+    },
+    {
+      "id": "FR-2.6",
+      "description_from_original_matrix": "Create terms with dates; mark exactly one term Active"
+    },
+    {
+      "id": "FR-2.7",
+      "description_from_original_matrix": "Generate equal slot grid and block individual slots with reason"
+    },
+    {
+      "id": "FR-2.8",
+      "description_from_original_matrix": "Create offerings; reject duplicate course/batch/term"
+    },
+    {
+      "id": "FR-2.9",
+      "description_from_original_matrix": "Derive required lecture sessions/lab blocks from course hours and slot length"
+    },
+    {
+      "id": "FR-2.10",
+      "description_from_original_matrix": "Add/view/remove student enrollment links"
+    },
+    {
+      "id": "FR-2.11",
+      "description_from_original_matrix": "Preserve all schedule-referenced records; offer deactivation"
+    },
+    {
+      "id": "FR-2.12",
+      "description_from_original_matrix": "Search/sort/page every master list; default 25 rows"
+    },
+    {
+      "id": "FR-3.1",
+      "description_from_original_matrix": "Faculty edits only own weekly availability"
+    },
+    {
+      "id": "FR-3.2",
+      "description_from_original_matrix": "Coordinator edits any instructor availability"
+    },
+    {
+      "id": "FR-3.3",
+      "description_from_original_matrix": "All unmarked slots are available"
+    },
+    {
+      "id": "FR-3.4",
+      "description_from_original_matrix": "Warn changes affect schedules only after regeneration"
+    },
+    {
+      "id": "FR-4.1",
+      "description_from_original_matrix": "UTF-8 CSV up to 10 MB; six entity types and downloadable templates"
+    },
+    {
+      "id": "FR-4.2",
+      "description_from_original_matrix": "Validate every row including referenced records before storing"
+    },
+    {
+      "id": "FR-4.3",
+      "description_from_original_matrix": "Rejected-row report includes line, column and reason"
+    },
+    {
+      "id": "FR-4.4",
+      "description_from_original_matrix": "Import valid rows or cancel the whole operation"
+    },
+    {
+      "id": "FR-4.5",
+      "description_from_original_matrix": "Persist filename, user, time and import/rejection counts"
+    },
+    {
+      "id": "FR-5.1",
+      "description_from_original_matrix": "Default H01-H10/S01-S06/E01-E05/ES01-ES03 rules and metadata"
+    },
+    {
+      "id": "FR-5.2",
+      "description_from_original_matrix": "Never disable H01/H02/H03/H08/E01/E04/E05"
+    },
+    {
+      "id": "FR-5.3",
+      "description_from_original_matrix": "Warn before disabling optional hard rule and log change"
+    },
+    {
+      "id": "FR-5.4",
+      "description_from_original_matrix": "Weights 0-10 and integer parameters for soft/exam limits"
+    },
+    {
+      "id": "FR-5.5",
+      "description_from_original_matrix": "Solver limit 10-600 seconds default 120 and random seed"
+    },
+    {
+      "id": "FR-5.6",
+      "description_from_original_matrix": "Save/clone configs and delete unused configs"
+    },
+    {
+      "id": "FR-5.7",
+      "description_from_original_matrix": "Define exam windows; reject same-date overlap"
+    },
+    {
+      "id": "FR-5.8",
+      "description_from_original_matrix": "Validate config before run incl at least one exam session"
+    },
+    {
+      "id": "FR-6.1",
+      "description_from_original_matrix": "Check input completeness and report every defect before solving"
+    },
+    {
+      "id": "FR-6.2",
+      "description_from_original_matrix": "Start chosen term/config run with new Generating version"
+    },
+    {
+      "id": "FR-6.3",
+      "description_from_original_matrix": "CP-SAT slot-room variable per session; enforce enabled H01-H10"
+    },
+    {
+      "id": "FR-6.4",
+      "description_from_original_matrix": "Maximize weighted satisfied soft constraints within limit"
+    },
+    {
+      "id": "FR-6.5",
+      "description_from_original_matrix": "Stop at configured limit; best feasible result or Infeasible"
+    },
+    {
+      "id": "FR-6.6",
+      "description_from_original_matrix": "Progress/elapsed display and actual safe cancellation"
+    },
+    {
+      "id": "FR-6.7",
+      "description_from_original_matrix": "Independent validator before save; invalid result never Generated"
+    },
+    {
+      "id": "FR-6.8",
+      "description_from_original_matrix": "Persist entries, objective, status and runtime; mark Generated"
+    },
+    {
+      "id": "FR-6.9",
+      "description_from_original_matrix": "Same data/config/seed should produce same schedule"
+    },
+    {
+      "id": "FR-6.10",
+      "description_from_original_matrix": "Preserve locked slot/room in new run"
+    },
+    {
+      "id": "FR-7.1",
+      "description_from_original_matrix": "Conflict graph course vertices; edge for any shared student"
+    },
+    {
+      "id": "FR-7.2",
+      "description_from_original_matrix": "DSATUR then exact CP-SAT fallback when sessions insufficient"
+    },
+    {
+      "id": "FR-7.3",
+      "description_from_original_matrix": "Maximum configured exams per student per day"
+    },
+    {
+      "id": "FR-7.4",
+      "description_from_original_matrix": "Rooms cover exact student count; no session room reuse"
+    },
+    {
+      "id": "FR-7.5",
+      "description_from_original_matrix": "Infeasible reports session shortfall and unplaced courses"
+    },
+    {
+      "id": "FR-7.6",
+      "description_from_original_matrix": "Prefer batch exams on different days and minimal rooms"
+    },
+    {
+      "id": "FR-7.7",
+      "description_from_original_matrix": "Persist exams/allocations and run stats; mark Generated"
+    },
+    {
+      "id": "FR-8.1",
+      "description_from_original_matrix": "Validate any schedule; report type/severity/entities/description"
+    },
+    {
+      "id": "FR-8.2",
+      "description_from_original_matrix": "Display/filter conflict report and export CSV"
+    },
+    {
+      "id": "FR-8.3",
+      "description_from_original_matrix": "Coordinator moves session/exam slot and room only when Generated"
+    },
+    {
+      "id": "FR-8.4",
+      "description_from_original_matrix": "Revalidate moves within1s; reject hard violations by name"
+    },
+    {
+      "id": "FR-8.5",
+      "description_from_original_matrix": "Persist manual override marker on changed entries"
+    },
+    {
+      "id": "FR-8.6",
+      "description_from_original_matrix": "Coordinator can lock/unlock sessions/exams"
+    },
+    {
+      "id": "FR-8.7",
+      "description_from_original_matrix": "Undo all manual changes of version"
+    },
+    {
+      "id": "FR-9.1",
+      "description_from_original_matrix": "Six schedule statuses with only specified transitions"
+    },
+    {
+      "id": "FR-9.2",
+      "description_from_original_matrix": "Only Approver publishes Generated zero-hard-violation schedule"
+    },
+    {
+      "id": "FR-9.3",
+      "description_from_original_matrix": "One published per term/type; previous becomes Archived"
+    },
+    {
+      "id": "FR-9.4",
+      "description_from_original_matrix": "Faculty/Students can view Published only"
+    },
+    {
+      "id": "FR-9.5",
+      "description_from_original_matrix": "Retain numbered versions; duplicate draft; view archives"
+    },
+    {
+      "id": "FR-9.6",
+      "description_from_original_matrix": "Approver sees sessions/score/conflict summary before publish"
+    },
+    {
+      "id": "FR-10.1",
+      "description_from_original_matrix": "Weekly timetable grid by selected batch/instructor/room/course"
+    },
+    {
+      "id": "FR-10.2",
+      "description_from_original_matrix": "Show code/title/type/instructor/room/day/time on every session"
+    },
+    {
+      "id": "FR-10.3",
+      "description_from_original_matrix": "Filter timetable by term/version/batch/instructor/room/course/day"
+    },
+    {
+      "id": "FR-10.4",
+      "description_from_original_matrix": "Date/time ordered exams filtered by date/batch/course/room"
+    },
+    {
+      "id": "FR-10.5",
+      "description_from_original_matrix": "Own Faculty/Student timetable/exams by default"
+    },
+    {
+      "id": "FR-10.6",
+      "description_from_original_matrix": "Visually distinguish labs/locked/manual entries"
+    },
+    {
+      "id": "FR-10.7",
+      "description_from_original_matrix": "Dashboard active term, schedule status and master counts"
+    },
+    {
+      "id": "FR-10.8",
+      "description_from_original_matrix": "Schedule views usable at360px"
+    },
+    {
+      "id": "FR-11.1",
+      "description_from_original_matrix": "A4 landscape PDF with institution/term/version/filter/date"
+    },
+    {
+      "id": "FR-11.2",
+      "description_from_original_matrix": "Schedule CSV with specified columns and row granularity"
+    },
+    {
+      "id": "FR-11.3",
+      "description_from_original_matrix": "All batches or instructors in one PDF one per page"
+    },
+    {
+      "id": "FR-11.4",
+      "description_from_original_matrix": "Exports restricted to permitted schedules"
+    },
+    {
+      "id": "FR-11.5",
+      "description_from_original_matrix": "Audit every export"
+    },
+    {
+      "id": "FR-12.1",
+      "description_from_original_matrix": "Audit login/failure/account/import/config/generation/move/publish/export"
+    },
+    {
+      "id": "FR-12.2",
+      "description_from_original_matrix": "Administrator-only audit with user/date/action filters"
+    },
+    {
+      "id": "FR-12.3",
+      "description_from_original_matrix": "Users cannot modify/delete audit entries"
+    },
+    {
+      "id": "UR-01",
+      "description_from_original_matrix": "Secure role-scoped username/password login"
+    },
+    {
+      "id": "UR-02",
+      "description_from_original_matrix": "Administrator manages accounts and one role"
+    },
+    {
+      "id": "UR-03",
+      "description_from_original_matrix": "Only permitted functions visible and usable"
+    },
+    {
+      "id": "UR-04",
+      "description_from_original_matrix": "Manage/search/deactivate courses"
+    },
+    {
+      "id": "UR-05",
+      "description_from_original_matrix": "Manage/search/deactivate instructors with workload"
+    },
+    {
+      "id": "UR-06",
+      "description_from_original_matrix": "Manage/search/deactivate rooms"
+    },
+    {
+      "id": "UR-07",
+      "description_from_original_matrix": "Manage/search/deactivate batches"
+    },
+    {
+      "id": "UR-08",
+      "description_from_original_matrix": "Define term/working days/grid/blocked slots"
+    },
+    {
+      "id": "UR-09",
+      "description_from_original_matrix": "Assign course/batch/instructor offering per term"
+    },
+    {
+      "id": "UR-10",
+      "description_from_original_matrix": "Faculty own and Coordinator any availability"
+    },
+    {
+      "id": "UR-11",
+      "description_from_original_matrix": "Record student course enrollment including electives/repeats"
+    },
+    {
+      "id": "UR-12",
+      "description_from_original_matrix": "CSV imports with every rejected row explained"
+    },
+    {
+      "id": "UR-13",
+      "description_from_original_matrix": "Optional rules/weights/time limits configuration"
+    },
+    {
+      "id": "UR-14",
+      "description_from_original_matrix": "Define exam sessions and daily exam maximum"
+    },
+    {
+      "id": "UR-15",
+      "description_from_original_matrix": "Generate complete conflict-free weekly timetable"
+    },
+    {
+      "id": "UR-16",
+      "description_from_original_matrix": "Generate all exams with rooms and no student clash"
+    },
+    {
+      "id": "UR-17",
+      "description_from_original_matrix": "Explain conflicting data/rules when no schedule possible"
+    },
+    {
+      "id": "UR-18",
+      "description_from_original_matrix": "Regenerate and retain earlier versions"
+    },
+    {
+      "id": "UR-19",
+      "description_from_original_matrix": "Manual moves with immediate rule warnings"
+    },
+    {
+      "id": "UR-20",
+      "description_from_original_matrix": "Lock sessions across regeneration"
+    },
+    {
+      "id": "UR-21",
+      "description_from_original_matrix": "Approver review/approve/publish"
+    },
+    {
+      "id": "UR-22",
+      "description_from_original_matrix": "Filter timetable by batch/instructor/room/course/day"
+    },
+    {
+      "id": "UR-23",
+      "description_from_original_matrix": "Filter exams by date/batch/course/room"
+    },
+    {
+      "id": "UR-24",
+      "description_from_original_matrix": "Published-only and own default schedules"
+    },
+    {
+      "id": "UR-25",
+      "description_from_original_matrix": "Export current schedule as PDF/CSV"
+    },
+    {
+      "id": "UR-26",
+      "description_from_original_matrix": "Administrator sees trusted who/what/when log"
+    },
+    {
+      "id": "UR-27",
+      "description_from_original_matrix": "Archive older published schedules and view them"
+    },
+    {
+      "id": "UC-01",
+      "description_from_original_matrix": "Log In with role-limited session"
+    },
+    {
+      "id": "UC-02",
+      "description_from_original_matrix": "Manage User Accounts"
+    },
+    {
+      "id": "UC-03",
+      "description_from_original_matrix": "View Audit Log"
+    },
+    {
+      "id": "UC-04",
+      "description_from_original_matrix": "Manage Master Data"
+    },
+    {
+      "id": "UC-05",
+      "description_from_original_matrix": "Import CSV and confirm valid rows"
+    },
+    {
+      "id": "UC-06",
+      "description_from_original_matrix": "Configure Constraints and save named configs"
+    },
+    {
+      "id": "UC-07",
+      "description_from_original_matrix": "Define Exam Sessions"
+    },
+    {
+      "id": "UC-08",
+      "description_from_original_matrix": "Generate Timetable new version"
+    },
+    {
+      "id": "UC-09",
+      "description_from_original_matrix": "Generate Exam Schedule"
+    },
+    {
+      "id": "UC-10",
+      "description_from_original_matrix": "Validate Input Data before generation"
+    },
+    {
+      "id": "UC-11",
+      "description_from_original_matrix": "View Conflict Report"
+    },
+    {
+      "id": "UC-12",
+      "description_from_original_matrix": "Manual adjustment/locking with revalidation"
+    },
+    {
+      "id": "UC-13",
+      "description_from_original_matrix": "Approve/Publish and archive previous"
+    },
+    {
+      "id": "UC-14",
+      "description_from_original_matrix": "View weekly timetable with authorized filters"
+    },
+    {
+      "id": "UC-15",
+      "description_from_original_matrix": "View exams with authorized filters"
+    },
+    {
+      "id": "UC-16",
+      "description_from_original_matrix": "Download shown PDF/CSV"
+    },
+    {
+      "id": "UC-17",
+      "description_from_original_matrix": "Set own/any instructor availability by role"
+    },
+    {
+      "id": "H01",
+      "description_from_original_matrix": "Instructor at most one session per slot (mandatory)"
+    },
+    {
+      "id": "H02",
+      "description_from_original_matrix": "Room at most one session per slot (mandatory)"
+    },
+    {
+      "id": "H03",
+      "description_from_original_matrix": "Batch at most one session per slot (mandatory)"
+    },
+    {
+      "id": "H04",
+      "description_from_original_matrix": "Room capacity at least offering enrolled count"
+    },
+    {
+      "id": "H05",
+      "description_from_original_matrix": "Labs in Lab rooms and lectures in Lecture rooms"
+    },
+    {
+      "id": "H06",
+      "description_from_original_matrix": "No teaching in instructor unavailable slot"
+    },
+    {
+      "id": "H07",
+      "description_from_original_matrix": "No sessions in blocked slots"
+    },
+    {
+      "id": "H08",
+      "description_from_original_matrix": "Exact lecture and lab session counts per offering (mandatory)"
+    },
+    {
+      "id": "H09",
+      "description_from_original_matrix": "Lab consecutive clock slots on one day and one room"
+    },
+    {
+      "id": "H10",
+      "description_from_original_matrix": "Daily and weekly instructor teaching hours respected"
+    },
+    {
+      "id": "S01",
+      "description_from_original_matrix": "Minimize idle batch gaps"
+    },
+    {
+      "id": "S02",
+      "description_from_original_matrix": "Spread offering sessions over days"
+    },
+    {
+      "id": "S03",
+      "description_from_original_matrix": "Prefer at most configured batch sessions per day"
+    },
+    {
+      "id": "S04",
+      "description_from_original_matrix": "Prefer at most configured consecutive instructor slots"
+    },
+    {
+      "id": "S05",
+      "description_from_original_matrix": "Prefer prior version slot and room"
+    },
+    {
+      "id": "S06",
+      "description_from_original_matrix": "Prefer smallest fitting room"
+    },
+    {
+      "id": "E01",
+      "description_from_original_matrix": "Shared-student courses use different sessions (mandatory)"
+    },
+    {
+      "id": "E02",
+      "description_from_original_matrix": "Daily student exam count <= configured maximum"
+    },
+    {
+      "id": "E03",
+      "description_from_original_matrix": "Exact seats equal students and do not exceed capacity"
+    },
+    {
+      "id": "E04",
+      "description_from_original_matrix": "Room used by at most one exam per session (mandatory)"
+    },
+    {
+      "id": "E05",
+      "description_from_original_matrix": "Each required course exactly one valid exam session (mandatory)"
+    },
+    {
+      "id": "ES01",
+      "description_from_original_matrix": "Spread one batch exams across days"
+    },
+    {
+      "id": "ES02",
+      "description_from_original_matrix": "Minimize rooms per exam"
+    },
+    {
+      "id": "ES03",
+      "description_from_original_matrix": "Keep rooms for one exam in same building"
+    },
+    {
+      "id": "P-1",
+      "description_from_original_matrix": "95% ordinary requests <=2s with50 concurrent users"
+    },
+    {
+      "id": "P-2",
+      "description_from_original_matrix": "Reference timetable within configured limit; typical <=60s"
+    },
+    {
+      "id": "P-3",
+      "description_from_original_matrix": "Reference exam generation <=30s"
+    },
+    {
+      "id": "P-4",
+      "description_from_original_matrix": "Manual move validation <=1s"
+    },
+    {
+      "id": "P-5",
+      "description_from_original_matrix": "Validate/import5000 rows <=15s"
+    },
+    {
+      "id": "P-6",
+      "description_from_original_matrix": "Single export<=5s; all-batch PDF<=30s"
+    },
+    {
+      "id": "P-7",
+      "description_from_original_matrix": "Schedule-view queries <=500ms reference size"
+    },
+    {
+      "id": "P-8",
+      "description_from_original_matrix": "Generation isolation worker process; other requests slowdown<=20%"
+    },
+    {
+      "id": "SAF-1",
+      "description_from_original_matrix": "Never publish a hard-invalid schedule; independent validator gate"
+    },
+    {
+      "id": "SAF-2",
+      "description_from_original_matrix": "Failed/cancelled/timed-out generation leaves prior schedules unchanged; atomic result save"
+    },
+    {
+      "id": "SAF-3",
+      "description_from_original_matrix": "Confirm destructive changes and explain consequence"
+    },
+    {
+      "id": "SAF-4",
+      "description_from_original_matrix": "Published schedule immutable; changes require new validated approved version"
+    },
+    {
+      "id": "SAF-5",
+      "description_from_original_matrix": "Daily automatic backups; retain7; prove restore of all data"
+    },
+    {
+      "id": "SAF-6",
+      "description_from_original_matrix": "Retain older versions for rollback"
+    },
+    {
+      "id": "SEC-1",
+      "description_from_original_matrix": "Login before every application function; passwords>=8"
+    },
+    {
+      "id": "SEC-2",
+      "description_from_original_matrix": "Only salted slow bcrypt>=12 hashes; never log/return passwords"
+    },
+    {
+      "id": "SEC-3",
+      "description_from_original_matrix": "Server RBAC every request"
+    },
+    {
+      "id": "SEC-4",
+      "description_from_original_matrix": "30-minute inactivity timeout;5-failure15-minute lock"
+    },
+    {
+      "id": "SEC-5",
+      "description_from_original_matrix": "HTTPS TLS>=1.2; refuse/redirect HTTP"
+    },
+    {
+      "id": "SEC-6",
+      "description_from_original_matrix": "Server validation; parameterized ORM; escape rendered text"
+    },
+    {
+      "id": "SEC-7",
+      "description_from_original_matrix": "CSV-only<=10MB; parse as data; outside web root"
+    },
+    {
+      "id": "SEC-8",
+      "description_from_original_matrix": "Least-privilege DB account; env-supplied secrets"
+    },
+    {
+      "id": "SEC-9",
+      "description_from_original_matrix": "Immutable trusted security audit"
+    },
+    {
+      "id": "SEC-10",
+      "description_from_original_matrix": "Minimal personal data; Students own-batch Published; Faculty Published only"
+    },
+    {
+      "id": "DB-1",
+      "description_from_original_matrix": "All business data relational with21 tables; none only in files"
+    },
+    {
+      "id": "DB-2",
+      "description_from_original_matrix": "3NF except justified instructor/batch copies with clash enforcement"
+    },
+    {
+      "id": "DB-3",
+      "description_from_original_matrix": "Integer surrogate PKs and enforced relationships"
+    },
+    {
+      "id": "DB-4",
+      "description_from_original_matrix": "DB NOT NULL/UNIQUE/CHECK rules beyond app validation"
+    },
+    {
+      "id": "DB-5",
+      "description_from_original_matrix": "No deletion of referenced records; append-only logs"
+    },
+    {
+      "id": "DB-6",
+      "description_from_original_matrix": "Generation result saved atomically"
+    },
+    {
+      "id": "DB-7",
+      "description_from_original_matrix": "Index every FK and schedule/slot/room/instructor lookups"
+    },
+    {
+      "id": "DB-8",
+      "description_from_original_matrix": "UTF8; event timestampsUTC displayed Asia/Karachi"
+    },
+    {
+      "id": "DB-9",
+      "description_from_original_matrix": "Schema only through versioned migrations; PG/SQLite equivalent"
+    },
+    {
+      "id": "C-1",
+      "description_from_original_matrix": "Python OR-Tools/NetworkX; React/Tailwind; open-source components"
+    },
+    {
+      "id": "C-2",
+      "description_from_original_matrix": "All functions REST/JSON overHTTPS; no frontend business rules"
+    },
+    {
+      "id": "C-3",
+      "description_from_original_matrix": "Relational storage via ORM; same code PostgreSQL/SQLite"
+    },
+    {
+      "id": "C-4",
+      "description_from_original_matrix": "Every generation run bounded by configured limit default 120s"
+    },
+    {
+      "id": "C-5",
+      "description_from_original_matrix": "Salted hashes/encrypted traffic/every API authorized"
+    },
+    {
+      "id": "C-6",
+      "description_from_original_matrix": "Equal fixed weekly slots; whole sessions; consecutive labs"
+    },
+    {
+      "id": "C-7",
+      "description_from_original_matrix": "Four-student semester delivery using free tools"
+    },
+    {
+      "id": "C-8",
+      "description_from_original_matrix": "LaTeX SRS; UML2; specified requirement IDs"
+    },
+    {
+      "id": "C-9",
+      "description_from_original_matrix": "Current Chrome/Firefox/Edge/Safari without plugins"
+    },
+    {
+      "id": "Q-01",
+      "description_from_original_matrix": "Correctness: independent validation; zero hard violations incl reference-size case; one negative test per H/E"
+    },
+    {
+      "id": "Q-02",
+      "description_from_original_matrix": "Reliability:99% valid runs; failure explanations; restart interrupted recovery"
+    },
+    {
+      "id": "Q-03",
+      "description_from_original_matrix": "Availability99%08:00-18:00 working days per month"
+    },
+    {
+      "id": "Q-04",
+      "description_from_original_matrix": "Usability:<15min import-to-generation; own view<=2clicks; useful errors; AA contrast"
+    },
+    {
+      "id": "Q-05",
+      "description_from_original_matrix": "Maintainability:constraint interfaces/layers/config/exporter;>=70% coverage; pinned dependencies"
+    },
+    {
+      "id": "Q-06",
+      "description_from_original_matrix": "Portability:Linux/Windows; PG/SQLite tests; four browsers; one-command packaging"
+    },
+    {
+      "id": "Q-07",
+      "description_from_original_matrix": "Testability:repeatable seed/sample expected results/traceability"
+    },
+    {
+      "id": "Q-08",
+      "description_from_original_matrix": "Interoperability:UTF8 CSV,JSON/OpenAPI,PDF"
+    },
+    {
+      "id": "Q-09",
+      "description_from_original_matrix": "Adaptability:new term/data/rules without code; retain usable configs"
+    },
+    {
+      "id": "Q-10",
+      "description_from_original_matrix": "Flexibility:new rule/exporter/role with localized changes"
+    },
+    {
+      "id": "Q-11",
+      "description_from_original_matrix": "Robustness:bad rows isolated; invalid input explanatory; cancelled/timeouts safe"
+    },
+    {
+      "id": "Q-12",
+      "description_from_original_matrix": "Reusability:engine/validator/CSV independent web layer; schema/templates documented"
+    },
+    {
+      "id": "Q-13",
+      "description_from_original_matrix": "Scalability:double reference offerings/rooms without redesign, within configurable limit"
+    },
+    {
+      "id": "UI-01",
+      "description_from_original_matrix": "Shared layout; primary colored right action and adjacent Cancel"
+    },
+    {
+      "id": "UI-02",
+      "description_from_original_matrix": "Destructive/irreversible actions require confirmation"
+    },
+    {
+      "id": "UI-03",
+      "description_from_original_matrix": "Red field errors plus top-of-form summary"
+    },
+    {
+      "id": "UI-04",
+      "description_from_original_matrix": "Fixed status area; icon plus color for success/warning/error"
+    },
+    {
+      "id": "UI-05",
+      "description_from_original_matrix": "Default25-row table pagination"
+    },
+    {
+      "id": "UI-06",
+      "description_from_original_matrix": "Text/background WCAG2.1AA contrast"
+    },
+    {
+      "id": "UI-07",
+      "description_from_original_matrix": "Visible label and tooltip for every form field"
+    },
+    {
+      "id": "UI-08",
+      "description_from_original_matrix": "Responsive from360px"
+    },
+    {
+      "id": "DOC-01",
+      "description_from_original_matrix": "Role-based user manual PDF with screenshots/tasks"
+    },
+    {
+      "id": "DOC-02",
+      "description_from_original_matrix": "Tooltips per form field and help page per screen"
+    },
+    {
+      "id": "DOC-03",
+      "description_from_original_matrix": "CSV templates with sample rows and field-by-field explanations"
+    },
+    {
+      "id": "DOC-04",
+      "description_from_original_matrix": "Two-page quick-start guide data entry through publication"
+    },
+    {
+      "id": "DOC-05",
+      "description_from_original_matrix": "Installation and administration guide"
+    },
+    {
+      "id": "DOC-06",
+      "description_from_original_matrix": "Interactive OpenAPI documentation"
+    },
+    {
+      "id": "IF-01",
+      "description_from_original_matrix": "Standard browser input and OS printing; no special hardware"
+    },
+    {
+      "id": "IF-02",
+      "description_from_original_matrix": "Separate solver worker process; OS files/environment/log interfaces"
+    },
+    {
+      "id": "IF-03",
+      "description_from_original_matrix": "TLS1.2 JSON/JWT; multipart CSV<=10MB; correct file content types"
+    },
+    {
+      "id": "IF-04",
+      "description_from_original_matrix": "Browser polls generation status every2seconds"
+    },
+    {
+      "id": "IF-05",
+      "description_from_original_matrix": "Table9 REST resource coverage"
+    },
+    {
+      "id": "LEGAL-01",
+      "description_from_original_matrix": "SRS5.2:university privacy rules; only scheduling PII; licence notices delivered"
+    },
+    {
+      "id": "I18N-01",
+      "description_from_original_matrix": "SRS5.3:English/UTF8 Urdu-ready strings separated;24h Asia/Karachi; configurable first weekday"
+    },
+    {
+      "id": "REUSE-01",
+      "description_from_original_matrix": "SRS5.4:independent engine/constraints; adoptable schema and CSV template documentation"
+    }
+  ],
+  "note": "Inventory only: no prior status inherited and no acceptance classification assigned yet."
+}

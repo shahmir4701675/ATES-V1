@@ -1,0 +1,12 @@
+{
+  "project_passed": 203,
+  "project_failed": 0,
+  "b002_passed": 87,
+  "b001_passed": 37,
+  "targeted_audit_passed": 6,
+  "full_audit_passed": 14,
+  "full_audit_failed": 14,
+  "typescript": "PASS",
+  "production_build": "PASS",
+  "production_data_modified": false
+}

@@ -1,0 +1,187 @@
+........................................................................ [ 68%]
+..............................F..                                        [100%]
+================================== FAILURES ===================================
+_ test_put_schedule_entry_valid_move_and_409_on_violated_timetable_constraints _
+
+sqlite_app_env = (<starlette.testclient.TestClient object at 0x0000020BDF7D0270>, Engine(sqlite:///C%3A/Users/DELL/AppData/Local/Temp/p...ytest-of-DELL/pytest-9/test_put_schedule_entry_valid_0/test_ates_api.sqlite), autoflush=False, expire_on_commit=False))
+
+    def test_put_schedule_entry_valid_move_and_409_on_violated_timetable_constraints(
+        sqlite_app_env: Tuple[TestClient, Engine, sessionmaker[Session]],
+    ) -> None:
+        """Verify `PUT /schedules/{id}/entries/{entry_id}` updates valid moves and returns 409 naming violated H-codes."""
+        client, _, session_factory = sqlite_app_env
+    
+        # Include the capacity-test room in the immutable generation context (B004).
+        tiny_room_res = client.post(
+            "/rooms",
+            json={"room_code": "TINY-10", "building": "Block A", "capacity": 10, "room_type": "Lecture"},
+        )
+        assert tiny_room_res.status_code == 201
+        tiny_room_id = tiny_room_res.json()["room_id"]
+    
+        # Generate a valid timetable first
+        gen_res = client.post(
+            "/schedules/generate",
+            json={
+                "term_id": 1,
+                "config_id": 1,
+                "schedule_type": "Timetable",
+                "solver_time_limit_s": 30,
+                "random_seed": 42,
+            },
+        )
+        assert gen_res.status_code == 202
+        schedule_id = gen_res.json()["schedule_id"]
+    
+        entries = client.get(f"/schedules/{schedule_id}/entries").json()["timetable_entries"]
+        assert len(entries) == 26
+    
+        # Pick a lecture entry (`session_type == 'Lecture'`)
+        lecture_entries = [e for e in entries if e["session_type"] == "Lecture"]
+        target_entry = lecture_entries[0]
+        target_entry_id = target_entry["entry_id"]
+    
+        # --- Case 1: H01 / H02 / H03 Clash (move target_entry into the exact same slot & room as another entry) ---
+        other_entry = next(
+            e
+            for e in lecture_entries
+            if e["entry_id"] != target_entry_id and e["slot_id"] != target_entry["slot_id"]
+        )
+        clash_res = client.put(
+            f"/schedules/{schedule_id}/entries/{target_entry_id}",
+            json={
+                "slot_id": other_entry["slot_id"],
+                "room_id": other_entry["room_id"],
+            },
+        )
+        assert clash_res.status_code == 409
+        clash_body = clash_res.json()
+        assert "H02" in clash_body["violated_constraints"] or clash_body["rule_code"] in {
+            "H01",
+            "H02",
+            "H03",
+        }
+        assert any(code in clash_body["detail"] for code in ("H01", "H02", "H03"))
+    
+        # --- Case 2: H05 Room Type Mismatch (move a Lab entry into a Lecture room) ---
+        lab_entry = next(e for e in entries if e["session_type"] == "Lab")
+        lecture_room_id = target_entry["room_id"]  # A Lecture room
+        h05_res = client.put(
+            f"/schedules/{schedule_id}/entries/{lab_entry['entry_id']}",
+            json={
+                "slot_id": lab_entry["slot_id"],
+                "room_id": lecture_room_id,
+            },
+        )
+        assert h05_res.status_code == 409
+        h05_body = h05_res.json()
+        assert "H05" in h05_body["violated_constraints"]
+        assert "H05" in h05_body["detail"]
+    
+        # --- Case 3: H07 Blocked Slot (move an entry into a recess/blocked slot) ---
+        with session_factory() as session:
+            blocked_slot = session.scalars(
+                select(TimeSlot).where(TimeSlot.term_id == 1, TimeSlot.is_blocked.is_(True))
+            ).first()
+            assert blocked_slot is not None
+            blocked_slot_id = blocked_slot.slot_id
+    
+        h07_res = client.put(
+            f"/schedules/{schedule_id}/entries/{target_entry_id}",
+            json={
+                "slot_id": blocked_slot_id,
+                "room_id": target_entry["room_id"],
+            },
+        )
+        assert h07_res.status_code == 409
+        h07_body = h07_res.json()
+        assert "H07" in h07_body["violated_constraints"]
+        assert "H07" in h07_body["detail"]
+    
+        # --- Case 4: H06 Instructor Availability (move an entry into an UNAVAILABLE slot for its instructor) ---
+        with session_factory() as session:
+            unavail = session.scalars(
+                select(InstructorAvailability).where(
+                    InstructorAvailability.is_available.is_(False)
+                )
+            ).first()
+            assert unavail is not None
+            unavail_inst_id = unavail.instructor_id
+            unavail_slot_id = unavail.slot_id
+    
+        inst_entry = next(e for e in entries if e["instructor_id"] == unavail_inst_id)
+        h06_res = client.put(
+            f"/schedules/{schedule_id}/entries/{inst_entry['entry_id']}",
+            json={
+                "slot_id": unavail_slot_id,
+                "room_id": inst_entry["room_id"],
+            },
+        )
+        assert h06_res.status_code == 409
+        h06_body = h06_res.json()
+        assert "H06" in h06_body["violated_constraints"]
+        assert "H06" in h06_body["detail"]
+    
+        # --- Case 5: H04 Room Capacity (move target_entry into the captured capacity-10 room) ---
+    
+        h04_res = client.put(
+            f"/schedules/{schedule_id}/entries/{target_entry_id}",
+            json={
+                "slot_id": target_entry["slot_id"],
+                "room_id": tiny_room_id,
+            },
+        )
+        assert h04_res.status_code == 409
+        h04_body = h04_res.json()
+        assert "H04" in h04_body["violated_constraints"]
+        assert "H04" in h04_body["detail"]
+    
+        # Verify failed moves did NOT alter target_entry in the database
+        entries_after_failures = client.get(
+            f"/schedules/{schedule_id}/entries"
+        ).json()["timetable_entries"]
+        unchanged_target = next(e for e in entries_after_failures if e["entry_id"] == target_entry_id)
+        assert unchanged_target["slot_id"] == target_entry["slot_id"]
+        assert unchanged_target["room_id"] == target_entry["room_id"]
+        assert unchanged_target["is_manual_override"] is False
+    
+        # --- Case 6: Valid Move & Lock (`200 OK`, marks `is_manual_override = True` and `is_locked = True`) ---
+        # Add a spacious new Lecture room so moving `target_entry` to that room at its current slot is guaranteed clash-free
+        spacious_room_res = client.post(
+            "/rooms",
+            json={
+                "room_code": "R-SPACIOUS-100",
+                "building": "Block A",
+                "capacity": 100,
+                "room_type": "Lecture",
+            },
+        )
+        assert spacious_room_res.status_code == 201
+        spacious_room_id = spacious_room_res.json()["room_id"]
+    
+        valid_move_res = client.put(
+            f"/schedules/{schedule_id}/entries/{target_entry_id}",
+            json={
+                "slot_id": target_entry["slot_id"],
+                "room_id": spacious_room_id,
+                "is_locked": True,
+            },
+        )
+>       assert valid_move_res.status_code == 200
+E       assert 409 == 200
+E        +  where 409 = <Response [409 Conflict]>.status_code
+
+tests\test_backend_api.py:717: AssertionError
+============================== warnings summary ===============================
+.venv\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\DELL\OneDrive\Desktop\ATES-V1\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+tests/test_backend_api.py::test_master_data_terms_slots_exam_slots_offerings_and_configs
+  C:\Users\DELL\OneDrive\Desktop\ATES-V1\.venv\Lib\site-packages\fastapi\telemetry\_api.py:244: StarletteDeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+    return function(**arguments)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_backend_api.py::test_put_schedule_entry_valid_move_and_409_on_violated_timetable_constraints
+1 failed, 104 passed, 2 warnings in 403.96s (0:06:43)

@@ -1,0 +1,18 @@
+{
+  "backend/routers/schedules.py": "59534acf3f835566baafdf7bcb09e645308bf092562e86d24738569fe268b0ae",
+  "engine/timetable_solver.py": "4952d41609f259f82daa4a5e50e7b8ff3320820a8fd44323649c462db7d77d0f",
+  "frontend/src/App.tsx": "7955b9da45d373e8bdb9480f94d111a5b683106d11bcf888168047591868706c",
+  "frontend/src/services/http.ts": "e11b672e0f7a91378b837f9ac26050f3dca91671701fb7b01f377442ca22775e",
+  "backend/dependencies.py": "a746fc4a86edac4f41fd4e26e242c179f1f100d13b6bfe509b46d8e850837576",
+  "backend/schemas.py": "e733c8d0ee98f2db5efc84c40948ea12846fbe7203f6a8a427259a0765d75fab",
+  "frontend/src/services/api.ts": "09d045dfa50286e6aa75171452960c03e4b3baaebdd556a0651ba6cdc6f9eaaf",
+  "backend/main.py": "f309bd2142bc5b2e7112f3968b3f0a243da24eb6c627b694730a00e3c1387e3c",
+  "engine/weekly_grid.py": "9ce455657bf5d49476952e968b11b8cf5945e0d13ca0a60cf1c6ab97985d2b8c",
+  "backend/routers/auth.py": "b3ccbbe4841f254d0abc39c4f039647ca34c83bd18201dc76ff16fca1e9e31e7",
+  "conftest.py": "f4933510c0ad8256c96fc942bac5168b5fd5643e5850b55be2853c640841cb57",
+  "backend/auth_password.py": "49e4f975465779d13c0307e5fae52c5dbedbe2ce574e5b48c95e4d2fe2295beb",
+  "backend/routers/master_data.py": "ccc903803b724c1ac221a09e8dda435762f74b1d97e9e4f494241dd02594e020",
+  "tests/test_auth.py": "edea4077c197f61961845f207a19c8871dad91b893cb89a409f3efff05b6f934",
+  "backend/auth.py": "3075e99d5bf3c5b26f1931d42d318952acab2df6f41515e8e3dd60f2a3f91fce",
+  "tests/test_weekly_grid.py": "2e0db63041963268f8c6a53b1c99b79bf2c10c4277f8b7dc1462b878eb9f4bf4"
+}

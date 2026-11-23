@@ -1,0 +1,3 @@
+﻿day,start_time,end_time,course_code,session_type,instructor,room,batch,exam_date,student_count,term,version,generated_at,status,course_title
+Monday,09:00,10:00,C2,Lecture,Instructor 2,R2,QA1-30 A,,,Journey term,2,2026-11-21T16:23:39Z,Published,Course 2
+Monday,10:00,11:00,C1,Lecture,Instructor 1,R2,QA1-30 A,,,Journey term,2,2026-11-21T16:23:39Z,Published,Course 1

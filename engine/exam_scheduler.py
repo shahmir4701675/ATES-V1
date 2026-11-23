@@ -17,6 +17,7 @@ Implements the hybrid examination scheduling pipeline:
 """
 
 from __future__ import annotations
+from engine.execution import bounded, check_deadline, remaining_seconds, search_seconds
 
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -468,7 +469,7 @@ class ExamScheduler:
 
         model.Minimize(sum(objective_terms))
         solver = cp_model.CpSolver()
-        solver.parameters.max_time_in_seconds = 5.0
+        solver.parameters.max_time_in_seconds = search_seconds(5.0)
         solver.parameters.num_search_workers = 1
         status = solver.Solve(model)
         if status not in (cp_model.OPTIMAL, cp_model.FEASIBLE):
@@ -612,6 +613,7 @@ class ExamScheduler:
         best_cost: tuple[int, int] | None = None
 
         def backtrack(pos: int, current_es01_clashes: int, slot_idx_sum: int) -> bool:
+            check_deadline()
             nonlocal best_slot_for_pos, best_cost
 
             if best_cost is not None and (current_es01_clashes, slot_idx_sum) >= best_cost:
@@ -890,7 +892,7 @@ class ExamScheduler:
             model.Minimize(sum(context.soft_penalty_terms))
 
         solver = cp_model.CpSolver()
-        solver.parameters.max_time_in_seconds = max(1.0, float(remaining_time_s))
+        solver.parameters.max_time_in_seconds = search_seconds(float(remaining_time_s))
         solver.parameters.random_seed = int(self.random_seed)
         solver.parameters.num_search_workers = 1
 
@@ -1147,7 +1149,7 @@ class ExamScheduler:
                 )
             )
             solver = cp_model.CpSolver()
-            solver.parameters.max_time_in_seconds = 5.0
+            solver.parameters.max_time_in_seconds = remaining_seconds(5.0)
             solver.parameters.random_seed = int(self.random_seed)
             solver.parameters.num_search_workers = 1
             status = solver.Solve(model)
@@ -1243,6 +1245,7 @@ class ExamScheduler:
 
         return shortfall, unplaced_courses, unplaced_codes, reasons
 
+    @bounded("exam")
     def solve(self) -> ExamScheduleResult:
         """Execute the 4-step examination scheduling pipeline with hard (E01–E05) and soft (ES01–ES03) rules."""
         start_time = time.perf_counter()
@@ -1361,7 +1364,7 @@ class ExamScheduler:
         if course_to_slot is None or course_to_rooms is None:
             used_cpsat = True
             elapsed_so_far = time.perf_counter() - start_time
-            remaining_s = max(1.0, self.time_limit_s - elapsed_so_far)
+            remaining_s = remaining_seconds(self.time_limit_s - elapsed_so_far)
             cpsat_status, course_to_slot, course_to_rooms = self._solve_with_cpsat(
                 course_ids=course_ids,
                 exam_slots=exam_slots,
